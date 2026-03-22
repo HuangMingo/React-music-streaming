@@ -1,7 +1,7 @@
 export function PlaylistSection() {
     return (
         <>
-            <div className="grid container__tab tab-playlist">
+            <div className="grid container__tab tab-playlist active">
                 <div className="container__section row">
                     <div className="col l-12 m-12 c-12 mb-16">
                         <div className="container__header">

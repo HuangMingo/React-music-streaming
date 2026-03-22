@@ -1,8 +1,7 @@
 export function UploadSection() {
     return (
         <>
-        <h1>hello</h1>
-            <div className="grid container__tab tab-upload">
+            <div className="grid container__tab tab-upload active">
                 <div className="container__section row">
                     <div className="container__header col l-12 m-12 c-12 mb-10">
                         <a href="#" className="container__header-title">

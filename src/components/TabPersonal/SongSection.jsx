@@ -1,7 +1,7 @@
 export function SongSection() {
     return (
         <>
-            <div className="grid container__tab tab-song">
+            <div className="grid container__tab tab-song active">
                 <div className="row no-gutters">
                     <div className="col l-12 m-12 c-12">
                         <div className="container__header mb-10">
