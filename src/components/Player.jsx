@@ -1,6 +1,5 @@
 export function Player() {
     return (
-
         <>
             < div className="player grid" >
                 <div className="player__container">

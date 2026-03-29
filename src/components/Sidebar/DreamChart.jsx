@@ -3,7 +3,7 @@ export function DreamChart() {
     return (
         <>
             {/* Tab charts */}
-            < div className="app__container tab--charts" ></div >
+            < div className="app__container tab--charts active" ></div >
         </>
     )
 }

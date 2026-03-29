@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { UploadSection } from "./UploadSection";
-export function Content() {
+export function Content({selectedPlaylist, setSelectedPlaylist, playlists}) {
     return (
         <>
             {/* Đầu mục chung */}
@@ -9,7 +9,7 @@ export function Content() {
                 <div className="content__navbar">
                     <div className="content__navbar-container">
                         <ul className="content__navbar-menu">
-                            <NavLink to="overview" className="content__navbar-item">
+                            <NavLink to="" end className="content__navbar-item">
                                 <li >
                                     <span>Tổng quan</span>
                                 </li>
@@ -29,11 +29,6 @@ export function Content() {
                                     <span>Album</span>
                                 </li>
                             </NavLink>
-                            <NavLink to="mv" className="content__navbar-item">
-                                <li >
-                                    <span>MV</span>
-                                </li>
-                            </NavLink>
                             <NavLink to="artist" className="content__navbar-item hide-on-mobile">
                                 <li>
                                     <span>Nghệ sĩ</span>
@@ -48,8 +43,7 @@ export function Content() {
                     </div>
                 </div>
                 <div className="content__container">
-                    <Outlet />
-
+                    <Outlet context={{ selectedPlaylist, setSelectedPlaylist, playlists }} />
                 </div>
             </div>
         </>

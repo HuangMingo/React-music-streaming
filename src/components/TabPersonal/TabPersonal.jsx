@@ -1,7 +1,9 @@
 import { Content } from './Content';
 import { User } from './User';
+import { useMusicContext } from '../../context/MusicContext';
 
-export function TabPersonal() {
+export function TabPersonal({ playlists }) {
+    const { selectedPlaylist, setSelectedPlaylist } = useMusicContext();
     return (
         <>
             <div className="app__container tab--personal active">
@@ -9,7 +11,7 @@ export function TabPersonal() {
                 <User />
 
                 {/* Content */}
-                <Content />
+                <Content selectedPlaylist={selectedPlaylist} setSelectedPlaylist={setSelectedPlaylist} playlists={playlists} />
             </div>
         </>
     )

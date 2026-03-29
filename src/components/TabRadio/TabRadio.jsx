@@ -10,10 +10,10 @@ export function TabRadio() {
                             {/* Radio list */}
                             <RadioList />
                             {/* Playlist */}
-                            <Playlist />
-                            <Playlist />
-                            <Playlist />
-                            <Playlist />
+                            {/* <Playlist /> */}
+                            {/* <Playlist /> */}
+                            {/* <Playlist /> */}
+                            {/* <Playlist /> */}
                         </div>
                     </div>
                 </div>

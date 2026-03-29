@@ -12,7 +12,7 @@ import { NewPlaylist } from "./NewPlaylist";
 export function TabExplorer() {
     return (
         <>
-            < div className="app__container tab--explore" >
+            < div className="app__container tab--explore active" >
                 <div className="app__container-content">
                     <div className="explore__container">
                         <div className="grid">
@@ -26,8 +26,8 @@ export function TabExplorer() {
                             <Radio />
 
                             {/* Playlist */}
-                            <Playlist />
-                            <Playlist />
+                            {/* <Playlist />
+                            <Playlist /> */}
 
                             {/* Label */}
                             <Label />
@@ -36,19 +36,19 @@ export function TabExplorer() {
                             <SingerSlide />
 
                             {/* Playlist */}
-                            <Playlist />
+                            {/* <Playlist /> */}
 
                             {/* Event */}
                             <Event />
 
                             {/* Playlist */}
-                            <Playlist />
+                            {/* <Playlist /> */}
 
                             {/* New Playlist */}
                             <NewPlaylist />
 
                             {/* Playlist */}
-                            <Playlist />
+                            {/* <Playlist /> */}
                             
                             {/* Favorite artist */}
                             <FavoriteArtist />

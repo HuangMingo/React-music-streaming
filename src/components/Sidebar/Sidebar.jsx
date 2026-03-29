@@ -5,19 +5,18 @@ export function Sidebar() {
     return (
         <div className="app__sidebar">
             <div className="sidebar__logo hide-on-mobile">
-                <a href="#" className="sidebar__logo-link">
+                <a href="http://localhost:5173/" className="sidebar__logo-link">
                     <img
                         src="/assets/img/logos/main-logo.png"
                         alt="Logo"
                         className="sidebar__logo-img"
                     />
-                    {/* <img src="./assets/img/logos/small-logo.png" alt="Logo" class="sidebar__small-logo"> */}
                 </a>
             </div>
 
             <div className="sidebar__nav">
                 <ul className="sidebar__nav-list sidebar__nav-list--separate ">
-                    <NavLink to="/personal" className="sidebar__nav-item">
+                    <NavLink to="/personal" className= "sidebar__nav-item">
                         <li className="sidebar__item-link">
                             <i className="bi bi-music-player"></i>
                             <span>Cá nhân</span>
@@ -25,9 +24,7 @@ export function Sidebar() {
 
                     </NavLink>
 
-
-
-                    <NavLink to="/mood" className="sidebar__nav-item">
+                    <NavLink to="/" className={'sidebar__nav-item'}>
                         <li className="sidebar__item-link">
                             <i className="bi bi-vinyl" />
                             <span>Mood on top</span>
@@ -59,9 +56,6 @@ export function Sidebar() {
                             <span>Theo Dõi</span>
                         </li>
                     </NavLink>
-
-
-
 
                 </ul>
             </div>

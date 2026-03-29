@@ -1,12 +1,9 @@
 import { THEME_LIST_STORAGE_KEY } from '../../public/data/listThemes.js'
 import { useState, useEffect } from 'react';
 export function applyTheme(theme) {
-
-
     const app = document.querySelector(".app");
     const player = document.querySelector(".player");
     const closeModalBtn = document.querySelector('.modal__close-btn');
-    
     document.documentElement.style.setProperty('--bg-content-color', theme.colors.bgContentColor)
     document.documentElement.style.setProperty('--border-box', theme.colors.borderBox)
     document.documentElement.style.setProperty('--border-primary', theme.colors.borderPrimary)
@@ -29,10 +26,8 @@ export function applyTheme(theme) {
         player.style.background = `url(${theme.playerImage})`;
     }
     localStorage.setItem("theme", JSON.stringify(theme));
-    // onClose();
 }
 export function ThemeModal({ onClose }) {
-
     const data = JSON.parse(localStorage.getItem(THEME_LIST_STORAGE_KEY));
     return (
 

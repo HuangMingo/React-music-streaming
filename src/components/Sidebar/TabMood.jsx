@@ -5,7 +5,6 @@ export function Mood() {
         <>
             {/* Tab explore */}
             <TabExplorer />
-            <h1>Hello world</h1>
         </>
 
     )

@@ -1,4 +1,4 @@
-export function SongSection() {
+export function SongSection({playlist}) {
     return (
         <>
             <div className="grid container__tab tab-song active">
