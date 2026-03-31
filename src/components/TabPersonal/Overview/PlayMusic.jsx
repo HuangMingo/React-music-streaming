@@ -3,8 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext.jsx";
 
 export function PlayMusic({ playlist }) {
-    const { currentIndex, setCurrentIndex } = useMusicContext();
-    const [activeSong, setActiveSong] = useState(false);
+    const { currentIndex, setCurrentIndex, currentSong, setCurrentSong } = useMusicContext();
     const [slideIndex, setSlideIndex] = useState(0);
     const visibleSongs = useMemo(() => (playlist?.songs ?? []), [playlist]);
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
@@ -12,8 +11,7 @@ export function PlayMusic({ playlist }) {
     // --------------Active song-------------
     function handleClickSong(index) {
         setCurrentIndex(index);
-        localStorage.setItem("currentSongIndex", index);
-        setActiveSong(true);
+        setCurrentSong(playlist.songs[index]);
     }
 
     //--------------Slide show logic-------------
@@ -82,27 +80,11 @@ export function PlayMusic({ playlist }) {
                 <div className="col l-12 m-12 c-12">
                     <div className="container__playmusic">
                         {!playlist || !playlist.songs || playlist.songs.length === 0 ? (
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '400px',
-                                gap: '20px',
-                                width: '100%'
-                            }}>
-                                <i className="bi bi-music-note-beamed" style={{
-                                    fontSize: '80px',
-                                    color: '#bbb',
-                                    opacity: 0.5
-                                }}></i>
-                                <p style={{
-                                    fontSize: '16px',
-                                    color: '#999',
-                                    textAlign: 'center',
-                                    margin: 0,
-                                    fontWeight: '500'
-                                }}>Chưa có playlist nào được chọn</p>
+                            <div className="box--no-content">
+                                <div className="no-content-image" />
+                                <span className="no-content-text">
+                                    Chưa có playlist nào được chọn!
+                                </span>
                             </div>
                         ) : (
                             <>
@@ -121,63 +103,63 @@ export function PlayMusic({ playlist }) {
                                 <div className="container__playlist">
                                     <div className="playlist__list">
                                         {playlist?.songs?.map((song, index) => {
-                                    return (
-                                        <div className={`playlist__list-song playing media ${currentIndex === index ? 'active' : ''}`} key={index} onClick={() => handleClickSong(index)}>
-                                            <div className="playlist__song-info media__left">
-                                                <div className="playlist__song-thumb media__thumb mr-10"
-                                                    style={{
-                                                        "background": `url(${song.image}) no-repeat center center / cover`
-                                                    }}>
-                                                    <div className="thumb--animate" >
-                                                        <div className="thumb--animate-img" style={{ "background": "url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
+                                            return (
+                                                <div className={`playlist__list-song playing media ${currentIndex === index ? 'active' : ''}`} key={index} onClick={() => handleClickSong(index)}>
+                                                    <div className="playlist__song-info media__left">
+                                                        <div className="playlist__song-thumb media__thumb mr-10"
+                                                            style={{
+                                                                "background": `url(${song.image}) no-repeat center center / cover`
+                                                            }}>
+                                                            <div className="thumb--animate" >
+                                                                <div className="thumb--animate-img" style={{ "background": "url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
 
+                                                                </div>
+                                                            </div>
+                                                            <div className="play-song--actions">
+                                                                <div className="control-btn btn-toggle-play btn--play-song">
+                                                                    <i className="bi bi-play-fill"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="playlist__song-body media__info">
+                                                            <span className="playlist__song-title info__title">{song.name}</span>
+                                                            <p className="playlist__song-author info__author">
+                                                                {
+                                                                    song.singers.map((s, i) => {
+                                                                        return (
+                                                                            <span key={i}>
+                                                                                <a href="#" className="is-ghost">{s}</a>
+                                                                                {i < song.singers.length - 1 && ', '}
+                                                                            </span>
+                                                                        );
+                                                                    })
+                                                                }
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <div className="play-song--actions">
-                                                        <div className="control-btn btn-toggle-play btn--play-song">
-                                                            <i className="bi bi-play-fill"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="playlist__song-body media__info">
-                                                    <span className="playlist__song-title info__title">{song.name}</span>
-                                                    <p className="playlist__song-author info__author">
+                                                    <span className="playlist__song-time media__content">
                                                         {
-                                                            song.singer.map((s, i) => {
-                                                                return (
-                                                                    <span key={i}>
-                                                                        <a href="#" className="is-ghost">{s}</a>
-                                                                        {i < song.singer.length - 1 && ', '}
-                                                                    </span>
-                                                                );
-                                                            })
+                                                            `${Math.floor(song.duration / 60).toString().padStart(2, '0')}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
                                                         }
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <span className="playlist__song-time media__content">
-                                                {
-                                                    `${Math.floor(song.duration / 60).toString().padStart(2, '0')}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
-                                                }
-                                            </span>
+                                                    </span>
 
-                                            <div className="playlist__song-option song--tab media__right hide-on-mobile">
-                                                <div className="playlist__song-btn btn--mic option-btn">
-                                                    <i className="btn--icon song__icon bi bi-mic-fill"></i>
-                                                </div>
-                                                <div className="playlist__song-btn btn--heart option-btn">
-                                                    <i className="btn--icon song__icon icon--heart bi bi-heart-fill primary"></i>
-                                                </div>
-                                                <div className="playlist__song-btn option-btn">
-                                                    <i className="btn--icon bi bi-three-dots"></i>
-                                                </div>
-                                            </div>
+                                                    <div className="playlist__song-option song--tab media__right hide-on-mobile">
+                                                        <div className="playlist__song-btn btn--mic option-btn">
+                                                            <i className="btn--icon song__icon bi bi-mic-fill"></i>
+                                                        </div>
+                                                        <div className="playlist__song-btn btn--heart option-btn">
+                                                            <i className="btn--icon song__icon icon--heart bi bi-heart-fill primary"></i>
+                                                        </div>
+                                                        <div className="playlist__song-btn option-btn">
+                                                            <i className="btn--icon bi bi-three-dots"></i>
+                                                        </div>
+                                                    </div>
 
-                                        </div>
-                                    )
-                                })}
-                            </div >
-                        </div >
+                                                </div>
+                                            )
+                                        })}
+                                    </div >
+                                </div >
                             </>
                         )}
                     </div >

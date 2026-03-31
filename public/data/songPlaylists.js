@@ -6,28 +6,28 @@ var listSong = [
         songs: [
             {
                 name: "Mơ",
-                singer: ["VCT"],
+                singers: ["VCT"],
                 path: "./../public/assets/music/listSong1/song1.mp3",
                 image: "./../public/assets/img/music/favouriteSong/song1.jpg",
                 duration: 270
             },
             {
                 name: "Mơ",
-                singer: ["VCT"],
+                singers: ["VCT"],
                 path: "./../public/assets/music/listSong1/song1.mp3",
                 image: "./../public/assets/img/music/listSong1/song1.jpg",
                 duration: 270
             },
             {
                 name: "Mơ",
-                singer: ["VCT"],
+                singers: ["VCT"],
                 path: "./../public/assets/music/listSong1/song1.mp3",
                 image: "./../public/assets/img/music/favouriteSong/song1.jpg",
                 duration: 270
             },
             // {
             //     name: "Mơ",
-            //     singer: ["VCT"],
+            //     singers: ["VCT"],
             //     path: "./../public/assets/music/listSong1/song1.mp3",
             //     image: "./../public/assets/img/music/favouriteSong/song1.jpg",
             //     duration: 270
@@ -43,42 +43,42 @@ var listSong = [
         songs: [
             {
                 name: "Cứ Chill Thôi",
-                singer: ["Chillies", "Suni Hạ Linh", "Rhymastic"],
+                singers: ["Chillies", "Suni Hạ Linh", "Rhymastic"],
                 path: "./../public/assets/music/listSong1/song1.mp3",
                 image: "./../public/assets/img/music/listSong1/song1.jpg",
                 duration: 270
             },
             {
                 name: "Crush",
-                singer: ["WN", "Vani", "An An"],
+                singers: ["WN", "Vani", "An An"],
                 path: "./../public/assets/music/listSong1/song2.mp3",
                 image: "./../public/assets/img/music/listSong1/song2.jpg",
                 duration: 198
             },
             {
                 name: "Vô Tình",
-                singer: ["Xesi", "Hoaprox"],
+                singers: ["Xesi", "Hoaprox"],
                 path: "./../public/assets/music/listSong1/song3.mp3",
                 image: "./../public/assets/img/music/listSong1/song3.jpg",
                 duration: 273
             },
             {
                 name: "Because I'm Stupid",
-                singer: ["SS501"],
-                path: "./../public/assets/music/listSong1/song4.flac",
+                singers: ["SS501"],
+                path: "./../public/assets/music/listSong1/song4.mp3",
                 image: "./../public/assets/img/music/listSong1/song4.jpg",
                 duration: 260
             },
             {
                 name: "Mama Boy",
-                singer: ["AMEE"],
+                singers: ["AMEE"],
                 path: "./../public/assets/music/listSong1/song5.mp3",
                 image: "./../public/assets/img/music/listSong1/song5.jpg",
                 duration: 204
             },
         ],
         created_at: "2026-03-24",
-        image: "./../public/assets/img/music/listSong1/song1.jpg"
+        image: "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774608161/playlist1_c2l8fr.jpg"
     }
     ,
     {
@@ -88,49 +88,49 @@ var listSong = [
         songs: [
             {
                 name: "Rồi Tới Luôn",
-                singer: ["Nal"],
+                singers: ["Nal"],
                 path: "./../public/assets/music/listSong2/song1.mp3",
                 image: "./../public/assets/img/music/listSong2/song1.jpg",
                 duration: 242
             },
             {
                 name: "Yêu Là Cưới",
-                singer: ["PHÁT HỒ X2X"],
+                singers: ["PHÁT HỒ X2X"],
                 path: "./../public/assets/music/listSong2/song2.mp3",
                 image: "./../public/assets/img/music/listSong2/song2.jpg",
                 duration: 177
             },
             {
                 name: "Độ Tộc 2",
-                singer: ["Masew", "Độ Mixi", "Phúc Du", "Pháo"],
+                singers: ["Masew", "Độ Mixi", "Phúc Du", "Pháo"],
                 path: "./../public/assets/music/listSong2/song3.mp3",
                 image: "./../public/assets/img/music/listSong2/song3.jpg",
                 duration: 201
             },
             {
                 name: "Chúng Ta Của Hiện Tại",
-                singer: ["Sơn Tùng M-TP"],
+                singers: ["Sơn Tùng M-TP"],
                 path: "./../public/assets/music/listSong2/song4.mp3",
                 image: "./../public/assets/img/music/listSong2/song4.jpg",
                 duration: 890
             },
             {
                 name: "Em Không Hiểu",
-                singer: ["Changg", "Minh Huy"],
+                singers: ["Changg", "Minh Huy"],
                 path: "./../public/assets/music/listSong2/song5.mp3",
                 image: "./../public/assets/img/music/listSong2/song5.jpg",
                 duration: 237
             },
             {
                 name: "Đã Lỡ Yêu Em Nhiều",
-                singer: ["JustaTee"],
+                singers: ["JustaTee"],
                 path: "./../public/assets/music/listSong2/song6.mp3",
                 image: "./../public/assets/img/music/listSong2/song6.jpg",
                 duration: 261
             },
             {
                 name: "Cưới Đi",
-                singer: ["2T", "ChangC"],
+                singers: ["2T", "ChangC"],
                 path: "./../public/assets/music/listSong2/song7.mp3",
                 image: "./../public/assets/img/music/listSong2/song7.jpg",
                 duration: 285
@@ -146,35 +146,35 @@ var listSong = [
         songs: [
             {
                 name: "Cheating On You",
-                singer: ["Charlie Puth"],
+                singers: ["Charlie Puth"],
                 path: "./../public/assets/music/listSong3/song1.mp3",
                 image: "./../public/assets/img/music/listSong3/song1.jpg",
                 duration: 196
             },
             {
                 name: "I Do",
-                singer: ["911"],
+                singers: ["911"],
                 path: "./../public/assets/music/listSong3/song2.mp3",
                 image: "./../public/assets/img/music/listSong3/song2.jpg",
                 duration: 201
             },
             {
                 name: "Reality",
-                singer: ["Lost Frequencies", "Janieck Devy"],
+                singers: ["Lost Frequencies", "Janieck Devy"],
                 path: "./../public/assets/music/listSong3/song3.mp3",
                 image: "./../public/assets/img/music/listSong3/song3.jpg",
                 duration: 158
             },
             {
                 name: "Attention",
-                singer: ["Charlie Puth"],
+                singers: ["Charlie Puth"],
                 path: "./../public/assets/music/listSong3/song4.mp3",
                 image: "./../public/assets/img/music/listSong3/song4.jpg",
                 duration: 208
             },
             {
                 name: "Monster",
-                singer: ["Katie Sky"],
+                singers: ["Katie Sky"],
                 path: "./../public/assets/music/listSong3/song5.mp3",
                 image: "./../public/assets/img/music/listSong3/song5.jpg",
                 duration: 228
@@ -182,28 +182,28 @@ var listSong = [
 
             {
                 name: "Faded",
-                singer: ["Alan Walker"],
+                singers: ["Alan Walker"],
                 path: "./../public/assets/music/listSong3/song6.mp3",
                 image: "./../public/assets/img/music/listSong3/song6.jpg",
                 duration: 212
             },
             {
                 name: "Save Me",
-                singer: ["DEAMN"],
+                singers: ["DEAMN"],
                 path: "./../public/assets/music/listSong3/song7.mp3",
                 image: "./../public/assets/img/music/listSong3/song7.jpg",
                 duration: 184
             },
             {
                 name: "Havana",
-                singer: ["Camila Cabello", "Young Thug"],
+                singers: ["Camila Cabello", "Young Thug"],
                 path: "./../public/assets/music/listSong3/song8.mp3",
                 image: "./../public/assets/img/music/listSong3/song8.jpg",
                 duration: 217
             },
             {
                 name: "The River",
-                singer: ["Axel Johansson"],
+                singers: ["Axel Johansson"],
                 path: "./../public/assets/music/listSong3/song9.mp3",
                 image: "./../public/assets/img/music/listSong3/song9.jpg",
                 duration: 211
@@ -212,7 +212,7 @@ var listSong = [
 
             {
                 name: "Nevada",
-                singer: ["Vicetone"],
+                singers: ["Vicetone"],
                 path: "./../public/assets/music/listSong3/song14.mp3",
                 image: "./../public/assets/img/music/listSong3/song14.jpg",
                 duration: 208
@@ -229,35 +229,35 @@ var listSong = [
         songs: [
             {
                 name: "Eyes - Đôi mắt",
-                singer: ["G.Ducky"],
+                singers: ["G.Ducky"],
                 path: "./../public/assets/music/listSong4/song1.mp3",
                 image: "./../public/assets/img/music/listSong4/song1.jpg",
                 duration: 205
             },
             {
                 name: "Giàu Vì Bạn Sang Vì Vợ",
-                singer: ["RPT MCK"],
+                singers: ["RPT MCK"],
                 path: "./../public/assets/music/listSong4/song2.mp3",
                 image: "./../public/assets/img/music/listSong4/song2.jpg",
                 duration: 205
             },
             {
                 name: "Walk On Da Street",
-                singer: ["16 Typh", "16 BrT"],
+                singers: ["16 Typh", "16 BrT"],
                 path: "./../public/assets/music/listSong4/song3.mp3",
                 image: "./../public/assets/img/music/listSong4/song3.jpg",
                 duration: 194
             },
             {
                 name: "CHƠI",
-                singer: ["HIEUTHUHAI", "MANBO"],
+                singers: ["HIEUTHUHAI", "MANBO"],
                 path: "./../public/assets/music/listSong4/song4.mp3",
                 image: "./../public/assets/img/music/listSong4/song4.jpg",
                 duration: 255
             },
             {
                 name: "Thủ Đô Cypher",
-                singer: ["RPT Orijinn", "LOW G", "RZMas", "RPT MCK"],
+                singers: ["RPT Orijinn", "LOW G", "RZMas", "RPT MCK"],
                 path: "./../public/assets/music/listSong4/song5.mp3",
                 image: "./../public/assets/img/music/listSong4/song5.jpg",
                 duration: 174
@@ -265,42 +265,42 @@ var listSong = [
 
             {
                 name: "Buông Hàng",
-                singer: ["Young Milo"],
+                singers: ["Young Milo"],
                 path: "./../public/assets/music/listSong4/song6.mp3",
                 image: "./../public/assets/img/music/listSong4/song6.jpg",
                 duration: 171
             },
             {
                 name: "Người Chơi Hệ Đẹp",
-                singer: ["16 Typh"],
+                singers: ["16 Typh"],
                 path: "./../public/assets/music/listSong4/song7.mp3",
                 image: "./../public/assets/img/music/listSong4/song7.jpg",
                 duration: 121
             },
             {
                 name: "Ghé Qua",
-                singer: ["Dick ", "PC", "Tofu"],
+                singers: ["Dick ", "PC", "Tofu"],
                 path: "./../public/assets/music/listSong4/song8.mp3",
                 image: "./../public/assets/img/music/listSong4/song8.jpg",
                 duration: 268
             },
             {
                 name: "Đìu Anh Luôn Giữ Kín Trong Tym",
-                singer: ["RPT MCK", "tlinh", "2pillz "],
+                singers: ["RPT MCK", "tlinh", "2pillz "],
                 path: "./../public/assets/music/listSong4/song9.mp3",
                 image: "./../public/assets/img/music/listSong4/song9.jpg",
                 duration: 203
             },
             {
                 name: "Xích Thêm Chút",
-                singer: ["RPT Groovie", "TLinh", "RPT MCK"],
+                singers: ["RPT Groovie", "TLinh", "RPT MCK"],
                 path: "./../public/assets/music/listSong4/song10.mp3",
                 image: "./../public/assets/img/music/listSong4/song10.jpg",
                 duration: 244
             },
             {
                 name: "Tay To",
-                singer: ["RPT MCK", "RPT PhongKhin"],
+                singers: ["RPT MCK", "RPT PhongKhin"],
                 path: "./../public/assets/music/listSong4/song11.mp3",
                 image: "./../public/assets/img/music/listSong4/song11.jpg",
                 duration: 165

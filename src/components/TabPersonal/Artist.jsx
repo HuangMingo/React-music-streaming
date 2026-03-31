@@ -12,7 +12,6 @@ function doi(followers) {
 export function Artist() {
 
     const artists = JSON.parse(localStorage.getItem(ARTIST_STORAGE_KEY));
-    console.log(artists);
     return (
         <>
             <div className="container__section row mt-30">

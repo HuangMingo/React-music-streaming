@@ -42,39 +42,37 @@ export function Playlist({ playlists }) {
                         {
                             playlists.map((playlist, playlistIndex) => {
                                 return (
-                                    <>
-                                        <div className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`} key={`${playlistIndex}`} onClick={() => handleClickPlaylist(playlist, playlistIndex)}>
-                                            <div className="row__item item--playlist">
-                                                <div className="row__item-container flex--top-left">
-                                                    <div className="row__item-display br-5">
-                                                        <div className="row__item-img img--square" style={
-                                                            { "background": `url(${playlist.image}) no-repeat center center / cover` }
-                                                        }>
+
+                                    <div className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`} key={`${playlistIndex}`} onClick={() => handleClickPlaylist(playlist, playlistIndex)}>
+                                        <div className="row__item item--playlist">
+                                            <div className="row__item-container flex--top-left">
+                                                <div className="row__item-display br-5">
+                                                    <div className="row__item-img img--square" style={
+                                                        { "background": `url(${playlist.image}) no-repeat center center / cover` }
+                                                    }>
+                                                    </div>
+                                                    <div className="row__item-actions">
+                                                        <div className="action-btn btn--heart">
+                                                            <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
                                                         </div>
-                                                        <div className="row__item-actions">
-                                                            <div className="action-btn btn--heart">
-                                                                <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
-                                                            </div>
-                                                            <div className="btn--play-playlist">
-                                                                <div className="control-btn btn-toggle-play">
-                                                                    <i className="bi bi-play-fill"></i>
-                                                                </div>
-                                                            </div>
-                                                            <div className="action-btn">
-                                                                <i className="btn--icon bi bi-three-dots"></i>
+                                                        <div className="btn--play-playlist">
+                                                            <div className="control-btn btn-toggle-play">
+                                                                <i className="bi bi-play-fill"></i>
                                                             </div>
                                                         </div>
-                                                        <div className="overlay"></div>
+                                                        <div className="action-btn">
+                                                            <i className="btn--icon bi bi-three-dots"></i>
+                                                        </div>
                                                     </div>
-                                                    <div className="row__item-info">
-                                                        <a href="#" className="row__info-name is-twoline">{playlist.name}</a>
-                                                        <h3 className="row__info-creator">{playlist.user_name}</h3>
-                                                    </div>
+                                                    <div className="overlay"></div>
+                                                </div>
+                                                <div className="row__item-info">
+                                                    <a href="#" className="row__info-name is-twoline">{playlist.name}</a>
+                                                    <h3 className="row__info-creator">{playlist.user_name}</h3>
                                                 </div>
                                             </div>
-                                        </div >
-                                    </>
-
+                                        </div>
+                                    </div >
                                 )
                             })
 

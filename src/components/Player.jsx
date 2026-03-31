@@ -1,17 +1,105 @@
+import { useState, useEffect, useRef } from "react";
+import { useMusicContext } from "../context/MusicContext";
+const formatTime = (seconds = 0) => {
+    const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
+    const mins = Math.floor(safeSeconds / 60)
+        .toString()
+        .padStart(2, "0");
+    const secs = Math.floor(safeSeconds % 60)
+        .toString()
+        .padStart(2, "0");
+    return `${mins}:${secs}`;
+};
+
 export function Player() {
+    const { currentSong, currentTime, currentVolume, setcurrentVolume, setCurrentTime } = useMusicContext();
+    const audioRef = useRef();
+    const [isPlaying, setIsPlaying] = useState(false);
+    const duration = audioRef.current?.duration || currentSong?.duration || 0;
+    const [pendingRestoreTime, setPendingRestoreTime] = useState(null);
+    const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+    console.log(progressPercent);
+    //Khôi phục trạng thái phát nhạc khi reload trang nếu có dữ liệu hợp lệ trong localStorage
+    useEffect(() => {
+        if (audioRef.current && currentSong?.path) {
+            const savedTime = JSON.parse(localStorage.getItem("currentTime"));
+            console.log("Restoring time from localStorage:", savedTime);
+            if(savedTime && savedTime !== "undefined") {
+                setPendingRestoreTime(savedTime);
+            }
+            audioRef.current
+                .play()
+                .then(() => setIsPlaying(true))
+                .catch(() => setIsPlaying(false));
+        }
+    }, [currentSong, setCurrentTime]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        audio.volume = currentVolume / 100;
+    }, [currentVolume]);
+
+    const togglePlay = () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        if (audio.paused) {
+            audio
+                .play()
+                .then(() => setIsPlaying(true))
+                .catch(() => setIsPlaying(false));
+            return;
+        }
+        audio.pause();
+        setIsPlaying(false);
+    };
+    //Cập nhật thời gian hiện tại của bài hát khi phát và lưu tiến trình vào localStorage
+    const handleTimeUpdate = () => {
+        if (!audioRef.current || !currentSong?.path) return;
+        const newTime = audioRef.current.currentTime;
+        setCurrentTime(newTime);
+        // Save progress every time update (at least once per ~250-500ms depending on audio events)
+    };
+
+    const handleLoadedMetadata = () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        if (pendingRestoreTime !== null) {
+            const restoredTime = Math.min(pendingRestoreTime, audio.duration || pendingRestoreTime);
+            audio.currentTime = restoredTime;
+            setCurrentTime(restoredTime);
+            setPendingRestoreTime(null);
+        }
+    };
+    //Sự kiện tua bài hát khi người dùng tương tác với thanh tiến trình, đồng thời cập nhật thời gian hiện tại và lưu tiến trình vào localStorage
+    const handleSeek = (event) => {
+        const audio = audioRef.current;
+        if (!audio || !duration) return;
+        const value = Number(event.target.value);
+        const nextTime = (value / 100) * duration;
+        audio.currentTime = nextTime;
+        setCurrentTime(nextTime);
+        // Save progress immediately when seeking  
+    };
+
+    const handleVolumeChange = (event) => {
+        const nextVolume = Number(event.target.value);
+        setcurrentVolume(nextVolume);
+    };
+
     return (
         <>
-            < div className="player grid" >
+            < div className={`player grid${isPlaying ? " playing" : ""}`} >
                 <div className="player__container">
                     <div className="player__container-song">
-                        <div className="player__song-info media">
+                        <div className={`player__song-info media${isPlaying ? " playing" : ""}`}>
                             <div className="media__left">
                                 <div className="player__song-thumb media__thumb note-1">
                                     <div
                                         className="thumb-img"
                                         style={{
                                             background:
-                                                'url("https://i.ytimg.com/vi/kTJczUoc26U/maxresdefault.jpg") no-repeat center center / cover'
+                                                `url(${currentSong?.image || "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg"}) no-repeat center center / cover`
                                         }}
                                     />
                                     <svg
@@ -48,11 +136,22 @@ export function Player() {
                                 <div className="player__song-body media__info">
                                     <div className="player__song-title info__title">
                                         <div className="player__title-animate">
-                                            <div className="title__item">Music name</div>
-                                            <div className="title__item">Music name</div>
+                                            <div className="title__item">{currentSong.name}</div>
+                                            <div className="title__item">{currentSong.name}</div>
                                         </div>
                                     </div>
-                                    <div className="player__song-author info__author">Author</div>
+                                    <div className="player__song-author info__author">
+                                        {
+                                            currentSong?.singers?.map((singer, index) => {
+                                                return (
+                                                    <span key={index}>
+                                                        <a href="#" className="is-ghost">{singer}</a>
+                                                        {index < currentSong.singers.length - 1 && ", "}
+                                                    </span>
+                                                )
+                                            })
+                                        }
+                                    </div>
                                 </div>
                             </div>
                             <div className="media__right hide-on-tablet-mobile">
@@ -75,7 +174,7 @@ export function Player() {
                             <div className="control-btn btn-prev">
                                 <i className="bi bi-skip-start-fill" />
                             </div>
-                            <div className="control-btn btn-toggle-play btn--play-song is-medium">
+                            <div className="control-btn btn-toggle-play btn--play-song is-medium" onClick={togglePlay}>
                                 <i className="bi bi-pause icon-pause" />
                                 <i className="bi bi-play-fill icon-play" />
                             </div>
@@ -87,20 +186,21 @@ export function Player() {
                             </div>
                         </div>
                         <div className="progress-block hide-on-mobile">
-                            <span className="tracktime">00:00</span>
+                            <span className="tracktime">{formatTime(currentTime)}</span>
                             <input
                                 id="progress--main"
                                 className="progress"
                                 type="range"
-                                defaultValue={0}
+                                value={pendingRestoreTime || undefined ? (pendingRestoreTime / duration) * 100 : progressPercent}
+                                onChange={handleSeek}
                                 step={1}
                                 min={0}
                                 max={100}
                             />
                             <div className="progress__track song--track">
-                                <div className="progress__track-update" />
+                                <div className="progress__track-update" style={{ width: `${progressPercent}%` }} />
                             </div>
-                            <span className="durationtime">--:--</span>
+                            <span className="durationtime">{formatTime(duration || currentSong?.duration || 0)}</span>
                         </div>
                     </div>
                     <div className="player__options hide-on-mobile">
@@ -118,13 +218,14 @@ export function Player() {
                                 <input
                                     type="range"
                                     className="volume__range"
-                                    defaultValue={100}
+                                    value={currentVolume}
+                                    onChange={handleVolumeChange}
                                     step={1}
                                     min={0}
                                     max={100}
                                 />
                                 <div className="progress__track volume--track">
-                                    <div className="progress__track-update" />
+                                    <div className="progress__track-update" style={{ width: `${currentVolume}%` }}></div>
                                 </div>
                             </div>
                             <div className="player__list-icon">
@@ -132,6 +233,20 @@ export function Player() {
                             </div>
                         </div>
                     </div>
+                    <audio
+                        ref={audioRef}
+                        src={`${currentSong?.path || null}`}
+                        id="audio"
+                        onTimeUpdate={handleTimeUpdate}
+                        onLoadedMetadata={handleLoadedMetadata}
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        onEnded={() => {
+                            setIsPlaying(false);
+                            setCurrentTime(0);
+                        }}
+                    ></audio>
+
                 </div>
                 <div className="player__popup">
                     <div className="player__popup-header">
@@ -185,7 +300,7 @@ export function Player() {
                     </div>
                     <div className="player__popup-footer">
                         <div className="player__container-song hide-on-mobile">
-                            <div className="player__song-info media">
+                            <div className={`player__song-info media${isPlaying ? " playing" : ""}`}>
                                 <div className="media__left">
                                     <div className="player__song-thumb media__thumb note-1">
                                         <div
@@ -229,11 +344,11 @@ export function Player() {
                                     <div className="player__song-body media__info">
                                         <div className="player__song-title info__title">
                                             <div className="player__title-animate">
-                                                <div className="title__item">Music name</div>
-                                                <div className="title__item">Music name</div>
+                                                <div className="title__item">{currentSong.name}</div>
+                                                <div className="title__item">{currentSong.name}</div>
                                             </div>
                                         </div>
-                                        <div className="player__song-author info__author">Author</div>
+                                        <div className="player__song-author info__author">{currentSong.singers?.join(', ') || 'Unknown Artist'}</div>
                                     </div>
                                 </div>
                                 <div className="media__right hide-on-tablet-mobile">
@@ -256,7 +371,7 @@ export function Player() {
                                 <div className="control-btn btn-prev">
                                     <i className="bi bi-skip-start-fill" />
                                 </div>
-                                <div className="control-btn btn-toggle-play btn--play-song is-medium">
+                                <div className="control-btn btn-toggle-play btn--play-song is-medium" onClick={togglePlay}>
                                     <i className="bi bi-pause icon-pause" />
                                     <i className="bi bi-play-fill icon-play" />
                                 </div>
@@ -268,20 +383,21 @@ export function Player() {
                                 </div>
                             </div>
                             <div className="progress-block">
-                                <span className="tracktime">00:00</span>
+                                <span className="tracktime">{formatTime(currentTime)}</span>
                                 <input
                                     id="progress--pop-up"
                                     className="progress"
                                     type="range"
-                                    defaultValue={0}
+                                    value={progressPercent}
+                                    onChange={handleSeek}
                                     step={1}
                                     min={0}
                                     max={100}
                                 />
                                 <div className="progress__track song--track">
-                                    <div className="progress__track-update" />
+                                    <div className="progress__track-update" style={{ width: `${progressPercent}%` }} />
                                 </div>
-                                <span className="durationtime">--:--</span>
+                                <span className="durationtime">{formatTime(duration || currentSong?.duration || 0)}</span>
                             </div>
                         </div>
                         <div className="player__options hide-on-mobile">
@@ -299,13 +415,14 @@ export function Player() {
                                     <input
                                         type="range"
                                         className="volume__range"
-                                        defaultValue={100}
+                                        value={currentVolume}
+                                        onChange={handleVolumeChange}
                                         step={1}
                                         min={0}
                                         max={100}
                                     />
                                     <div className="progress__track volume--track">
-                                        <div className="progress__track-update" />
+                                        <div className="progress__track-update" style={{ width: `${currentVolume}%` }} />
                                     </div>
                                     <span className="volume__background" />
                                 </div>

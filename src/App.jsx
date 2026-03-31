@@ -30,7 +30,7 @@ import { Radio } from './components/TabExplorer/Radio.jsx'
 function App() {
   const [showTheme, setShowTheme] = useState(false);
   const [isOpen, setOpen] = useState(false);
-  const playlists = JSON.parse(localStorage.getItem(MUSIC_STORAGE_KEY)  || []);
+  const playlists = JSON.parse(localStorage.getItem(MUSIC_STORAGE_KEY) || []);
   const [selectedAlbum, setSelectedAlbum] = useState(null);
 
   // -----------Set background for header when scroll-----------
@@ -65,54 +65,54 @@ function App() {
   return (
     <MusicProvider>
       <>
-      <div className="app grid" style={{ backgroundImage: "none" }}>
-        {/* Header */}
-        <Header onClose={() => setShowTheme(true)} onOpen={() => setOpen(true)} />
+        <div className="app grid" style={{ backgroundImage: "none" }}>
+          {/* Header */}
+          <Header onClose={() => setShowTheme(true)} onOpen={() => setOpen(true)} />
 
-        {/* Sidebar */}
-        <Sidebar />
-
-
-        <Routes>
-          <Route path="/" element={<Mood />} />
-          <Route path="/personal" element={<TabPersonal playlists={playlists} />} >
-            <Route path="" element={<OverviewSection />} />
-            <Route path="overview" element={<OverviewSection />} />
-            <Route path="song" element={<SongSection />} />
-            <Route path="playlist" element={<PlaylistSection />} />
-            <Route path="album" element={<AlbumSection />} />
-            <Route path="artist" element={<ArtistSection />} />
-            <Route path="upload" element={<UploadSection />} />
-          </Route>
-          <Route path="/mood" element={<Mood />} />
-          <Route path="/dream" element={<DreamChart />} />
-          <Route path="/radio" element={<Radio />} />
-          <Route path="/following" element={<TabFollowing />} />
-        </Routes>
+          {/* Sidebar */}
+          <Sidebar />
 
 
+          <Routes>
+            <Route path="/" element={<Mood />} />
+            <Route path="/personal" element={<TabPersonal playlists={playlists} />} >
+              <Route path="" element={<OverviewSection />} />
+              <Route path="overview" element={<OverviewSection />} />
+              <Route path="song" element={<SongSection />} />
+              <Route path="playlist" element={<PlaylistSection />} />
+              <Route path="album" element={<AlbumSection />} />
+              <Route path="artist" element={<ArtistSection />} />
+              <Route path="upload" element={<UploadSection />} />
+            </Route>
+            <Route path="/mood" element={<Mood />} />
+            <Route path="/dream" element={<DreamChart />} />
+            <Route path="/radio" element={<Radio />} />
+            <Route path="/following" element={<TabFollowing />} />
+          </Routes>
 
-      </div >
 
-      {/* Tab radio */}
-      < TabRadio />
 
-      {/* Tab following */}
-      < TabFollowing />
+        </div >
 
-      {/* Player */}
-      < Player />
-      {/* Theme */}
-      {
-        showTheme && (
-          <ThemeModal onClose={() => setShowTheme(false)} />
-        )
-      }
+        {/* Tab radio */}
+        < TabRadio />
 
-      {/* Toast */}
-      < div id="toast" ></div >
+        {/* Tab following */}
+        < TabFollowing />
 
-    </>
+        {/* Player */}
+        < Player />
+        {/* Theme */}
+        {
+          showTheme && (
+            <ThemeModal onClose={() => setShowTheme(false)} />
+          )
+        }
+
+        {/* Toast */}
+        < div id="toast" ></div >
+
+      </>
     </MusicProvider>
   )
 }
