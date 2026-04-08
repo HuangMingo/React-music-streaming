@@ -39,7 +39,7 @@ export function PlaylistSection() {
                                             <div className="row__item item--playlist">
                                                 <div className="row__item-container flex--top-left">
                                                     <div className="row__item-display br-5">
-                                                        <div className="row__item-img img--square" style={{ background: `url(${playlist.image}) no-repeat center center / cover` }}></div>
+                                                        <div className="row__item-img img--square" style={{ background: `url(${playlist.playlist_image}) no-repeat center center / cover` }}></div>
                                                         <div className="row__item-actions">
                                                             <div className="action-btn btn--heart">
                                                                 <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
@@ -56,8 +56,8 @@ export function PlaylistSection() {
                                                         <div className="overlay"></div>
                                                     </div>
                                                     <div className="row__item-info">
-                                                        <a href="#" className="row__info-name is-twoline">{playlist.name}</a>
-                                                        <h3 className="row__info-creator">{playlist.user_name}</h3>
+                                                        <a href="#" className="row__info-name is-twoline">{playlist.playlist_name}</a>
+                                                        <h3 className="row__info-creator">{playlist.username}</h3>
                                                     </div>
                                                 </div>
                                             </div>

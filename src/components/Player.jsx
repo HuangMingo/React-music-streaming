@@ -12,18 +12,32 @@ const formatTime = (seconds = 0) => {
 };
 
 export function Player() {
-    const { currentSong, currentTime, currentVolume, setcurrentVolume, setCurrentTime } = useMusicContext();
+    const {
+        currentSong,
+        setCurrentSong,
+        currentIndex,
+        setCurrentIndex,
+        selectedPlaylist,
+        currentTime,
+        currentVolume,
+        setCurrentVolume,
+        setCurrentTime,
+        isPlaying,
+        setIsPlaying
+    } = useMusicContext();
     const audioRef = useRef();
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [isRandom, setIsRandom] = useState(() => JSON.parse(localStorage.getItem("isRandom") || "false"));
+    const [isRepeat, setIsRepeat] = useState(() => JSON.parse(localStorage.getItem("isRepeat") || "false"));
     const duration = audioRef.current?.duration || currentSong?.duration || 0;
     const [pendingRestoreTime, setPendingRestoreTime] = useState(null);
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-    console.log(progressPercent);
+    const songs = selectedPlaylist?.songs || [];
+    // console.log(currentVolume);
+    // console.log(progressPercent);
     //Khôi phục trạng thái phát nhạc khi reload trang nếu có dữ liệu hợp lệ trong localStorage
     useEffect(() => {
         if (audioRef.current && currentSong?.path) {
-            const savedTime = JSON.parse(localStorage.getItem("currentTime"));
-            console.log("Restoring time from localStorage:", savedTime);
+            const savedTime = currentTime;
             if(savedTime && savedTime !== "undefined") {
                 setPendingRestoreTime(savedTime);
             }
@@ -39,6 +53,63 @@ export function Player() {
         if (!audio) return;
         audio.volume = currentVolume / 100;
     }, [currentVolume]);
+
+    useEffect(() => {
+        localStorage.setItem("isRandom", JSON.stringify(isRandom));
+    }, [isRandom]);
+
+    useEffect(() => {
+        localStorage.setItem("isRepeat", JSON.stringify(isRepeat));
+    }, [isRepeat]);
+
+    useEffect(() => {
+        if (!songs.length) return;
+        if (!currentSong?.path) {
+            setCurrentSong(songs[0]);
+            setCurrentIndex(0);
+            setCurrentTime(0);
+        }
+    }, [songs, currentSong, setCurrentSong, setCurrentIndex, setCurrentTime]);
+
+    const playSongAt = (songIndex) => {
+        if (!songs.length) return;
+        const nextIndex = (songIndex + songs.length) % songs.length;
+        const nextSong = songs[nextIndex];
+        if (!nextSong) return;
+        setCurrentIndex(nextIndex);
+        setCurrentSong(nextSong);
+        setCurrentTime(0);
+        setPendingRestoreTime(null);
+    };
+
+    const pickRandomIndex = () => {
+        if (songs.length <= 1) return currentIndex;
+        let nextIndex = currentIndex;
+        while (nextIndex === currentIndex) {
+            nextIndex = Math.floor(Math.random() * songs.length);
+        }
+        return nextIndex;
+    };
+
+    const handleNextSong = () => {
+        if (!songs.length) return;
+        const nextIndex = isRandom ? pickRandomIndex() : currentIndex + 1;
+        playSongAt(nextIndex);
+    };
+
+    const handlePrevSong = () => {
+        if (!songs.length) return;
+        const prevIndex = isRandom ? pickRandomIndex() : currentIndex - 1;
+        playSongAt(prevIndex);
+    };
+
+    const toggleRandom = () => {
+        setIsRandom((prev) => !prev);
+    };
+
+    const toggleRepeat = () => {
+        setIsRepeat((prev) => !prev);
+    };
 
     const togglePlay = () => {
         const audio = audioRef.current;
@@ -84,7 +155,7 @@ export function Player() {
 
     const handleVolumeChange = (event) => {
         const nextVolume = Number(event.target.value);
-        setcurrentVolume(nextVolume);
+        setCurrentVolume(nextVolume);
     };
 
     return (
@@ -137,16 +208,15 @@ export function Player() {
                                     <div className="player__song-title info__title">
                                         <div className="player__title-animate">
                                             <div className="title__item">{currentSong.name}</div>
-                                            <div className="title__item">{currentSong.name}</div>
                                         </div>
                                     </div>
                                     <div className="player__song-author info__author">
                                         {
-                                            currentSong?.singers?.map((singer, index) => {
+                                            currentSong?.artists?.map((artist, index) => {
                                                 return (
                                                     <span key={index}>
-                                                        <a href="#" className="is-ghost">{singer}</a>
-                                                        {index < currentSong.singers.length - 1 && ", "}
+                                                        <a href="#" className="is-ghost">{artist}</a>
+                                                        {index < currentSong.artists.length - 1 && ", "}
                                                     </span>
                                                 )
                                             })
@@ -168,20 +238,20 @@ export function Player() {
                     </div>
                     <div className="player__control">
                         <div className="player__control-btn">
-                            <div className="control-btn btn-random is-small">
+                            <div className={`control-btn btn-random is-small${isRandom ? " active" : ""}`} onClick={toggleRandom}>
                                 <i className="bi bi-shuffle" />
                             </div>
-                            <div className="control-btn btn-prev">
+                            <div className="control-btn btn-prev" onClick={handlePrevSong}>
                                 <i className="bi bi-skip-start-fill" />
                             </div>
                             <div className="control-btn btn-toggle-play btn--play-song is-medium" onClick={togglePlay}>
                                 <i className="bi bi-pause icon-pause" />
                                 <i className="bi bi-play-fill icon-play" />
                             </div>
-                            <div className="control-btn btn-next">
+                            <div className="control-btn btn-next" onClick={handleNextSong}>
                                 <i className="bi bi-skip-end-fill" />
                             </div>
-                            <div className="control-btn btn-repeat is-small is-medium">
+                            <div className={`control-btn btn-repeat is-small is-medium${isRepeat ? " active" : ""}`} onClick={toggleRepeat}>
                                 <i className="bi bi-arrow-repeat" />
                             </div>
                         </div>
@@ -242,8 +312,18 @@ export function Player() {
                         onPlay={() => setIsPlaying(true)}
                         onPause={() => setIsPlaying(false)}
                         onEnded={() => {
-                            setIsPlaying(false);
-                            setCurrentTime(0);
+                            if (isRepeat) {
+                                if (audioRef.current) {
+                                    audioRef.current.currentTime = 0;
+                                    setCurrentTime(0);
+                                    audioRef.current
+                                        .play()
+                                        .then(() => setIsPlaying(true))
+                                        .catch(() => setIsPlaying(false));
+                                }
+                                return;
+                            }
+                            handleNextSong();
                         }}
                     ></audio>
 
@@ -365,20 +445,20 @@ export function Player() {
                         </div>
                         <div className="player__control">
                             <div className="player__control-btn">
-                                <div className="control-btn btn-random is-small">
+                                <div className={`control-btn btn-random is-small${isRandom ? " active" : ""}`} onClick={toggleRandom}>
                                     <i className="bi bi-shuffle" />
                                 </div>
-                                <div className="control-btn btn-prev">
+                                <div className="control-btn btn-prev" onClick={handlePrevSong}>
                                     <i className="bi bi-skip-start-fill" />
                                 </div>
                                 <div className="control-btn btn-toggle-play btn--play-song is-medium" onClick={togglePlay}>
                                     <i className="bi bi-pause icon-pause" />
                                     <i className="bi bi-play-fill icon-play" />
                                 </div>
-                                <div className="control-btn btn-next">
+                                <div className="control-btn btn-next" onClick={handleNextSong}>
                                     <i className="bi bi-skip-end-fill" />
                                 </div>
-                                <div className="control-btn btn-repeat is-small is-medium">
+                                <div className={`control-btn btn-repeat is-small is-medium${isRepeat ? " active" : ""}`} onClick={toggleRepeat}>
                                     <i className="bi bi-arrow-repeat" />
                                 </div>
                             </div>

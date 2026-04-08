@@ -43,7 +43,7 @@ var listAlbum = [
     {
         title: "Boycold (Mini Album)",
         image: "./assets/img/albums/album2.jpg",
-        singer: ['Đen Vâu', 'Binz', 'Min'],
+        singers: ['Đen Vâu', 'Binz', 'Min'],
         songs: [
             {
                 title: "Em Có Nghe",
@@ -153,7 +153,7 @@ var listAlbum = [
     {
         title: "Người Yêu Cũ (Gửi Cho Anh 2) (Mini Album)",
         image: "./assets/img/albums/album4.jpg",
-        singer: ["AMEE", "VIRUSS"],
+        singers: ["AMEE", "VIRUSS"],
         songs: [
             {
                 name: "Trời Giấu Trời Mang Đi",
@@ -179,7 +179,7 @@ var listAlbum = [
     {
         title: "Querencia (Mini Album)",
         image: "./assets/img/albums/album5.jpg",
-        singer: ["Masew", "B Ray", "TAP"],
+        singers: ["Masew", "B Ray", "TAP"],
         songs: [
             {
                 name: "Muộn Rồi Mà Sao Còn",
@@ -228,7 +228,7 @@ var listAlbum = [
     {
         title: "Justice (Mini Album)",
         image: "./assets/img/albums/album6.jpg",
-        singer: ["Justin Bieber", "Daniel Caesar", "Giveon"],
+        singers: ["Justin Bieber", "Daniel Caesar", "Giveon"],
         songs: [
             {
                 name: "Rendezvous",
@@ -253,7 +253,7 @@ var listAlbum = [
     {
         title: "Teenage Dream",
         image: "./assets/img/albums/album7.jpg",
-        singer: ["The Kid LAROI", "Justin Bieber"],
+        singers: ["The Kid LAROI", "Justin Bieber"],
         songs: [
             {
                 name: "Stay",
@@ -278,7 +278,7 @@ var listAlbum = [
     {
         title: "The Off Season",
         image: "./assets/img/albums/album8.jpg",
-        singer: ["Obito", "Seachains", "Davis", "Lena"],
+        singers: ["Obito", "Seachains", "Davis", "Lena"],
         songs: [
             {
                 name: "SIMPLE LOVE",
@@ -303,7 +303,7 @@ var listAlbum = [
     {
         title: "Lemonade",
         image: "./assets/img/albums/album15.jpg",
-        singer: ["Binz"],
+        singers: ["Binz"],
         songs: [
             {
                 name: "OK",

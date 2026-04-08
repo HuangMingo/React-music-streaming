@@ -843,10 +843,21 @@ a {
     color: var(--text-secondary);
 }
 
-.row__item.item--artist .row__info-creator {
-    line-height: 1.5rem;
+a.row__info-creator {
+    transition: color 180ms ease;
 }
 
+a.row__info-creator:hover {
+    color: var(--link-text-hover);
+}
+
+.row__item.item--artist .row__info-creator {
+    line-height: 1.5rem;
+    
+}
+.row__item.item--artist:hover .row__info-creator:hover{
+    color: var(--link-text-hover);
+}
 
 .row__item-detail {
     flex: 1;

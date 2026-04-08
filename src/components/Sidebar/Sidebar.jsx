@@ -1,7 +1,13 @@
 import { useState } from "react"
 import { NavLink } from "react-router-dom"
+import { CreatePlaylist } from "./CreatePlaylist";
 export function Sidebar() {
     const [isActive, setActive] = useState(false);
+    const [isOpenForm, setOpenForm] = useState(false);
+
+    function toggleOpenForm() {
+        setOpenForm(!isOpenForm);
+    }   
     return (
         <div className="app__sidebar">
             <div className="sidebar__logo hide-on-mobile">
@@ -284,10 +290,13 @@ export function Sidebar() {
                 </ul>
             </div>
             <div className="sidebar__create-playlist">
-                <div className="sidebar__create-container hide-on-tablet-mobile">
+                <div className="sidebar__create-container hide-on-tablet-mobile" onClick={() =>{toggleOpenForm()} }>
                     <i className="bi bi-plus-lg" />
                     <h2 className="sidebar__create-title">Tạo playlist mới</h2>
                 </div>
+                {
+                    isOpenForm && (<CreatePlaylist onClose={() => setOpenForm(false)} />)
+                }
                 <div className="sidebar__expand">
                     <div className="sidebar__expand-btn btn--expand">
                         <i className="bi bi-chevron-right" />

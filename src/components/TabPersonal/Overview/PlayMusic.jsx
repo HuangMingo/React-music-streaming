@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext.jsx";
 
 export function PlayMusic({ playlist }) {
-    const { currentIndex, setCurrentIndex, currentSong, setCurrentSong } = useMusicContext();
+    const { currentIndex, setCurrentIndex, currentSong, setCurrentSong, setCurrentTime, isPlaying } = useMusicContext();
     const [slideIndex, setSlideIndex] = useState(0);
     const visibleSongs = useMemo(() => (playlist?.songs ?? []), [playlist]);
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
@@ -12,6 +12,11 @@ export function PlayMusic({ playlist }) {
     function handleClickSong(index) {
         setCurrentIndex(index);
         setCurrentSong(playlist.songs[index]);
+        if (currentSong !== playlist.songs[index]) {
+            // Reset currentTime when changing songs
+            setCurrentTime(0);
+        }
+
     }
 
     //--------------Slide show logic-------------
@@ -83,7 +88,7 @@ export function PlayMusic({ playlist }) {
                             <div className="box--no-content">
                                 <div className="no-content-image" />
                                 <span className="no-content-text">
-                                    Chưa có playlist nào được chọn!
+                                    Chưa có bài hát nào được chọn!
                                 </span>
                             </div>
                         ) : (
@@ -104,12 +109,16 @@ export function PlayMusic({ playlist }) {
                                     <div className="playlist__list">
                                         {playlist?.songs?.map((song, index) => {
                                             return (
-                                                <div className={`playlist__list-song playing media ${currentIndex === index ? 'active' : ''}`} key={index} onClick={() => handleClickSong(index)}>
+                                                <div className={`playlist__list-song media ${currentIndex === index ? 'active' : ''} ${currentIndex === index && isPlaying ? 'playing' : ''}`} key={index} onClick={() => handleClickSong(index)}>
                                                     <div className="playlist__song-info media__left">
                                                         <div className="playlist__song-thumb media__thumb mr-10"
                                                             style={{
                                                                 "background": `url(${song.image}) no-repeat center center / cover`
                                                             }}>
+                                                            <span className="song-note note-1">♪</span>
+                                                            <span className="song-note note-2">♫</span>
+                                                            <span className="song-note note-3">♪</span>
+                                                            <span className="song-note note-4">♫</span>
                                                             <div className="thumb--animate" >
                                                                 <div className="thumb--animate-img" style={{ "background": "url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
 
@@ -125,11 +134,11 @@ export function PlayMusic({ playlist }) {
                                                             <span className="playlist__song-title info__title">{song.name}</span>
                                                             <p className="playlist__song-author info__author">
                                                                 {
-                                                                    song.singers.map((s, i) => {
+                                                                    song?.artists?.map((artist, i) => {
                                                                         return (
                                                                             <span key={i}>
-                                                                                <a href="#" className="is-ghost">{s}</a>
-                                                                                {i < song.singers.length - 1 && ', '}
+                                                                                <a href="#" className="is-ghost">{artist}</a>
+                                                                                {i < song?.artists?.length - 1 && ', '}
                                                                             </span>
                                                                         );
                                                                     })

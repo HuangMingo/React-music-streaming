@@ -10,8 +10,10 @@ const EMPTY_SONG = {
 };
 
 export function MusicProvider({ children }) {
-  const [currentTime, setCurrentTime] = useState(0); // Thời gian hiện tại của bài hát
-  const [currentVolume, setCurrentVolume] = useState(100); // Mặc định âm lượng là 100%
+   // Thời gian hiện tại của bài hát
+  const [currentTime, setCurrentTime] = useState(0);
+  // Mặc định âm lượng là 0%
+  const [currentVolume, setCurrentVolume] = useState(0); 
   //Chạy bài hoặc dừng
   const [isPlaying, setIsPlaying] = useState(false);
   //Dữ liệu bài hát được chọn
@@ -57,6 +59,22 @@ export function MusicProvider({ children }) {
           setSelectedPlaylist(savedPlaylist);
         }
       }
+      //Lưu dữ liệu âm lượng vào biến hiện tại
+      const savedVolumeStr = localStorage.getItem("currentVolume");
+      if (savedVolumeStr && savedVolumeStr !== "undefined") {
+        const savedVolume = JSON.parse(savedVolumeStr);
+        if (savedVolume !== null) {
+          setCurrentVolume(savedVolume);
+        }
+      }
+      //Lưu dữ liệu thời gian hiện tại của bài hát vào currentTime
+      const savedTimeStr = localStorage.getItem("currentTime");
+      if (savedTimeStr && savedTimeStr !== "undefined") {
+        const savedTime = JSON.parse(savedTimeStr);
+        if (savedTime !== null) {
+          setCurrentTime(savedTime);
+        }
+      }
       //Dữ liệu bài hát hiện tại được lưu trong localStorage
       const savedCurrentSongStr = localStorage.getItem("currentSong");
       if (savedCurrentSongStr && savedCurrentSongStr !== "undefined") {
@@ -65,6 +83,7 @@ export function MusicProvider({ children }) {
           setCurrentSong(savedCurrentSong);
         }
       }
+
     } catch (error) {
       console.error("Error parsing localStorage:", error);
       // Clear corrupted data
@@ -112,7 +131,7 @@ export function MusicProvider({ children }) {
     localStorage.setItem("currentTime", JSON.stringify(currentTime));
   }, [currentTime]);
   return (
-    <MusicContext.Provider value={{ currentSong, setCurrentSong, currentIndex, setCurrentIndex, playlistIndex, setPlaylistIndex, selectedPlaylist, setSelectedPlaylist, currentVolume, setCurrentVolume, currentTime, setCurrentTime }}>
+    <MusicContext.Provider value={{ currentSong, setCurrentSong, currentIndex, setCurrentIndex, playlistIndex, setPlaylistIndex, selectedPlaylist, setSelectedPlaylist, currentVolume, setCurrentVolume, currentTime, setCurrentTime, isPlaying, setIsPlaying }}>
       {children}
     </MusicContext.Provider>
   );
