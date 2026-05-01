@@ -10,6 +10,10 @@
     height: calc(100vh - var(--player-height));
 }
 
+.app.app--full-screen {
+    height: 100vh;
+}
+
 /* Siderbar CSS */
 .app__sidebar {
     width: 240px;
@@ -392,12 +396,24 @@
 }
 
 
+/* Nút điều hướng mặc định: có hover khi còn khả dụng */
 .header__button {
     padding: 0;
     outline: none;
     border: none;
     cursor: pointer;
     background-color: transparent;
+    transition: opacity 0.3s ease, cursor 0.3s ease;
+    position: relative;
+}
+
+.header__button:hover:not(:disabled) {
+    opacity: 0.8;
+}
+
+/* Khi hết trang để chuyển: làm mờ và chặn tương tác bằng thuộc tính disabled */
+.header__button:disabled {
+    opacity: 0.3 !important;
 }
 
 .header__button-icon {
@@ -570,6 +586,28 @@
 .header__nav-item {
     margin-right: 10px;
     -webkit-tap-highlight-color: transparent;
+}
+
+.header__auth-btn {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 98px;
+    border-radius: 999px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    background: #1d9bf0;
+    border: 1px solid #1d9bf0;
+    padding: 0 16px;
+}
+
+.header__auth-btn--outline {
+    color: var(--text-color);
+    background: transparent;
+    border-color: var(--border-primary);
 }
 
 .header__nav-item:last-child {
@@ -815,14 +853,15 @@
 .option__log-out {
     right: 0;
     width: 210px;
-    height: 56px;
+    min-height: 56px;
     display: none;
-    padding: 16px 15px;
+    padding: 8px;
     position: absolute;
     border-radius: 8px;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     top: calc(100% + 5px);
-    justify-content: flex-start;
+    justify-content: center;
     color: var(--navigation-text);
     background-color: var(--primary-bg);
 }
@@ -831,16 +870,75 @@
     display: flex;
 }
 
-.option__log-out span {
+.log-out__action {
+    width: 100%;
+    border: none;
+    display: flex;
+    cursor: pointer;
+    text-align: left;
     font-size: 1.4rem;
-    line-height: 2.4rem;
+    line-height: 2.2rem;
+    border-radius: 6px;
+    padding: 10px 12px;
+    align-items: center;
+    text-decoration: none;
+    background: transparent;
+    color: var(--navigation-text);
+}
+
+.log-out__action:hover {
+    background-color: var(--bg-content-color);
 }
 
 .option__log-out .log-out__icon {
-    font-size: 2.4rem;
+    font-size: 1.8rem;
+    min-width: 24px;
     margin-right: 10px;
-    line-height: 4.4rem;
+    line-height: 1;
     -webkit-text-stroke: 0.5px var(--primary-bg);
+}
+
+.log-out__button {
+    font-family: inherit;
+}
+
+.playlist__song-more {
+    position: relative;
+}
+
+.playlist__song-more .option__log-out {
+    width: 260px;
+    z-index: 999;
+    right: -8px;
+    top: calc(100% + 8px);
+}
+
+.playlist__menu-title {
+    cursor: default;
+    font-weight: 600;
+}
+
+.playlist__menu-title:hover {
+    background: transparent;
+}
+
+.playlist__menu-field {
+    padding: 0 12px 8px;
+}
+
+.playlist__menu-select {
+    width: 100%;
+    height: 34px;
+    border: none;
+    outline: none;
+    border-radius: 6px;
+    padding: 0 10px;
+    color: var(--text-color);
+    background: var(--bg-content-color);
+}
+
+.playlist__menu-submit {
+    justify-content: center;
 }
 
 
@@ -1440,14 +1538,6 @@ label .container__header-icon {
     font-weight: 400;
 }
 
-.playlist__song-time {
-    
-}
-
-.playlist__song-option {
-
-}
-
 
 
 /* Container album playlist */
@@ -1493,6 +1583,17 @@ label .container__header-icon {
 
 .playlist__container {
     align-items: stretch;
+}
+
+.playlist__create-col {
+    flex: 0 0 165px;
+    min-width: 165px;
+    height: 260px;
+}
+
+.playlist__create-col .row__item,
+.playlist__create-col .row__item-container {
+    height: 100%;
 }
 
 .playlist__viewport {

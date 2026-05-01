@@ -1,74 +1,123 @@
-import { useOutletContext, useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { useAuthContext } from "../../context/AuthContext";
 import { useMusicContext } from "../../context/MusicContext";
+import { DeletePlaylistDialog } from "./DeletePlaylistDialog";
 
 export function PlaylistSection() {
-    const {playlists} = useOutletContext();
-    const { setPlaylistIndex, setSelectedPlaylist } = useMusicContext();
+    const { playlists, onPlaylistsChanged } = useOutletContext();
+    const { currentUser } = useAuthContext();
+    const { setPlaylistIndex, setSelectedPlaylist, setCurrentSong, setCurrentTime, setCurrentSongId, setIsPlaying } = useMusicContext();
     const navigate = useNavigate();
-    function handleClickPlaylist(playlist, index) {
-        setSelectedPlaylist(playlist);
-        setPlaylistIndex(index);
-        navigate("/personal/overview");
+
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [playlistIdToDelete, setPlaylistIdToDelete] = useState(null);
+
+    function handleClickDeletePlaylist(playlistId) {
+        setPlaylistIdToDelete(playlistId);
+        setIsDeleting(true);
     }
+
+    function closeDeleteDialog() {
+        setIsDeleting(false);
+        setPlaylistIdToDelete(null);
+    }
+
+    function handleClickPlaylist(playlist, index) {
+        const firstSong = playlist?.songs?.[0];
+        const hasSongs = Boolean(firstSong);
+        setSelectedPlaylist(playlist);
+        if (hasSongs) {
+            setCurrentSong(firstSong);
+        }
+        setPlaylistIndex(index);
+        setCurrentTime(0);
+        setCurrentSongId(firstSong?.id);
+        setIsPlaying(hasSongs);
+        navigate("/personal");
+    }
+
     return (
         <>
             <div className="grid container__tab tab-playlist active">
                 <div className="container__section row">
                     <div className="col l-12 m-12 c-12 mb-16">
                         <div className="container__header">
-                            <a href="#" className="container__header-title">
+                            <div className="container__header-title">
                                 <h3>Playlist&nbsp;</h3>
-                            </a>
+                            </div>
                             <h3 className="container__header-subtitle">Playlist</h3>
                         </div>
                     </div>
                     <div className="col l-12 m-12 c-12">
                         <div className="row playlist--container">
-                            <div className="col l-2-4 m-3 c-4 mb-30">
-                                <div className="row__item  playlist--create item--playlist">
-                                    <div className="row__item-container flex--center item-create--properties">
-                                        <i className="bi bi-plus-lg album__create-icon"></i>
-                                        <span className="album__create-annotate text-center">Tạo playlist mới</span>
-                                    </div>
-                                </div>
-                            </div>
-                            {
-                                playlists.map((playlist, playlistIndex) => {
-                                    return (
-                                        <div className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 ? 'mb-30' : ''}`} onClick={() => handleClickPlaylist(playlist, playlistIndex)} key={playlist.name}>
-                                            <div className="row__item item--playlist">
-                                                <div className="row__item-container flex--top-left">
-                                                    <div className="row__item-display br-5">
-                                                        <div className="row__item-img img--square" style={{ background: `url(${playlist.playlist_image}) no-repeat center center / cover` }}></div>
-                                                        <div className="row__item-actions">
-                                                            <div className="action-btn btn--heart">
-                                                                <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
+                            {playlists.map((playlist, playlistIndex) => {
+                                return (
+                                    <div
+                                        className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 ? "mb-30" : ""}`}
+                                        key={`${playlist.id ?? playlistIndex}`}
+                                        onClick={() => handleClickPlaylist(playlist, playlistIndex)}
+                                    >
+                                        <div className="row__item item--playlist">
+                                            <div className="row__item-container flex--top-left">
+                                                <div className="row__item-display br-5">
+                                                    <div
+                                                        className="row__item-img img--square"
+                                                        style={{ background: `url(${playlist.playlist_image}) no-repeat center center / cover` }}
+                                                    />
+                                                    <div className="row__item-actions">
+                                                        {playlist.isdefault === true ? "" : (
+                                                            <div
+                                                                className="action-btn btn--heart"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                }}
+                                                            >
+                                                                {playlist.ismine != null && playlist.ismine === true ? (
+                                                                    <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(playlist.id)} />
+                                                                ) : (
+                                                                    <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                                                                )}
                                                             </div>
-                                                            <div className="btn--play-playlist">
-                                                                <div className="control-btn btn-toggle-play">
-                                                                    <i className="bi bi-play-fill"></i>
-                                                                </div>
-                                                            </div>
-                                                            <div className="action-btn">
-                                                                <i className="btn--icon bi bi-three-dots"></i>
+                                                        )}
+
+                                                        <div className="btn--play-playlist">
+                                                            <div className="control-btn btn-toggle-play">
+                                                                <i className="bi bi-play-fill" />
                                                             </div>
                                                         </div>
-                                                        <div className="overlay"></div>
+
+                                                        {playlist.isdefault != null && playlist.isdefault === true ? "" : (
+                                                            <div className="action-btn">
+                                                                <i className="btn--icon bi bi-three-dots" />
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div className="row__item-info">
-                                                        <a href="#" className="row__info-name is-twoline">{playlist.playlist_name}</a>
-                                                        <h3 className="row__info-creator">{playlist.username}</h3>
-                                                    </div>
+                                                    <div className="overlay"></div>
+                                                </div>
+                                                <div className="row__item-info">
+                                                    <a href="#" className="row__info-name is-twoline">{playlist.playlist_name}</a>
+                                                    <h3 className="row__info-creator">{playlist.username}</h3>
                                                 </div>
                                             </div>
                                         </div>
-                                    )
-                                })
-                            }
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                </div >
+                </div>
             </div >
+            {
+                isDeleting && (
+                    <DeletePlaylistDialog
+                        playlistId={playlistIdToDelete}
+                        onClose={closeDeleteDialog}
+                        currentUser={currentUser}
+                        onDeleted={onPlaylistsChanged}
+                    />
+                )
+            }
         </>
     )
 }

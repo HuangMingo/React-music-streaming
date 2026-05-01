@@ -1,28 +1,22 @@
 import { useMemo } from "react";
 import { useMusicContext } from "../../context/MusicContext";
-
 export function SongSection() {
     const {
         selectedPlaylist,
-        currentIndex,
-        setCurrentIndex,
+        currentSongId,
+        setCurrentSongId,
         currentSong,
         setCurrentSong,
         setCurrentTime,
-        isPlaying
+        isPlaying,
+        setIsPlaying,
+        favouriteSongIds,
+        setIsFavouriteSongIds,
+        toggleFavouriteSong,
+        handleClickSong
     } = useMusicContext();
 
     const songs = useMemo(() => selectedPlaylist?.songs ?? [], [selectedPlaylist]);
-
-    function handleClickSong(song, index) {
-        setCurrentIndex(index);
-        setCurrentSong(song);
-
-        if (currentSong !== song) {
-            setCurrentTime(0);
-        }
-    }
-
     return (
         <>
             <div className="grid container__tab tab-song active">
@@ -70,24 +64,25 @@ export function SongSection() {
                                     </div>
                                 ) : (
                                     songs.map((song, index) => {
-                                        const isActiveSong = currentIndex === index;
-                                        const songDuration = Number(song.duration) || 0;
+                                        const isActiveSong = currentSongId === song.id;
+                                        const songDuration = Number(song.duration_seconds) || 0;
                                         const durationText = `${Math.floor(songDuration / 60)
                                             .toString()
                                             .padStart(2, "0")}:${Math.floor(songDuration % 60)
-                                            .toString()
-                                            .padStart(2, "0")}`;
+                                                .toString()
+                                                .padStart(2, "0")}`;
 
                                         return (
                                             <div
                                                 className={`playlist__list-song media ${isActiveSong ? "active" : ""} ${isActiveSong && isPlaying ? "playing" : ""}`}
                                                 key={`${song.name}-${index}`}
-                                                onClick={() => handleClickSong(song, index)}
+                                                onClick={() => handleClickSong(song)}
                                             >
                                                 <div className="playlist__song-info media__left">
                                                     <i className="bi bi-music-note-beamed playlist__song-icon mr-10" />
                                                     <div
-                                                        className="playlist__song-thumb media__thumb mr-10"
+                                                        className={`playlist__song-thumb media__thumb mr-10 ${currentSong.id === song.id ? 'active' : ''} ${currentSong.id === song.id && isPlaying ? 'playing' : ''}`}
+                                                        
                                                         style={{
                                                             background: `url(${song.image}) no-repeat center center / cover`
                                                         }}
@@ -109,14 +104,14 @@ export function SongSection() {
                                                         </div>
                                                     </div>
                                                     <div className="playlist__song-body media__info">
-                                                        <span className="playlist__song-title info__title">{song.name}</span>
+                                                        <span className="playlist__song-title info__title">{song.title}</span>
                                                         <p className="playlist__song-author info__author">
-                                                            {song?.artists?.length ? (
-                                                                song.artists.map((artist, i) => {
+                                                            {song?.artist_names?.length ? (
+                                                                song.artist_names.map((artist, i) => {
                                                                     return (
                                                                         <span key={i}>
                                                                             <a href="#" className="is-ghost">{artist}</a>
-                                                                            {i < song.artists.length - 1 && ", "}
+                                                                            {i < song.artist_names.length - 1 && ", "}
                                                                         </span>
                                                                     );
                                                                 })
@@ -134,8 +129,8 @@ export function SongSection() {
                                                     <div className="playlist__song-btn btn--mic option-btn">
                                                         <i className="btn--icon song__icon bi bi-mic-fill" />
                                                     </div>
-                                                    <div className="playlist__song-btn btn--heart option-btn">
-                                                        <i className="btn--icon song__icon icon--heart bi bi-heart-fill primary" />
+                                                    <div className="playlist__song-btn btn--heart option-btn" onClick={(e) => toggleFavouriteSong(e, song.id)}>
+                                                        <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? "-fill" : ""} primary`} />
                                                     </div>
                                                     <div className="playlist__song-btn option-btn">
                                                         <i className="btn--icon bi bi-three-dots" />

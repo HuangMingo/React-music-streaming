@@ -1,17 +1,79 @@
 import '../assets/css/main.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuthContext } from '../context/AuthContext';
 export function Header({ onClose }) {
     const [isOpen, setOpen] = useState(false);
     const [isOpenLogout, setOpenLogout] = useState(false);
+    // Trạng thái bật/tắt của nút quay lại và tiến tới trên header.
+    const [canGoBack, setCanGoBack] = useState(false);
+    const [canGoForward, setCanGoForward] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { currentUser, isAuthenticated, isAdmin, logout } = useAuthContext();
+
+    // Đồng bộ trạng thái nút back/forward theo history index của browser
+    useEffect(() => {
+        // idx là vị trí hiện tại trong history stack của React Router.
+        const currentIdx = Number(window.history.state?.idx ?? 0);
+        const maxIdxKey = 'maxHistoryIdx';
+        // Lưu lại idx lớn nhất đã đi qua để biết còn trang forward hay không.
+        const savedMaxIdx = Number(sessionStorage.getItem(maxIdxKey) ?? currentIdx);
+        const maxIdx = Math.max(savedMaxIdx, currentIdx);
+
+        sessionStorage.setItem(maxIdxKey, String(maxIdx));
+
+        // Có thể lùi khi không ở vị trí đầu; có thể tiến khi chưa ở idx lớn nhất.
+        setCanGoBack(currentIdx > 0);
+        setCanGoForward(currentIdx < maxIdx);
+    }, [location]);
+
+    //Chuyển trang cũ
+    function handleBack() {
+        // Chỉ điều hướng khi nút đang khả dụng.
+        if (canGoBack) {
+            navigate(-1);
+        }
+    }
+    //Chuyển trang mới
+    function handleForward() {
+        // Chỉ điều hướng khi còn trang phía trước trong history.
+        if (canGoForward) {
+            navigate(1);
+        }
+    }
+
+    function handleLogout() {
+        logout();
+        setOpenLogout(false);
+        navigate('/personal');
+    }
+
+    function closeUserMenu() {
+        setOpenLogout(false);
+    }
+
     return (
         <>
             {/* Header */}
             < header className="header grid" >
                 <div className="header__with-search">
-                    <button className="header__button">
+                    <button 
+                        className="header__button" 
+                        type="button" 
+                        onClick={handleBack}
+                        disabled={!canGoBack}
+                        title={canGoBack ? 'Trang trước' : 'Không có trang trước'}
+                    >
                         <i className="bi bi-arrow-left header__button-icon" />
                     </button>
-                    <button className="header__button button--disabled">
+                    <button 
+                        className="header__button" 
+                        type="button" 
+                        onClick={handleForward}
+                        disabled={!canGoForward}
+                        title={canGoForward ? 'Trang tiếp theo' : 'Không có trang tiếp theo'}
+                    >
                         <i className="bi bi-arrow-right header__button-icon" />
                     </button>
                     <div className="header__search">
@@ -277,18 +339,45 @@ export function Header({ onClose }) {
                                 </div>
                             </div>
                         </li>
-                        <li className="header__nav-item">
-                            <img
-                                src="/assets/img/avatars/avatar.jpg"
-                                alt=""
-                                className="header__nav-btn"
-                                onClick={() => setOpenLogout(!isOpenLogout)}
-                            />
-                            <div className= {`option__log-out ${isOpenLogout ? "open" : ""}`}>
-                                <i className="bi bi-box-arrow-right log-out__icon" />
-                                <span>Đăng xuất</span>
-                            </div>
-                        </li>
+                        {!isAuthenticated ? (
+                            <>
+                                <li className="header__nav-item">
+                                    <Link className="header__auth-btn" to="/login">
+                                        Đăng nhập
+                                    </Link>
+                                </li>
+                                <li className="header__nav-item">
+                                    <Link className="header__auth-btn header__auth-btn--outline" to="/register">
+                                        Đăng ký
+                                    </Link>
+                                </li>
+                            </>
+                        ) : (
+                            <li className="header__nav-item">
+                                <img
+                                    src={currentUser?.avatar || '/assets/img/avatars/avatar.jpg'}
+                                    alt={currentUser?.username || 'avatar'}
+                                    className="header__nav-btn"
+                                    onClick={() => setOpenLogout(!isOpenLogout)}
+                                />
+                                <div className={`option__log-out ${isOpenLogout ? 'open' : ''}`}>
+                                    <Link className="log-out__action" to="/dashboard" onClick={closeUserMenu}>
+                                        <i className="bi bi-person-circle log-out__icon" />
+                                        <span>Trang đã đăng nhập</span>
+                                    </Link>
+                                    {isAdmin ? (
+                                        <Link className="log-out__action" to="/admin" onClick={closeUserMenu}>
+                                            <i className="bi bi-shield-lock log-out__icon" />
+                                            <span>Quản trị Admin</span>
+                                        </Link>
+                                    ) : null}
+                                    <button className="log-out__action log-out__button" type="button" onClick={handleLogout}>
+                                        <i className="bi bi-box-arrow-right log-out__icon" />
+                                        <span>Đăng xuất</span>
+                                    </button>
+                                </div>
+                            </li>
+                        )}
                     </ul>
                 </div>
             </header >

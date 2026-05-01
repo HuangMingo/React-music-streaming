@@ -1,0 +1,154 @@
+.delete-playlist-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 1200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background:
+		radial-gradient(circle at 0% 100%, rgba(38, 143, 255, 0.45), transparent 40%),
+		radial-gradient(circle at 100% 0%, rgba(161, 78, 255, 0.35), transparent 45%),
+		rgba(15, 23, 42, 0.7);
+	backdrop-filter: blur(3px);
+}
+
+.delete-playlist-dialog {
+	position: relative;
+	width: min(430px, 100%);
+	border-radius: 24px;
+	padding: 22px 22px 20px;
+	background: linear-gradient(140deg, #e8edf6 0%, #d9e2f3 100%);
+	box-shadow:
+		0 22px 45px rgba(20, 30, 70, 0.35),
+		0 0 0 1px rgba(255, 255, 255, 0.55) inset;
+}
+
+.delete-playlist-close {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	color: #27406f;
+	background: rgba(255, 255, 255, 0.9);
+	box-shadow: 0 8px 18px rgba(20, 30, 70, 0.12);
+	transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.delete-playlist-close:hover {
+	transform: scale(1.05);
+	background: #ffffff;
+	box-shadow: 0 10px 20px rgba(20, 30, 70, 0.16);
+}
+
+.delete-playlist-close i {
+	font-size: 1.6rem;
+	line-height: 1;
+}
+
+.delete-playlist-title {
+	margin: 0 42px 0 0;
+	font-size: 3rem;
+	line-height: 1.08;
+	font-weight: 800;
+	letter-spacing: 0.5px;
+	color: #22365f;
+}
+
+.delete-playlist-message {
+	margin: 14px 0 0;
+	font-size: 1.8rem;
+	line-height: 1.45;
+	color: #5b6d90;
+}
+
+.delete-playlist-actions {
+	margin-top: 22px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+.delete-playlist-actions .btn {
+	border: 0;
+	min-width: 112px;
+	height: 48px;
+	border-radius: 999px;
+	font-size: 2rem;
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: 0.3px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.delete-playlist-actions .btn:hover:not(:disabled) {
+	transform: translateY(-1px);
+}
+
+.delete-playlist-actions .btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.delete-playlist-actions .btn--cancel {
+	color: #4f6288;
+	background: #eef2fb;
+	box-shadow: 0 10px 20px rgba(35, 52, 94, 0.15);
+}
+
+.delete-playlist-actions .btn--confirm {
+	color: #ffffff;
+	background: linear-gradient(95deg, #4ea6f0 0%, #5378f0 48%, #a54ced 100%);
+	box-shadow: 0 14px 22px rgba(83, 120, 240, 0.35);
+}
+
+@media (max-width: 767px) {
+	.delete-playlist-overlay {
+		padding: 14px;
+	}
+
+	.delete-playlist-dialog {
+		width: min(360px, 100%);
+		border-radius: 20px;
+		padding: 18px 16px 16px;
+	}
+
+	.delete-playlist-close {
+		top: 12px;
+		right: 12px;
+		width: 32px;
+		height: 32px;
+	}
+
+	.delete-playlist-close i {
+		font-size: 1.4rem;
+	}
+
+	.delete-playlist-title {
+		margin-right: 40px;
+		font-size: 3rem;
+	}
+
+	.delete-playlist-message {
+		margin-top: 12px;
+		font-size: 1.6rem;
+	}
+
+	.delete-playlist-actions {
+		margin-top: 18px;
+	}
+
+	.delete-playlist-actions .btn {
+		min-width: 96px;
+		height: 42px;
+		font-size: 1.8rem;
+	}
+}

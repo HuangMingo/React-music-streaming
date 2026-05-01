@@ -1,13 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext";
-
-export function Playlist({ playlists = [] }) {
-    const { setPlaylistIndex, setSelectedPlaylist, setCurrentTime, setCurrentSong, setCurrentIndex, setIsPlaying } = useMusicContext();
+import { useAuthContext } from "../../../context/AuthContext";
+import { DeletePlaylistDialog } from "../DeletePlaylistDialog";
+export function Playlist({ playlists = [], onPlaylistsChanged }) {
+    const { setPlaylistIndex, setSelectedPlaylist, setCurrentTime, setCurrentSong, setCurrentSongId, setIsPlaying } = useMusicContext();
+    const { currentUser } = useAuthContext();
     const navigate = useNavigate();
-
+    //Phân trang cho playlist
     const [currentPage, setCurrentPage] = useState(0);
+    //so playlist hien thi tren mot trang
     const [itemsPerPage, setItemsPerPage] = useState(4);
+    //useState mo form tao playlist moi
+    const [isOpenForm, setOpenForm] = useState(false);
+    //useState hien thi diaglog xoa playlist
+    const [isDeleting, setIsDeleting] = useState(false);
+    //set playlistId can xoa khi click vao icon xoa
+    const [playlistIdToDelete, setPlaylistIdToDelete] = useState(null);
+    function handleClickDeletePlaylist(playlistId) {
+        setPlaylistIdToDelete(playlistId);
+        setIsDeleting(true);
+
+    }
+    //Đóng dialog xóa playlist
+    function closeDeleteDialog() {
+        setIsDeleting(false);
+        setPlaylistIdToDelete(null);
+    }
 
     useEffect(() => {
         function updateItemsPerPage() {
@@ -17,12 +36,10 @@ export function Playlist({ playlists = [] }) {
                 setItemsPerPage(2);
                 return;
             }
-
             if (width < 1024) {
                 setItemsPerPage(3);
                 return;
             }
-
             setItemsPerPage(4);
         }
 
@@ -33,7 +50,7 @@ export function Playlist({ playlists = [] }) {
     }, []);
 
     const totalPages = Math.max(1, Math.ceil(playlists.length / itemsPerPage));
-
+    //pagedPlaylists là mảng 2 chiều, mỗi phần tử là một trang chứa các playlist tương ứng với itemsPerPage
     const pagedPlaylists = useMemo(() => {
         const pages = [];
 
@@ -50,7 +67,6 @@ export function Playlist({ playlists = [] }) {
 
     function scrollPersonalContainerToTop() {
         const personalContainer = document.querySelector(".app__container.tab--personal");
-
         if (personalContainer) {
             personalContainer.scrollTo({ top: 0, behavior: "smooth" });
             return;
@@ -62,16 +78,14 @@ export function Playlist({ playlists = [] }) {
     function handleClickPlaylist(playlist, index) {
         const firstSong = playlist?.songs?.[0];
         const hasSongs = Boolean(firstSong);
-
         setSelectedPlaylist(playlist);
         if (hasSongs) {
             setCurrentSong(firstSong);
+            setPlaylistIndex(index);
+            setCurrentTime(0);
+            setIsPlaying(true);
         }
-        setPlaylistIndex(index);
-        setCurrentTime(0);
-        setCurrentIndex(0);
-        setIsPlaying(hasSongs);
-        navigate("/personal");
+        navigate("/personal");  
         requestAnimationFrame(() => {
             scrollPersonalContainerToTop();
         });
@@ -122,27 +136,18 @@ export function Playlist({ playlists = [] }) {
                 </div>
                 <div className="col l-12 m-12 c-12">
                     <div className="row no-wrap playlist--container playlist__container">
-                        <div className="col l-2-4 m-3 c-4 playlist__create-col">
-                            <div className="row__item  playlist--create item--playlist">
-                                <div className="row__item-container flex--center item-create--properties">
-                                    <i className="bi bi-plus-lg album__create-icon"></i>
-                                    <span className="album__create-annotate text-center">Tạo playlist mới</span>
-                                </div>
-                            </div>
-                        </div>
                         <div className="playlist__viewport">
                             <div
                                 className="playlist__track"
                                 style={{ transform: `translateX(-${currentPage * 100}%)` }}
                             >
-                                
+
                                 {
 
                                     pagedPlaylists.map((pagePlaylists, pageIndex) => (
                                         <div className="playlist__page" key={`playlist-page-${pageIndex}`}>
                                             {pagePlaylists.map((playlist, playlistIndex) => {
                                                 const absoluteIndex = pageIndex * itemsPerPage + playlistIndex;
-
                                                 return (
                                                     <div
                                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`}
@@ -157,17 +162,35 @@ export function Playlist({ playlists = [] }) {
                                                                     }>
                                                                     </div>
                                                                     <div className="row__item-actions">
-                                                                        <div className="action-btn btn--heart">
-                                                                            <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
-                                                                        </div>
+                                                                        {
+                                                                            playlist.isdefault === true ? '' : (
+                                                                                <div className="action-btn btn--heart" onClick={(e) => {
+                                                                                    //Ngăn sự kiện click lan sang playlist item khi click vào icon xóa
+                                                                                    e.stopPropagation();
+                                                                                }}>
+                                                                                    {
+                                                                                        playlist.ismine != null && playlist.ismine === true ? (
+                                                                                            <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(playlist.id)}></i>
+                                                                                        ) : (
+                                                                                            <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
+                                                                                        )
+                                                                                    }
+                                                                                </div>
+                                                                            )
+                                                                        }
                                                                         <div className="btn--play-playlist">
                                                                             <div className="control-btn btn-toggle-play">
                                                                                 <i className="bi bi-play-fill"></i>
                                                                             </div>
                                                                         </div>
-                                                                        <div className="action-btn">
-                                                                            <i className="btn--icon bi bi-three-dots"></i>
-                                                                        </div>
+                                                                        {
+                                                                            playlist.isdefault != null && playlist.isdefault === true ? '' : (
+                                                                                <div className="action-btn">
+                                                                                    <i className="btn--icon bi bi-three-dots"></i>
+                                                                                </div>
+                                                                            )
+                                                                        }
+
                                                                     </div>
                                                                     <div className="overlay"></div>
                                                                 </div>
@@ -188,6 +211,16 @@ export function Playlist({ playlists = [] }) {
                     </div>
                 </div>
             </div >
+            {
+                isDeleting && (
+                    <DeletePlaylistDialog
+                        playlistId={playlistIdToDelete}
+                        onClose={closeDeleteDialog}
+                        currentUser={currentUser}
+                        onDeleted={onPlaylistsChanged}
+                    />
+                )
+            }
         </>
     )
 }

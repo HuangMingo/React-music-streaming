@@ -1,0 +1,12 @@
+import express from 'express';
+import { PlaylistController } from './../controllers/PlaylistController.js';
+const router = express.Router();
+//Lấy playlist yêu thích của người dùng
+router.get('/favourite-playlists', PlaylistController.getFavouritePlaylist);
+//Lấy playlist do người dùng tạo (dùng cho trang cá nhân)
+router.get('/user-created-playlists', PlaylistController.getUserCreatedPlaylist);
+router.get('/playlist-details', PlaylistController.getPlaylistById);
+router.post('/create-playlist', PlaylistController.createPlaylist);
+router.delete('/delete-playlist', PlaylistController.deletePlaylist);
+router.post('/add-song-to-playlist', PlaylistController.addSongToPlaylist);
+export default router;

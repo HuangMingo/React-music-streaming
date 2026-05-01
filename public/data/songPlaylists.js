@@ -1,23 +1,25 @@
 import axios from 'axios';
-
-export const MUSIC_STORAGE_KEY = 'VIK_MUSIC';
-
 // Tạo một hàm khởi tạo dữ liệu
-const initMusicData = async () => {
+export const initMusicData = async (userId) => {
+    //Lưu các playlist cá nhân
+    let personalPlaylists = [];
     try {
-        // Chờ API trả về dữ liệu
-        const response = await axios.get('http://localhost:3000/api/favourite-playlists');
+        //Lấy dữ liệu playlist yêu thích của người dùng (dùng cho trang khám phá)
+        const response = await axios.get(`http://localhost:3000/api/playlists/favourite-playlists?userId=${userId}`);
         const data = response.data;
+        personalPlaylists = data;
 
-        // Sau khi có dữ liệu mới lưu vào localStorage
-        localStorage.setItem(MUSIC_STORAGE_KEY, JSON.stringify(data));
-        
-        console.log("Đã lưu dữ liệu vào VIK_MUSIC:", data);
-        return data;
     } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
     }
+    //Lấy dữ liệu playlist do người dùng tạo (dùng cho trang cá nhân)
+    try{
+        const response = await axios.get(`http://localhost:3000/api/playlists/user-created-playlists?userId=${userId}`);
+        const data = response.data;
+        personalPlaylists = [...personalPlaylists, ...data];
+    } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu playlist do người dùng tạo:", error);
+    }
+    return personalPlaylists;
 };
 
-// Gọi hàm để thực thi
-initMusicData();

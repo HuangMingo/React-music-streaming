@@ -1,65 +1,26 @@
-import { Slide } from "./Slide";
-import { Playlists } from "./Playlists";
-import { Radio } from "./Radio";
-import { Playlist } from "./Playlist";
-import { Label } from "./Label";
-import { SingerSlide } from "./SingerSlide";
-import { Event } from "./Event";
-import { Brand } from "./Brand";
+import { AllSongs } from "./AllSongs";
 import { FavoriteArtist } from "./FavoriteArtist";
 import { NewPlaylist } from "./NewPlaylist";
 
 export function TabExplorer() {
     return (
         <>
-            < div className="app__container tab--explore active" >
+            <div className="app__container tab--explore active">
                 <div className="app__container-content">
                     <div className="explore__container">
                         <div className="grid">
-                            {/* Slide */}
-                            <Slide />
+                            {/* Bài hát nổi bật */}
+                            <AllSongs />
 
-                            {/* Playlists */}
-                            <Playlists />
-
-                            {/* Radio */}
-                            <Radio />
-
-                            {/* Playlist */}
-                            {/* <Playlist />
-                            <Playlist /> */}
-
-                            {/* Label */}
-                            <Label />
-
-                            {/* Singer slide */}
-                            <SingerSlide />
-
-                            {/* Playlist */}
-                            {/* <Playlist /> */}
-
-                            {/* Event */}
-                            <Event />
-
-                            {/* Playlist */}
-                            {/* <Playlist /> */}
-
-                            {/* New Playlist */}
+                            {/* Album nổi bật */}
                             <NewPlaylist />
 
-                            {/* Playlist */}
-                            {/* <Playlist /> */}
-                            
-                            {/* Favorite artist */}
+                            {/* Nghệ sĩ nổi bật */}
                             <FavoriteArtist />
-
-                            {/* Brand */}
-                            <Brand />
-
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
         </>
-    )
+    );
 }

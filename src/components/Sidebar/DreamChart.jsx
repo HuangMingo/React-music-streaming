@@ -1,9 +1,169 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useMusicContext } from "../../context/MusicContext";
+import { useAuthContext } from "../../context/AuthContext";
+import { showNotificationToast } from "../../toast";
 export function DreamChart() {
+    const [topSongs, setTopSongs] = useState([]);
+    const { setCurrentSongId, currentSong, setCurrentSong, setCurrentTime } = useMusicContext();
+    const { currentUser } = useAuthContext();
+    const {
+        favouriteSongIds,
+        setFavouriteSongIds,
+        toggleFavouriteSong,
+        handleClickSong
+    } = useMusicContext();
+    useEffect(() => {
+        axios
+            .get("http://localhost:3000/api/songs/top10-most-played-songs")
+            .then((response) => {
+                setTopSongs(Array.isArray(response?.data) ? response.data : []);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            })
+    }, [])
+
+    useEffect(() => {
+        if (!currentUser?.id || topSongs.length === 0) {
+            setFavouriteSongIds(new Set());
+            return;
+        }
+
+        let isMounted = true;
+
+        async function loadFavouriteStatuses() {
+            try {
+                const checks = await Promise.all(
+                    topSongs.map(async (song) => {
+                        const response = await axios.get(
+                            `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${song.id}`
+                        );
+                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavourite) };
+                    })
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setFavouriteSongIds(
+                    new Set(checks.filter((item) => item.isFavourite).map((item) => item.songId))
+                );
+            } catch (error) {
+                if (isMounted) {
+                    setFavouriteSongIds(new Set());
+                }
+                console.error("Load favourite statuses failed:", error);
+            }
+        }
+
+        loadFavouriteStatuses();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [topSongs, currentUser?.id]);
     return (
         <>
             {/* Tab charts */}
-            < div className="app__container tab--charts active" ></div >
+            <div className="app__container tab--charts active" >
+                <div className="app__container-content">
+                    <div className="charts__container">
+                        <div className="grid">
+                            <div className="chart__container-header mb-40">
+                                <h3 className="chart__header-name">#Dream Chart</h3>
+                                <div className="chart__header-btn">
+                                    <i className="bi bi-play-fill chart__header-icon"></i>
+                                </div>
+                            </div>
+                            <div className="row no-gutters chart--container mt-10 mb-20">
+                                <div className="col l-12 m-12 c-12">
+                                    <div className="container__playlist">
+                                        <div className="playlist__list-charts overflow-visible">
+                                            {
+                                                topSongs.map((song, songIndex) => {
+                                                    return (
+                                                        <div key={song.id} className={`playlist__list-song media ${songIndex > 9 && 'song--not-expand'}`} onClick={() => handleClickSong(song)}>
+                                                            <div className="playlist__song-info media__left">
+                                                                <div className="playlist__song-rank">
+                                                                    <div className={`playlist__rank-number
+                                                                            ${songIndex === 0 && 'is-outline--blue'}
+                                                                            ${songIndex === 1 && 'is-outline--green'}
+                                                                            ${songIndex === 2 && 'is-outline--red'}
+                                                                            ${songIndex > 2 && 'is-outline--text'}`}>
+                                                                        {songIndex + 1}
+                                                                    </div>
+                                                                    <div className="playlist__rank-icon">
+                                                                        <i className="bi bi-dash-lg"></i>
+                                                                    </div>
+                                                                    <div className="playlist__song-thumb media__thumb mr-10" style={
+                                                                        {
+                                                                            background: `url(${song.image}) no-repeat center center / cover`
+                                                                        }
+                                                                    }>
+                                                                        <div className="thumb--animate">
+                                                                            <div className="thumb--animate-img" style={
+                                                                                {
+                                                                                    background: `url('./assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain`
+                                                                                }
+                                                                            }>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="play-song--actions">
+                                                                            <div className="control-btn btn-toggle-play">
+                                                                                <i className="bi bi-play-fill"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="playlist__song-body media__info">
+                                                                        <span className="playlist__song-title info__title">{song.title}</span>
+                                                                        <p className="playlist__song-author info__author">
+                                                                            {
+                                                                                song.artist_names.map((artist, artistIndex) => {
+                                                                                    return (
+                                                                                        <span>
+                                                                                            <a href="#" className="is-ghost">{artist}</a>
+                                                                                            {artistIndex < song.artist_names.length - 1 && ", "}
+                                                                                        </span>
+                                                                                    )
+
+                                                                                })
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <span className="playlist__song-time media__content">
+                                                                {
+                                                                    // const duration = song.audio.currentDuration;
+                                                                `${Math.floor(song.duration_seconds / 60).toString().padStart(2, '0')}:${Math.floor(song.duration_seconds % 60).toString().padStart(2, '0')}`
+                                                                }
+                                                            </span>
+                                                            <div className="playlist__song-option song--tab media__right hide-on-mobile">
+                                                                <div className="playlist__song-btn btn--mic option-btn">
+                                                                    <i className="btn--icon song__icon bi bi-mic-fill"></i>
+                                                                </div>
+                                                                <div className="playlist__song-btn btn--heart option-btn" onClick={(e) => toggleFavouriteSong(e, song.id)}>
+                                                                    <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
+                                                                </div>
+                                                                <div className="playlist__song-btn option-btn">
+                                                                    <i className="btn--icon bi bi-three-dots"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     )
 }

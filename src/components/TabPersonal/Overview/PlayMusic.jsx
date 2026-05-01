@@ -1,23 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext.jsx";
-
+import { useAuthContext } from "../../../context/AuthContext.jsx";
+import axios from "axios";
+import { showNotificationToast } from "../../../toast.js";
 export function PlayMusic({ playlist }) {
-    const { currentIndex, setCurrentIndex, currentSong, setCurrentSong, setCurrentTime, isPlaying } = useMusicContext();
+    const { currentSong,
+        setCurrentSong,
+        setCurrentTime,
+        isPlaying,
+        toggleFavouriteSong,
+        favouriteSongIds,
+        setFavouriteSongIds,
+        handleClickSong } = useMusicContext();
+    const { currentUser } = useAuthContext();
     const [slideIndex, setSlideIndex] = useState(0);
+    const [userPlaylists, setUserPlaylists] = useState([]);
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
+    const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
+    const [isAddingSong, setIsAddingSong] = useState(false);
+    const playlistMenuRef = useRef(null);
     const visibleSongs = useMemo(() => (playlist?.songs ?? []), [playlist]);
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
 
-    // --------------Active song-------------
-    function handleClickSong(index) {
-        setCurrentIndex(index);
-        setCurrentSong(playlist.songs[index]);
-        if (currentSong !== playlist.songs[index]) {
-            // Reset currentTime when changing songs
-            setCurrentTime(0);
-        }
-
-    }
+    const formatSongDuration = (song) => {
+        const durationInSeconds = Number(song?.duration_seconds ?? song?.duration ?? 0);
+        const safeDuration = Number.isFinite(durationInSeconds) ? Math.max(0, durationInSeconds) : 0;
+        const mins = Math.floor(safeDuration / 60).toString().padStart(2, "0");
+        const secs = Math.floor(safeDuration % 60).toString().padStart(2, "0");
+        return `${mins}:${secs}`;
+    };
 
     //--------------Slide show logic-------------
     useEffect(() => {
@@ -33,11 +45,128 @@ export function PlayMusic({ playlist }) {
         return () => clearInterval(interval);
     }, [slideshowActive, visibleSongs.length]);
 
+
     useEffect(() => {
-        if (currentIndex >= visibleSongs.length) {
-            setCurrentIndex(0);
+        if (!currentUser?.id || visibleSongs.length === 0) {
+            setFavouriteSongIds(new Set());
+            return;
         }
-    }, [visibleSongs.length, currentIndex]);
+
+        let isMounted = true;
+
+        async function loadFavouriteStatuses() {
+            try {
+                const checks = await Promise.all(
+                    visibleSongs.map(async (song) => {
+                        const response = await axios.get(
+                            `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${song.id}`
+                        );
+                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavourite) };
+                    })
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                const ids = new Set(
+                    checks.filter((item) => item.isFavourite).map((item) => item.songId)
+                );
+                setFavouriteSongIds(ids);
+            } catch (error) {
+                console.error("Load favourite statuses failed:", error);
+            }
+        }
+
+        loadFavouriteStatuses();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [visibleSongs, currentUser?.id]);
+
+    useEffect(() => {
+        if (!currentUser?.id) {
+            setUserPlaylists([]);
+            return;
+        }
+
+        let isMounted = true;
+        //Tải danh sách playlist của người dùng
+        async function loadUserPlaylists() {
+            try {
+                const response = await axios.get(
+                    `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
+            } catch (error) {
+                if (isMounted) {
+                    setUserPlaylists([]);
+                }
+                console.error("Load user playlists failed:", error);
+            }
+        }
+
+        loadUserPlaylists();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [currentUser?.id]);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
+                setOpenSongMenuId(null);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    function handleToggleSongMenu(event, songId) {
+        event.stopPropagation();
+        setOpenSongMenuId((prevSongId) => (prevSongId === songId ? null : songId));
+    }
+
+    function handleSelectTargetPlaylist(songId, playlistId) {
+        setSelectedPlaylistBySong((prev) => ({
+            ...prev,
+            [songId]: playlistId,
+        }));
+    }
+
+    async function handleAddSongToPlaylist(event, songId) {
+        event.stopPropagation();
+        const playlistId = Number(selectedPlaylistBySong[songId]);
+
+        if (!playlistId || !songId) {
+            showNotificationToast("Vui lòng chọn playlist trước khi thêm");
+            return;
+        }
+
+        try {
+            setIsAddingSong(true);
+            await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
+                params: { playlistId, songId },
+            });
+            showNotificationToast("Đã thêm bài hát vào playlist");
+            setOpenSongMenuId(null);
+        } catch (error) {
+            console.error("Add song to playlist failed:", error);
+            showNotificationToast("Không thể thêm bài hát vào playlist");
+        } finally {
+            setIsAddingSong(false);
+        }
+    }
 
     const currentSlideClasses = (index) => {
         if (!slideshowActive || visibleSongs.length < 2) {
@@ -109,7 +238,7 @@ export function PlayMusic({ playlist }) {
                                     <div className="playlist__list">
                                         {playlist?.songs?.map((song, index) => {
                                             return (
-                                                <div className={`playlist__list-song media ${currentIndex === index ? 'active' : ''} ${currentIndex === index && isPlaying ? 'playing' : ''}`} key={index} onClick={() => handleClickSong(index)}>
+                                                <div className={`playlist__list-song media ${currentSong?.id === song.id ? 'active' : ''} ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`} key={song.id} onClick={() => handleClickSong(song)}>
                                                     <div className="playlist__song-info media__left">
                                                         <div className="playlist__song-thumb media__thumb mr-10"
                                                             style={{
@@ -131,14 +260,14 @@ export function PlayMusic({ playlist }) {
                                                             </div>
                                                         </div>
                                                         <div className="playlist__song-body media__info">
-                                                            <span className="playlist__song-title info__title">{song.name}</span>
+                                                            <span className="playlist__song-title info__title">{song.title}</span>
                                                             <p className="playlist__song-author info__author">
                                                                 {
-                                                                    song?.artists?.map((artist, i) => {
+                                                                    song?.artist_names?.map((artist, i) => {
                                                                         return (
                                                                             <span key={i}>
                                                                                 <a href="#" className="is-ghost">{artist}</a>
-                                                                                {i < song?.artists?.length - 1 && ', '}
+                                                                                {i < song?.artist_names?.length - 1 && ', '}
                                                                             </span>
                                                                         );
                                                                     })
@@ -148,7 +277,7 @@ export function PlayMusic({ playlist }) {
                                                     </div>
                                                     <span className="playlist__song-time media__content">
                                                         {
-                                                            `${Math.floor(song.duration / 60).toString().padStart(2, '0')}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
+                                                            `${Math.floor(song.duration_seconds / 60).toString().padStart(2, '0')}:${Math.floor(song.duration_seconds % 60).toString().padStart(2, '0')}`
                                                         }
                                                     </span>
 
@@ -156,11 +285,39 @@ export function PlayMusic({ playlist }) {
                                                         <div className="playlist__song-btn btn--mic option-btn">
                                                             <i className="btn--icon song__icon bi bi-mic-fill"></i>
                                                         </div>
-                                                        <div className="playlist__song-btn btn--heart option-btn">
-                                                            <i className="btn--icon song__icon icon--heart bi bi-heart-fill primary"></i>
+                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
+                                                            <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
                                                         </div>
-                                                        <div className="playlist__song-btn option-btn">
+                                                        <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
                                                             <i className="btn--icon bi bi-three-dots"></i>
+                                                            <div className={`option__log-out ${openSongMenuId === song.id ? "open" : ""}`}>
+                                                                <div className="log-out__action playlist__menu-title">
+                                                                    <i className="bi bi-music-note-list log-out__icon" />
+                                                                    <span>Thêm vào playlist</span>
+                                                                </div>
+                                                                <div className="playlist__menu-field">
+                                                                    <select
+                                                                        className="playlist__menu-select"
+                                                                        value={selectedPlaylistBySong[song.id] ?? ""}
+                                                                        onChange={(event) => handleSelectTargetPlaylist(song.id, event.target.value)}
+                                                                        onClick={(event) => event.stopPropagation()}
+                                                                    >
+                                                                        <option value="">Chọn playlist</option>
+                                                                        {userPlaylists.map((item) => (
+                                                                            <option key={item.id} value={item.id}>{item.playlist_name}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>
+                                                                <button
+                                                                    className="log-out__action playlist__menu-submit"
+                                                                    type="button"
+                                                                    onClick={(event) => handleAddSongToPlaylist(event, song.id)}
+                                                                    disabled={isAddingSong}
+                                                                >
+                                                                    <i className="bi bi-plus-circle log-out__icon" />
+                                                                    <span>{isAddingSong ? "Đang thêm..." : "Thêm bài hát"}</span>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
 

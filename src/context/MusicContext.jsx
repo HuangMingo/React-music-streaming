@@ -1,5 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-
+import { useAuthContext } from './AuthContext';
+import axios from 'axios';
+import { showNotificationToast } from '../toast.js';
 const MusicContext = createContext();
 const EMPTY_SONG = {
   path: '',
@@ -10,18 +12,61 @@ const EMPTY_SONG = {
 };
 
 export function MusicProvider({ children }) {
-   // Thời gian hiện tại của bài hát
+  //Số bài hát yêu thích trong playlist  bản yêu thích của người dùng (0: mặc định, 1: yêu thích, 2: không yêu thích)
+  const { currentUser, setCurrentUser } = useAuthContext();
+
+  //Sử dụng Set tạo state để lưu trữ tập hợp ID của các bài hát yêu thích
+  const [favouriteSongIds, setFavouriteSongIds] = useState(new Set());
+  //Toggle trạng thái yêu thích của bài hát cho người dùng.
+  async function toggleFavouriteSong(event, songId) {
+    //Ngăn chặn sự kiện từ cha
+    event.stopPropagation();
+    if (!currentUser?.id || !songId) {
+      showNotificationToast("Vui lòng đăng nhập để thêm bài hát yêu thích");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:3000/api/songs/toggle-favourite", {
+        userId: currentUser.id,
+        songId: songId,
+      });
+      const nextIsFavourite = Boolean(response?.data?.isFavourite);
+      showNotificationToast(
+        nextIsFavourite
+          ? "Đã thêm bài hát vào " + `Nhạc của ${currentUser.username}`
+          : "Đã xóa bài hát khỏi " + `Nhạc của ${currentUser.username}`
+      );
+      setFavouriteSongIds((prev) => {
+        const next = new Set(prev);
+        if (nextIsFavourite) {
+          next.add(songId);
+        } else {
+          next.delete(songId);
+        }
+        return next;
+      });
+    } catch (error) {
+      console.error("Toggle favourite failed:", error);
+    }
+  }
+  const [favouriteVersion, setFavouriteVersion] = useState(0);
+  const refreshPlaylists = () => setPlaylistVersion(v => v + 1);
+  // Thời gian hiện tại của bài hát
   const [currentTime, setCurrentTime] = useState(0);
   // Mặc định âm lượng là 0%
-  const [currentVolume, setCurrentVolume] = useState(0); 
+  const [currentVolume, setCurrentVolume] = useState(0);
   //Chạy bài hoặc dừng
   const [isPlaying, setIsPlaying] = useState(false);
   //Dữ liệu bài hát được chọn
   const [currentSong, setCurrentSong] = useState(EMPTY_SONG);
-  // ----Vị trí bài hát đang phát trong playlist-----
-  const [currentIndex, setCurrentIndex] = useState(0);
-  //Playlist đang được chọn
-  const [playlistIndex, setPlaylistIndex] = useState(0);
+  // --------------Active song-------------
+  function handleClickSong(song) {
+    setCurrentSong(song);
+    if (currentSong !== song) {
+      // Reset currentTime when changing songs
+      setCurrentTime(0);
+    }
+  }
   //Dữ liệu các bài hát của playlist đang được chọn
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
@@ -35,29 +80,14 @@ export function MusicProvider({ children }) {
           setIsPlaying(savedIsPlaying);
         }
       }
-      //Chuỗi vị trí bài hát hiện tại được lưu trong localStorage
-      const savedIndexStr = localStorage.getItem("currentSongIndex");
-      if (savedIndexStr && savedIndexStr !== "undefined") {
-        const savedIndex = JSON.parse(savedIndexStr);
-        if (savedIndex !== null) {
-          setCurrentIndex(savedIndex);
-        }
-      }
-      //Chuỗi vị trí playlist hiện tại được lưu trong localStorage
-      const savedPlaylistIndexStr = localStorage.getItem("playlistIndex");
-      if (savedPlaylistIndexStr && savedPlaylistIndexStr !== "undefined") {
-        const savedPlaylistIndex = JSON.parse(savedPlaylistIndexStr);
-        if (savedPlaylistIndex !== null) {
-          setPlaylistIndex(savedPlaylistIndex);
-        }
-      }
-      //  Chuỗi playlist được lưu trong localStorage
+
+      // Không lưu selectedPlaylist nữa, chỉ giữ trong state runtime
       const savedPlaylistStr = localStorage.getItem("selectedPlaylist");
       if (savedPlaylistStr && savedPlaylistStr !== "undefined") {
-        const savedPlaylist = JSON.parse(savedPlaylistStr);
-        if (savedPlaylist !== null) {
-          setSelectedPlaylist(savedPlaylist);
-        }
+          const savedPlaylist = JSON.parse(savedPlaylistStr);
+          if (savedPlaylist !== null) {
+              setSelectedPlaylist(savedPlaylist);
+          }
       }
       //Lưu dữ liệu âm lượng vào biến hiện tại
       const savedVolumeStr = localStorage.getItem("currentVolume");
@@ -86,31 +116,45 @@ export function MusicProvider({ children }) {
 
     } catch (error) {
       console.error("Error parsing localStorage:", error);
-      // Clear corrupted data
-      localStorage.removeItem("currentSongIndex");
-      localStorage.removeItem("playlistIndex");
+      // Clear corrupted data from localStorage
       localStorage.removeItem("currentSong");
       localStorage.removeItem("selectedPlaylist");
       localStorage.removeItem("isPlaying");
     }
   }, []);
 
-  // Auto-save currentIndex to localStorage
-  useEffect(() => {
-    localStorage.setItem("currentSongIndex", JSON.stringify(currentIndex));
-  }, [currentIndex]);
 
-  // Auto-save playlistIndex to localStorage
+  // Luôn fetch lại playlist từ server khi selectedPlaylist.id thay đổi
   useEffect(() => {
-    localStorage.setItem("playlistIndex", JSON.stringify(playlistIndex));
-  }, [playlistIndex]);
-
-  // Auto-save selectedPlaylist to localStorage
-  useEffect(() => {
-    if (selectedPlaylist !== null) {
-      localStorage.setItem("selectedPlaylist", JSON.stringify(selectedPlaylist));
+    const playlistId = Number(selectedPlaylist?.id);
+    if (!playlistId) {
+      return;
     }
-  }, [selectedPlaylist]);
+
+    let isMounted = true;
+
+    async function loadSelectedPlaylist() {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/playlists/playlist-details?playlistId=${playlistId}`);
+        if (!isMounted) {
+          return;
+        }
+
+        const playlistData = Array.isArray(response?.data) ? response.data[0] : response?.data;
+        if (playlistData) {
+          setSelectedPlaylist(playlistData);
+        }
+      } catch (error) {
+        console.error("Load selected playlist failed:", error);
+      }
+    }
+
+    loadSelectedPlaylist();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedPlaylist?.id]);
 
   // Auto-save currentSong to localStorage
   useEffect(() => {
@@ -131,7 +175,7 @@ export function MusicProvider({ children }) {
     localStorage.setItem("currentTime", JSON.stringify(currentTime));
   }, [currentTime]);
   return (
-    <MusicContext.Provider value={{ currentSong, setCurrentSong, currentIndex, setCurrentIndex, playlistIndex, setPlaylistIndex, selectedPlaylist, setSelectedPlaylist, currentVolume, setCurrentVolume, currentTime, setCurrentTime, isPlaying, setIsPlaying }}>
+    <MusicContext.Provider value={{ favouriteSongIds, setFavouriteSongIds, toggleFavouriteSong, currentSong, setCurrentSong, selectedPlaylist, setSelectedPlaylist, currentVolume, setCurrentVolume, currentTime, setCurrentTime, isPlaying, setIsPlaying, handleClickSong }}>
       {children}
     </MusicContext.Provider>
   );
@@ -143,4 +187,15 @@ export function useMusicContext() {
     throw new Error('useMusicContext must be used within a MusicProvider');
   }
   return context;
+}
+
+// Function to clear all music-related localStorage when user logs out
+export function clearMusicStorage() {
+  localStorage.removeItem("currentSongIndex");
+  localStorage.removeItem("playlistIndex");
+  localStorage.removeItem("selectedPlaylist");
+  localStorage.removeItem("currentSong");
+  localStorage.removeItem("isPlaying");
+  localStorage.removeItem("currentVolume");
+  localStorage.removeItem("currentTime");
 }

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { NavLink } from "react-router-dom"
 import { CreatePlaylist } from "./CreatePlaylist";
-export function Sidebar() {
+export function Sidebar({ onPlaylistsChanged }) {
     const [isActive, setActive] = useState(false);
     const [isOpenForm, setOpenForm] = useState(false);
 
@@ -45,21 +45,10 @@ export function Sidebar() {
                             <span>#Dreamchart</span>
                         </li>
                     </NavLink>
-
-
-
-                    <NavLink to="/radio" className="sidebar__nav-item">
+                    <NavLink to="/recent" className="sidebar__nav-item">
                         <li className="sidebar__item-link">
-                            <i className="bi bi-soundwave" />
-                            <span>Radio</span>
-                            <div className="sidebar__nav-label">LIVE</div>
-                        </li>
-                    </NavLink>
-
-                    <NavLink to="/following" className="sidebar__nav-item">
-                        <li className="sidebar__item-link">
-                            <i className="bi bi-file-earmark-slides" />
-                            <span>Theo Dõi</span>
+                            <i className="bi bi-clock"></i>
+                            <span>Gần đây</span>
                         </li>
                     </NavLink>
 
@@ -92,7 +81,7 @@ export function Sidebar() {
                         </a>
                     </li>
                 </ul>
-                <div className="sidebar__login">
+                {/* <div className="sidebar__login">
                     <p className="sidebar__login-description">
                         Nghe nhạc không quảng cáo cùng kho nhạc VIP
                     </p>
@@ -102,8 +91,8 @@ export function Sidebar() {
                     >
                         Mua vip
                     </a>
-                </div>
-                <ul className="sidebar__subnav-menu">
+                </div> */}
+                {/* <ul className="sidebar__subnav-menu">
                     <li className="sidebar__menu-item menu-header">
                         <h2 className="sidebar__menu-title">THƯ VIỆN</h2>
                         <i className="bi bi-pencil hide-on-tablet" />
@@ -270,8 +259,8 @@ export function Sidebar() {
                             <span>Gần đây</span>
                         </a>
                     </li>
-                </ul>
-                <ul className="sidebar__nav-list hide-on-tablet-mobile">
+                </ul> */}
+                {/* <ul className="sidebar__nav-list hide-on-tablet-mobile">
                     <li className="sidebar__nav-item">
                         <a href="#" className="sidebar__item-link">
                             <span className="sidebar__link-topic">Tháng 1</span>
@@ -287,7 +276,7 @@ export function Sidebar() {
                             <span className="sidebar__link-topic">Sky Ơi</span>
                         </a>
                     </li>
-                </ul>
+                </ul> */}
             </div>
             <div className="sidebar__create-playlist">
                 <div className="sidebar__create-container hide-on-tablet-mobile" onClick={() =>{toggleOpenForm()} }>
@@ -295,7 +284,12 @@ export function Sidebar() {
                     <h2 className="sidebar__create-title">Tạo playlist mới</h2>
                 </div>
                 {
-                    isOpenForm && (<CreatePlaylist onClose={() => setOpenForm(false)} />)
+                    isOpenForm && (
+                        <CreatePlaylist
+                            onClose={() => setOpenForm(false)}
+                            onSuccess={onPlaylistsChanged}
+                        />
+                    )
                 }
                 <div className="sidebar__expand">
                     <div className="sidebar__expand-btn btn--expand">

@@ -5,10 +5,10 @@ export function FavoriteArtist() {
                 <div className="col l-12 m-12 c-12 mb-16">
                     <div className="container__header">
                         <a href="#" className="container__header-title">
-                            <h3>Nghệ Sĩ Yêu Thích</h3>
+                            <h3>Nghệ sĩ nổi bật</h3>
                         </a>
                         <h3 className="container__header-subtitle">
-                            Nghệ Sĩ Yêu Thích
+                            Nghệ sĩ nổi bật
                         </h3>
                         <div className="container__header-actions fav-artist--move hide-on-tablet-mobile">
                             <div className="container__move-btn move-btn--fav-artist btn--prev button--disabled">

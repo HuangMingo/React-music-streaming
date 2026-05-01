@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
 import { Outlet } from "react-router-dom";
-import { UploadSection } from "./UploadSection";
-export function Content({selectedPlaylist, setSelectedPlaylist, playlists}) {
+import { useAuthContext } from "../../context/AuthContext";
+export function Content({selectedPlaylist, setSelectedPlaylist, playlists, onPlaylistsChanged}) {
+    const { isAdmin } = useAuthContext();
+
     return (
         <>
             {/* Đầu mục chung */}
@@ -34,16 +36,18 @@ export function Content({selectedPlaylist, setSelectedPlaylist, playlists}) {
                                     <span>Nghệ sĩ</span>
                                 </li>
                             </NavLink>
-                            <NavLink to="upload" className="content__navbar-item hide-on-tablet-mobile">
-                                <li>
-                                    <span>Tải lên</span>
-                                </li>
-                            </NavLink>
+                            {isAdmin ? (
+                                <NavLink to="upload" className="content__navbar-item hide-on-tablet-mobile">
+                                    <li>
+                                        <span>Tải lên</span>
+                                    </li>
+                                </NavLink>
+                            ) : null}
                         </ul>
                     </div>
                 </div>
                 <div className="content__container">
-                    <Outlet context={{ selectedPlaylist, setSelectedPlaylist, playlists }} />
+                    <Outlet context={{ selectedPlaylist, setSelectedPlaylist, playlists, onPlaylistsChanged }} />
                 </div>
             </div>
         </>

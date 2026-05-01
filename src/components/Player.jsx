@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useMusicContext } from "../context/MusicContext";
+import { useAuthContext } from "../context/AuthContext";
+import axios from "axios";
+import { showNotificationToast } from "../toast";
 const formatTime = (seconds = 0) => {
     const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
     const mins = Math.floor(safeSeconds / 60)
@@ -15,77 +18,118 @@ export function Player() {
     const {
         currentSong,
         setCurrentSong,
-        currentIndex,
-        setCurrentIndex,
+        currentSongId,
+        setCurrentSongId,
         selectedPlaylist,
         currentTime,
         currentVolume,
         setCurrentVolume,
         setCurrentTime,
         isPlaying,
-        setIsPlaying
+        setIsPlaying, 
+        favouriteSongIds,
+        setIsFavouriteSongIds,
+        toggleFavouriteSong,
     } = useMusicContext();
+    const { currentUser } = useAuthContext();
     const audioRef = useRef();
+    const incrementedSongIdRef = useRef(null); // Lưu ID bài hát đã được tăng play_count để tránh tăng nhiều lần cho cùng một bài hát trong cùng một phiên nghe
+    const playSessionRef = useRef(null); //Lưu số thứ tự lần phát để
+    // mỗi lần phát là độc lập
+    //Để mỗi lần nghe lại đủ điều kiện sẽ tăng số lượt nghe dù là cùng một bài hát
+
+    const listenedTimeRef = useRef(0); // Lưu thời gian đã nghe của bài hát hiện tại để tính toán khi tăng play_count
+    const lastTimeRef = useRef(null); //Lưu currenTime của lần update trước
     const [isRandom, setIsRandom] = useState(() => JSON.parse(localStorage.getItem("isRandom") || "false"));
     const [isRepeat, setIsRepeat] = useState(() => JSON.parse(localStorage.getItem("isRepeat") || "false"));
-    const duration = audioRef.current?.duration || currentSong?.duration || 0;
+    const duration = audioRef.current?.duration || currentSong?.duration_seconds || 0;
     const [pendingRestoreTime, setPendingRestoreTime] = useState(null);
+    const [isFavouriteCurrentSong, setIsFavouriteCurrentSong] = useState(false);
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
     const songs = selectedPlaylist?.songs || [];
-    // console.log(currentVolume);
-    // console.log(progressPercent);
     //Khôi phục trạng thái phát nhạc khi reload trang nếu có dữ liệu hợp lệ trong localStorage
     useEffect(() => {
-        if (audioRef.current && currentSong?.path) {
+        if (audioRef.current && currentSong?.audio) {
             const savedTime = currentTime;
-            if(savedTime && savedTime !== "undefined") {
+            if (savedTime && savedTime !== "undefined") {
                 setPendingRestoreTime(savedTime);
             }
+            // Reset incrementedSongIdRef khi bài hát thay đổi
+            incrementedSongIdRef.current = null;
+            playSessionRef.current += 1; 
+            listenedTimeRef.current = 0; 
+            lastTimeRef.current = null;
             audioRef.current
                 .play()
                 .then(() => setIsPlaying(true))
                 .catch(() => setIsPlaying(false));
         }
     }, [currentSong, setCurrentTime]);
-
+    //Cập nhật âm lượng của thẻ audio khi currentVolume thay đổi
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
         audio.volume = currentVolume / 100;
     }, [currentVolume]);
-
+    //Lưu trạng thái phát ngẫu nhiên vào localStorage mỗi khi thay đổi để khôi phục khi reload trang
     useEffect(() => {
         localStorage.setItem("isRandom", JSON.stringify(isRandom));
     }, [isRandom]);
-
+    //Lưu trạng thái lặp lại vào localStorage mỗi khi thay đổi để khôi phục khi reload trang
     useEffect(() => {
         localStorage.setItem("isRepeat", JSON.stringify(isRepeat));
     }, [isRepeat]);
-
+    //Cập nhật bài hát yêu thích khi currentSong hoặc currentUser thay đổi
     useEffect(() => {
-        if (!songs.length) return;
-        if (!currentSong?.path) {
-            setCurrentSong(songs[0]);
-            setCurrentIndex(0);
-            setCurrentTime(0);
+        if (!currentUser?.id || !currentSong?.id) {
+            setIsFavouriteCurrentSong(false);
+            return;
         }
-    }, [songs, currentSong, setCurrentSong, setCurrentIndex, setCurrentTime]);
+
+        let isMounted = true;
+
+        async function loadFavouriteStatus() {
+            try {
+                const response = await axios.get(
+                    `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${currentSong.id}`
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setIsFavouriteCurrentSong(Boolean(response?.data?.isFavourite));
+            } catch (error) {
+                if (isMounted) {
+                    setIsFavouriteCurrentSong(false);
+                }
+                console.error("Load current song favourite status failed:", error);
+            }
+        }
+
+        loadFavouriteStatus();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [currentSong?.id, currentUser?.id]);
+
 
     const playSongAt = (songIndex) => {
         if (!songs.length) return;
         const nextIndex = (songIndex + songs.length) % songs.length;
         const nextSong = songs[nextIndex];
         if (!nextSong) return;
-        setCurrentIndex(nextIndex);
+        setCurrentSongId(nextIndex);
         setCurrentSong(nextSong);
         setCurrentTime(0);
         setPendingRestoreTime(null);
     };
-
+    //Hàm chọn bài hát ngẫu nhiên khác với bài hiện tại để phát khi ở chế độ phát ngẫu nhiên
     const pickRandomIndex = () => {
-        if (songs.length <= 1) return currentIndex;
-        let nextIndex = currentIndex;
-        while (nextIndex === currentIndex) {
+        if (songs.length <= 1) return currentSongId;
+        let nextIndex = currentSongId;
+        while (nextIndex === currentSongId) {
             nextIndex = Math.floor(Math.random() * songs.length);
         }
         return nextIndex;
@@ -93,13 +137,13 @@ export function Player() {
 
     const handleNextSong = () => {
         if (!songs.length) return;
-        const nextIndex = isRandom ? pickRandomIndex() : currentIndex + 1;
+        const nextIndex = isRandom ? pickRandomIndex() : currentSongId + 1;
         playSongAt(nextIndex);
     };
 
     const handlePrevSong = () => {
         if (!songs.length) return;
-        const prevIndex = isRandom ? pickRandomIndex() : currentIndex - 1;
+        const prevIndex = isRandom ? pickRandomIndex() : currentSongId - 1;
         playSongAt(prevIndex);
     };
 
@@ -126,10 +170,33 @@ export function Player() {
     };
     //Cập nhật thời gian hiện tại của bài hát khi phát và lưu tiến trình vào localStorage
     const handleTimeUpdate = () => {
-        if (!audioRef.current || !currentSong?.path) return;
+        if (!audioRef.current || !currentSong.audio) return;
         const newTime = audioRef.current.currentTime;
         setCurrentTime(newTime);
-        // Save progress every time update (at least once per ~250-500ms depending on audio events)
+        const audioDuration = audioRef.current.duration;
+        if (audioDuration && currentSong?.id) {
+            //Tính toán thời gian nghe thực tế (bỏ qua nếu tua)
+            if (lastTimeRef.current !== null) {
+                const timeDiff = newTime - lastTimeRef.current;
+                if (timeDiff > 0 && timeDiff < 2) {
+                    listenedTimeRef.current += timeDiff;
+                }
+            }
+            lastTimeRef.current = newTime;
+            //Kiểm tra xem đã đủ 50% audio chưa
+            const halfDuration = audioDuration * 0.5;
+            const sessionKey = `${currentSong.id}- ${playSessionRef.current}`;
+            if (incrementedSongIdRef.current !== sessionKey && listenedTimeRef.current >= halfDuration) {
+                incrementedSongIdRef.current = sessionKey;
+                // Gọi API để tăng play_count
+                axios.post('http://localhost:3000/api/songs/increment-play-count', {
+                    songId: currentSong.id
+                }).catch(error => {
+                    console.error('Failed to increment play count:', error);
+                });
+            }
+
+        }
     };
 
     const handleLoadedMetadata = () => {
@@ -207,16 +274,16 @@ export function Player() {
                                 <div className="player__song-body media__info">
                                     <div className="player__song-title info__title">
                                         <div className="player__title-animate">
-                                            <div className="title__item">{currentSong.name}</div>
+                                            <div className="title__item">{currentSong.title}</div>
                                         </div>
                                     </div>
                                     <div className="player__song-author info__author">
                                         {
-                                            currentSong?.artists?.map((artist, index) => {
+                                            currentSong?.artist_names?.map((artist, index) => {
                                                 return (
                                                     <span key={index}>
                                                         <a href="#" className="is-ghost">{artist}</a>
-                                                        {index < currentSong.artists.length - 1 && ", "}
+                                                        {index < currentSong?.artist_names?.length - 1 && ", "}
                                                     </span>
                                                 )
                                             })
@@ -226,8 +293,8 @@ export function Player() {
                             </div>
                             <div className="media__right hide-on-tablet-mobile">
                                 <div className="player__song-options">
-                                    <div className="player__song-btn option-btn btn--heart">
-                                        <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                                    <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}>
+                                        <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong.id) ? "-fill" : ""} primary`} />
                                     </div>
                                     <div className="player__song-btn option-btn">
                                         <i className="btn--icon bi bi-three-dots" />
@@ -270,7 +337,7 @@ export function Player() {
                             <div className="progress__track song--track">
                                 <div className="progress__track-update" style={{ width: `${progressPercent}%` }} />
                             </div>
-                            <span className="durationtime">{formatTime(duration || currentSong?.duration || 0)}</span>
+                            <span className="durationtime">{formatTime(duration)}</span>
                         </div>
                     </div>
                     <div className="player__options hide-on-mobile">
@@ -305,7 +372,7 @@ export function Player() {
                     </div>
                     <audio
                         ref={audioRef}
-                        src={`${currentSong?.path || null}`}
+                        src={currentSong?.audio || undefined}
                         id="audio"
                         onTimeUpdate={handleTimeUpdate}
                         onLoadedMetadata={handleLoadedMetadata}
@@ -424,17 +491,17 @@ export function Player() {
                                     <div className="player__song-body media__info">
                                         <div className="player__song-title info__title">
                                             <div className="player__title-animate">
-                                                <div className="title__item">{currentSong.name}</div>
-                                                <div className="title__item">{currentSong.name}</div>
+                                                <div className="title__item">{currentSong?.title || 'Unknown Song'}</div>
+                                                <div className="title__item">{currentSong?.title || 'Unknown Song'}</div>
                                             </div>
                                         </div>
-                                        <div className="player__song-author info__author">{currentSong.singers?.join(', ') || 'Unknown Artist'}</div>
+                                        <div className="player__song-author info__author">{currentSong?.artist_names?.join(', ') || 'Unknown Artist'}</div>
                                     </div>
                                 </div>
                                 <div className="media__right hide-on-tablet-mobile">
                                     <div className="player__song-options">
-                                        <div className="player__song-btn option-btn btn--heart">
-                                            <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                                        <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}>
+                                            <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds.has(currentSong.id) ? "-fill" : ""} primary`} />
                                         </div>
                                         <div className="player__song-btn option-btn">
                                             <i className="btn--icon bi bi-three-dots" />
@@ -477,7 +544,7 @@ export function Player() {
                                 <div className="progress__track song--track">
                                     <div className="progress__track-update" style={{ width: `${progressPercent}%` }} />
                                 </div>
-                                <span className="durationtime">{formatTime(duration || currentSong?.duration || 0)}</span>
+                                <span className="durationtime">{formatTime(duration || currentSong?.duration_seconds)}</span>
                             </div>
                         </div>
                         <div className="player__options hide-on-mobile">

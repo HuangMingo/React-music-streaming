@@ -1,35 +1,43 @@
 import { useState } from "react";
 import axios from "axios";
 import "./CreatePlaylist.css";
-import { MUSIC_STORAGE_KEY } from "../../../public/data/songPlaylists.js";
+import { useAuthContext } from "../../context/AuthContext.jsx";
 
-export function CreatePlaylist({ onClose }) {
+export function CreatePlaylist({ onClose, onSuccess }) {
     const [playlistName, setPlaylistName] = useState("");
     const [isPublic, setIsPublic] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const [nameError, setNameError] = useState("");
+    const { currentUser } = useAuthContext();
     async function handleSubmit(event) {
         event.preventDefault();
 
-        if (!playlistName.trim() || isSubmitting) {
+        if (isSubmitting) {
             return;
         }
 
+        if (!playlistName.trim()) {
+            setNameError("Vui lòng nhập tên playlist.");
+            return;
+        }
+
+        setNameError("");
+
         try {
             setIsSubmitting(true);
-
-            await axios.post("http://localhost:3000/api/playlists", {
+            const userId = currentUser?.id;
+            await axios.post("http://localhost:3000/api/playlists/create-playlist", {
                 name: playlistName.trim(),
-                creator_id: 1,
+                creator_id: userId,
                 ispublic: isPublic,
-                image: null,
+                isdefault: false
             });
 
-            const response = await axios.get("http://localhost:3000/api/favourite-playlists");
-            localStorage.setItem(MUSIC_STORAGE_KEY, JSON.stringify(response.data));
+            if (onSuccess) {
+                await onSuccess();
+            }
 
             onClose();
-            window.location.reload();
         } catch (error) {
             console.error("Create playlist failed:", error);
             alert("Tao playlist that bai. Vui long thu lai.");
@@ -60,10 +68,15 @@ export function CreatePlaylist({ onClose }) {
                     className="create-playlist-input"
                     type="text"
                     value={playlistName}
-                    onChange={(event) => setPlaylistName(event.target.value)}
-                    placeholder="Nhap ten playlist"
+                    onChange={(event) => {
+                        setPlaylistName(event.target.value);
+                        if (nameError) {
+                            setNameError("");
+                        }
+                    }}
+                    placeholder="Nhập tên playlist"
                 />
-
+                {nameError ? <div className="create-playlist-error">{nameError}</div> : null}
                 <div className="create-playlist-option">
                     <div>
                         <h3>Công khai</h3>
@@ -79,9 +92,8 @@ export function CreatePlaylist({ onClose }) {
                     </label>
                 </div>
 
-
                 <button className="create-playlist-submit" type="submit">
-                    {isSubmitting ? "Dang tao..." : "Tao moi"}
+                    {isSubmitting ? "Đang tạo..." : "Tạo mới"}
                 </button>
             </form>
         </div>
