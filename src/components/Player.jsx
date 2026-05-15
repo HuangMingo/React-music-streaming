@@ -19,14 +19,13 @@ export function Player() {
         currentSong,
         setCurrentSong,
         currentSongId,
-        setCurrentSongId,
         selectedPlaylist,
         currentTime,
         currentVolume,
         setCurrentVolume,
         setCurrentTime,
         isPlaying,
-        setIsPlaying, 
+        setIsPlaying,
         favouriteSongIds,
         setIsFavouriteSongIds,
         toggleFavouriteSong,
@@ -56,8 +55,8 @@ export function Player() {
             }
             // Reset incrementedSongIdRef khi bài hát thay đổi
             incrementedSongIdRef.current = null;
-            playSessionRef.current += 1; 
-            listenedTimeRef.current = 0; 
+            playSessionRef.current += 1;
+            listenedTimeRef.current = 0;
             lastTimeRef.current = null;
             audioRef.current
                 .play()
@@ -120,8 +119,7 @@ export function Player() {
         const nextIndex = (songIndex + songs.length) % songs.length;
         const nextSong = songs[nextIndex];
         if (!nextSong) return;
-        setCurrentSongId(nextIndex);
-        setCurrentSong(nextSong);
+        setCurrentSong(nextSong)
         setCurrentTime(0);
         setPendingRestoreTime(null);
     };

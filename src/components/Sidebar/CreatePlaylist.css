@@ -22,9 +22,8 @@
 	position: relative;
 	box-sizing: border-box;
 	overflow-y: auto;
-	background:
-		linear-gradient(145deg, rgba(246, 252, 255, 0.96), rgba(232, 242, 255, 0.93));
-	border: 1px solid rgba(255, 255, 255, 0.58);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 96%, #fff 4%), var(--sidebar-popup-bg));
+	border: 1px solid var(--border-primary);
 	box-shadow:
 		0 24px 70px rgba(19, 36, 74, 0.35),
 		0 6px 20px rgba(156, 102, 255, 0.2);
@@ -43,7 +42,7 @@
 	cursor: pointer;
 	border-radius: 50%;
 	position: absolute;
-	color: #2b335c;
+	color: var(--text-color);
 	background: transparent;
 	transition: background-color 0.2s ease, transform 0.2s ease;
 }
@@ -60,7 +59,7 @@
 	line-height: 1.1;
 	font-weight: 800;
 	letter-spacing: 0.2px;
-	color: #213457;
+	color: var(--text-color);
 }
 
 .create-playlist-input {
@@ -70,10 +69,10 @@
 	border-radius: 999px;
 	padding: 0 16px;
 	box-sizing: border-box;
-	background: rgba(255, 255, 255, 0.9);
+	background: rgba(var(--primary-bg), 0.1);
 	font-size: 2.2rem;
 	font-weight: 500;
-	color: #213457;
+	color: var(--text-color);
 	outline: none;
 	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -109,14 +108,14 @@
 	font-size: 2.2rem;
 	line-height: 1.2;
 	font-weight: 800;
-	color: #213457;
+	color: var(--text-color);
 }
 
 .create-playlist-option p {
 	margin: 4px 0 0;
 	font-size: 1.6rem;
 	line-height: 1.4;
-	color: rgba(33, 52, 87, 0.72);
+	color: var(--text-secondary);
 }
 
 .create-playlist-switch {
@@ -138,7 +137,7 @@
 	position: absolute;
 	inset: 0;
 	border-radius: 99px;
-	background: rgba(97, 113, 164, 0.35);
+	background: #A0A0A0;
 	transition: background-color 0.2s ease;
 }
 
@@ -156,7 +155,7 @@
 }
 
 .create-playlist-switch input:checked + .create-playlist-slider {
-	background: linear-gradient(120deg, #319dff, #4f7bff);
+	background: var(--purple-primary);
 }
 
 .create-playlist-switch input:checked + .create-playlist-slider::before {
@@ -174,16 +173,16 @@
 	font-size: 2.4rem;
 	font-weight: 700;
 	letter-spacing: 1px;
-	color: rgba(255, 255, 255, 0.96);
-	background: linear-gradient(120deg, #50abff 0%, #6e73ff 52%, #b857ff 100%);
-	box-shadow: 0 12px 28px rgba(70, 96, 221, 0.35);
+	color: #fff;
+	background: var(--purple-primary);
+
 	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .create-playlist-submit:hover {
 	transform: translateY(-1px);
 	filter: saturate(1.06);
-	box-shadow: 0 16px 32px rgba(70, 96, 221, 0.42);
+
 }
 
 .create-playlist-submit:disabled {
@@ -200,6 +199,7 @@
 
 	.create-playlist-title {
 		font-size: 2.6rem;
+		color: var(--text-color);
 	}
 
 	.create-playlist-input {
@@ -207,8 +207,9 @@
 		font-size: 1.9rem;
 	}
 
-	.create-playlist-option h3 {
+	.create-playlist-option {
 		font-size: 2rem;
+		color: var(--text-color);
 	}
 
 	.create-playlist-option p {

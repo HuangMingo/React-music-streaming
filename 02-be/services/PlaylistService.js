@@ -1,4 +1,6 @@
 import { pool } from "../config/dbpg.js"
+
+const DEFAULT_PLAYLIST_IMAGE = "https://res.cloudinary.com/dnsne0dgp/image/upload/v1775963817/macdinh_ivawgv.jpg";
 //Lấy tất cả playlist (dùng cho trang khám phá)
 const getAllPlaylist = async () => { }
 // const getFavouriteSong = async(userId, )
@@ -88,7 +90,7 @@ const getUserCreatedPlaylist = async (userId) => {
     LEFT JOIN song s ON sp.song_id = s.id
     LEFT JOIN song_artists sa ON s.id = sa.song_id
 	WHERE p.creator_id = $1
-    GROUP BY p.id, p.name, u.username, p.image;
+    GROUP BY p.id, p.name, u.username, p.image, p.isdefault;
         `, [userId]);
     return result.rows;
 }
@@ -98,9 +100,8 @@ const createPlaylist = async ({ name, creatorId, ispublic, isDefault }) => {
         `
         INSERT INTO playlist (name, creator_id, ispublic, image, isdefault)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, name, creator_id, ispublic, created_at, image, isdefault;
         `,
-        [name, creatorId, ispublic, "https://res.cloudinary.com/dnsne0dgp/image/upload/v1775963817/macdinh_ivawgv.jpg", isDefault]
+        [name, creatorId, ispublic, DEFAULT_PLAYLIST_IMAGE, isDefault]
     );
     return result.rows[0];
 };
@@ -113,18 +114,57 @@ const deletePlaylist = async (playlistId, userId) => {
     const result = await pool.query(`
         DELETE FROM playlist
         WHERE id = $1 AND creator_id = $2
-        RETURNING id;`, [playlistId, userId]);
+        `, [playlistId, userId]);
     return result;
 }
 //Xóa bài hát khỏi playlist
 const deleteSongFromPlaylist = async (playlistId, songId) => {
-    const result = await pool.query(`
+    await pool.query(`
         DELETE FROM song_playlist
         WHERE playlist_id = $1 AND song_id = $2
-        `, [playlistId, songId]);
-    return result;
+        RETURNING *
+    `, [playlistId, songId]);
+
+    const newestSongResult = await pool.query(`
+        SELECT s.image
+        FROM song_playlist sp
+        JOIN song s ON s.id = sp.song_id
+        WHERE sp.playlist_id = $1
+        ORDER BY sp.ctid DESC
+        LIMIT 1
+    `, [playlistId]);
+
+    const nextImage = newestSongResult.rows[0]?.image ?? DEFAULT_PLAYLIST_IMAGE;
+
+    await pool.query(`
+        UPDATE playlist
+        SET image = $1
+        WHERE id = $2
+        RETURNING *
+    `, [nextImage, playlistId]);
 }
 //Thêm bài hát vào playlist 
+// const addSongToPlaylist = async (playlistId, songId) => {
+//     const insertResult = await pool.query(`
+//         INSERT INTO song_playlist (playlist_id, song_id)
+//         VALUES ($1, $2)
+//         ON CONFLICT DO NOTHING
+//         RETURNING *
+//     `, [playlistId, songId]);
+
+//     if (insertResult.rowCount === 0) {
+//         return;
+//     }
+
+//     await pool.query(`
+//         UPDATE playlist p
+//         SET image = s.image
+//         FROM song s
+//         WHERE p.id = $1
+//           AND s.id = $2
+//         RETURNING p.*
+//     `, [playlistId, songId]);
+// }
 const addSongToPlaylist = async (playlistId, songId) => {
     const result = await pool.query(`
         INSERT INTO song_playlist (playlist_id, song_id)

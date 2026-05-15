@@ -193,11 +193,11 @@ export function AllSongs() {
                 </div>
                 <div className="col l-12 m-12 c-12">
                     {isLoading ? (
-                        <div style={{ textAlign: "center", padding: "20px" }}>
+                        <div style={{ textAlign: "center", padding: "20px", color: "var(--text-color)", fontSize: "16px" }}>
                             Đang tải...
                         </div>
                     ) : allSongs.length === 0 ? (
-                        <div style={{ textAlign: "center", padding: "20px" }}>
+                        <div style={{ textAlign: "center", padding: "20px", color: "var(--text-color)", fontSize: "16px" }}>
                             Chưa có bài hát nào
                         </div>
                     ) : (
