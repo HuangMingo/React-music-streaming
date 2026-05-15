@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
+import { AddSongToPlaylist } from "../../AddSongToPlaylist.jsx";
 import axios from "axios";
 import { showNotificationToast } from "../../../toast.js";
 export function PlayMusic({ playlist }) {
@@ -144,9 +145,8 @@ export function PlayMusic({ playlist }) {
         }));
     }
 
-    async function handleAddSongToPlaylist(event, songId) {
-        event.stopPropagation();
-        const playlistId = Number(selectedPlaylistBySong[songId]);
+    async function handleAddSongToPlaylist(songId, playlistIdFromChild) {
+        const playlistId = Number(playlistIdFromChild ?? selectedPlaylistBySong[songId]);
 
         if (!playlistId || !songId) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
@@ -190,25 +190,7 @@ export function PlayMusic({ playlist }) {
                             <i className="bi bi-chevron-right container__header-icon" />
                         </NavLink>
                         <h3 className="container__header-subtitle">Bài Hát</h3>
-                        <div className="container__header-actions">
-                            <div className="button is-small container__header-btn hide-on-mobile">
-                                <input
-                                    type="file"
-                                    name="upload song"
-                                    id="home__upload-input"
-                                    className="container__header-input"
-                                    accept=".mp3"
-                                />
-                                <label htmlFor="home__upload-input">
-                                    <i className="bi bi-upload container__header-icon" />
-                                    Tải lên
-                                </label>
-                            </div>
-                            <button className="button is-small button-primary container__header-btn btn--play-all">
-                                <i className="bi bi-play-fill container__header-icon" />
-                                <span>Phát tất cả</span>
-                            </button>
-                        </div>
+                        
                     </div>
                 </div>
                 <div className="col l-12 m-12 c-12">
@@ -282,44 +264,25 @@ export function PlayMusic({ playlist }) {
                                                     </span>
 
                                                     <div className="playlist__song-option song--tab media__right hide-on-mobile">
-                                                        <div className="playlist__song-btn btn--mic option-btn">
-                                                            <i className="btn--icon song__icon bi bi-mic-fill"></i>
-                                                        </div>
-                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
-                                                            <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
-                                                        </div>
-                                                        <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
-                                                            <i className="btn--icon bi bi-three-dots"></i>
-                                                            <div className={`option__log-out ${openSongMenuId === song.id ? "open" : ""}`}>
-                                                                <div className="log-out__action playlist__menu-title">
-                                                                    <i className="bi bi-music-note-list log-out__icon" />
-                                                                    <span>Thêm vào playlist</span>
-                                                                </div>
-                                                                <div className="playlist__menu-field">
-                                                                    <select
-                                                                        className="playlist__menu-select"
-                                                                        value={selectedPlaylistBySong[song.id] ?? ""}
-                                                                        onChange={(event) => handleSelectTargetPlaylist(song.id, event.target.value)}
-                                                                        onClick={(event) => event.stopPropagation()}
-                                                                    >
-                                                                        <option value="">Chọn playlist</option>
-                                                                        {userPlaylists.map((item) => (
-                                                                            <option key={item.id} value={item.id}>{item.playlist_name}</option>
-                                                                        ))}
-                                                                    </select>
-                                                                </div>
-                                                                <button
-                                                                    className="log-out__action playlist__menu-submit"
-                                                                    type="button"
-                                                                    onClick={(event) => handleAddSongToPlaylist(event, song.id)}
-                                                                    disabled={isAddingSong}
-                                                                >
-                                                                    <i className="bi bi-plus-circle log-out__icon" />
-                                                                    <span>{isAddingSong ? "Đang thêm..." : "Thêm bài hát"}</span>
-                                                                </button>
+                                                            <div className="playlist__song-btn btn--mic option-btn">
+                                                                <i className="btn--icon song__icon bi bi-mic-fill"></i>
+                                                            </div>
+                                                            <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
+                                                                <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
+                                                            </div>
+                                                            <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
+                                                                <i className="btn--icon bi bi-three-dots"></i>
+                                                                <AddSongToPlaylist
+                                                                    songId={song.id}
+                                                                    isOpen={openSongMenuId === song.id}
+                                                                    playlists={userPlaylists}
+                                                                    selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
+                                                                    onSelectPlaylist={handleSelectTargetPlaylist}
+                                                                    onAddSong={handleAddSongToPlaylist}
+                                                                    isAddingSong={isAddingSong}
+                                                                />
                                                             </div>
                                                         </div>
-                                                    </div>
 
                                                 </div>
                                             )

@@ -4,7 +4,7 @@ import { useMusicContext } from "../../../context/MusicContext";
 import { useAuthContext } from "../../../context/AuthContext";
 import { DeletePlaylistDialog } from "../DeletePlaylistDialog";
 export function Playlist({ playlists = [], onPlaylistsChanged }) {
-    const { setPlaylistIndex, setSelectedPlaylist, setCurrentTime, setCurrentSong, setCurrentSongId, setIsPlaying } = useMusicContext();
+    const { setPlaylistIndex, setSelectedPlaylist, setCurrentTime, setCurrentSong, setIsPlaying } = useMusicContext();
     const { currentUser } = useAuthContext();
     const navigate = useNavigate();
     //Phân trang cho playlist
@@ -76,19 +76,15 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
     }
 
     function handleClickPlaylist(playlist, index) {
+        scrollPersonalContainerToTop();
         const firstSong = playlist?.songs?.[0];
         const hasSongs = Boolean(firstSong);
         setSelectedPlaylist(playlist);
         if (hasSongs) {
             setCurrentSong(firstSong);
-            setPlaylistIndex(index);
             setCurrentTime(0);
             setIsPlaying(true);
         }
-        navigate("/personal");  
-        requestAnimationFrame(() => {
-            scrollPersonalContainerToTop();
-        });
     }
 
     function handlePrevPage() {

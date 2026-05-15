@@ -5,14 +5,15 @@ import { useAuthContext } from "../../context/AuthContext";
 import { showNotificationToast } from "../../toast";
 export function DreamChart() {
     const [topSongs, setTopSongs] = useState([]);
-    const { setCurrentSongId, currentSong, setCurrentSong, setCurrentTime } = useMusicContext();
-    const { currentUser } = useAuthContext();
     const {
+        currentSong,
+        isPlaying,
         favouriteSongIds,
         setFavouriteSongIds,
         toggleFavouriteSong,
         handleClickSong
     } = useMusicContext();
+    const { currentUser } = useAuthContext();
     useEffect(() => {
         axios
             .get("http://localhost:3000/api/songs/top10-most-played-songs")
@@ -83,8 +84,11 @@ export function DreamChart() {
                                         <div className="playlist__list-charts overflow-visible">
                                             {
                                                 topSongs.map((song, songIndex) => {
+                                                    const isActiveSong = currentSong?.id === song.id;
+                                                    const isPlayingSong = isActiveSong && isPlaying;
+
                                                     return (
-                                                        <div key={song.id} className={`playlist__list-song media ${songIndex > 9 && 'song--not-expand'}`} onClick={() => handleClickSong(song)}>
+                                                        <div key={song.id} className={`playlist__list-song media ${songIndex > 9 && 'song--not-expand'} ${isActiveSong ? 'active' : ''} ${isPlayingSong ? 'playing' : ''}`} onClick={() => handleClickSong(song)}>
                                                             <div className="playlist__song-info media__left">
                                                                 <div className="playlist__song-rank">
                                                                     <div className={`playlist__rank-number
@@ -102,16 +106,21 @@ export function DreamChart() {
                                                                             background: `url(${song.image}) no-repeat center center / cover`
                                                                         }
                                                                     }>
+                                                                        <span className="song-note note-1">♪</span>
+                                                                        <span className="song-note note-2">♫</span>
+                                                                        <span className="song-note note-3">♪</span>
+                                                                        <span className="song-note note-4">♫</span>
                                                                         <div className="thumb--animate">
                                                                             <div className="thumb--animate-img" style={
                                                                                 {
-                                                                                    background: `url('./assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain`
+                                                                                    background: `url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain`
                                                                                 }
                                                                             }>
+
                                                                             </div>
                                                                         </div>
                                                                         <div className="play-song--actions">
-                                                                            <div className="control-btn btn-toggle-play">
+                                                                            <div className="control-btn btn-toggle-play btn--play-song">
                                                                                 <i className="bi bi-play-fill"></i>
                                                                             </div>
                                                                         </div>
@@ -138,7 +147,7 @@ export function DreamChart() {
                                                             <span className="playlist__song-time media__content">
                                                                 {
                                                                     // const duration = song.audio.currentDuration;
-                                                                `${Math.floor(song.duration_seconds / 60).toString().padStart(2, '0')}:${Math.floor(song.duration_seconds % 60).toString().padStart(2, '0')}`
+                                                                    `${Math.floor(song.duration_seconds / 60).toString().padStart(2, '0')}:${Math.floor(song.duration_seconds % 60).toString().padStart(2, '0')}`
                                                                 }
                                                             </span>
                                                             <div className="playlist__song-option song--tab media__right hide-on-mobile">

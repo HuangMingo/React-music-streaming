@@ -7,7 +7,12 @@ import { DeletePlaylistDialog } from "./DeletePlaylistDialog";
 export function PlaylistSection() {
     const { playlists, onPlaylistsChanged } = useOutletContext();
     const { currentUser } = useAuthContext();
-    const { setPlaylistIndex, setSelectedPlaylist, setCurrentSong, setCurrentTime, setCurrentSongId, setIsPlaying } = useMusicContext();
+    const { 
+        setSelectedPlaylist,
+        setCurrentSong,
+        setCurrentTime,
+        setCurrentSongId,
+        setIsPlaying } = useMusicContext();
     const navigate = useNavigate();
 
     const [isDeleting, setIsDeleting] = useState(false);
@@ -30,9 +35,7 @@ export function PlaylistSection() {
         if (hasSongs) {
             setCurrentSong(firstSong);
         }
-        setPlaylistIndex(index);
         setCurrentTime(0);
-        setCurrentSongId(firstSong?.id);
         setIsPlaying(hasSongs);
         navigate("/personal");
     }

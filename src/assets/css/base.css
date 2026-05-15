@@ -1,3 +1,18 @@
+/* bgContentColor: màu nền của các thành phần chứa nội dung như playlist, bài hát, album */
+/* borderBox: màu của đường viền bao quanh các thành phần như playlist, bài hát, album */
+/* borderPrimary: màu của đường viền chính khi hover vào các thành phần như playlist, bài hát, album */
+/* layoutBg: màu nền của toàn bộ layout */
+/* linkTextHover: màu của text khi hover vào các link như tên bài hát, tên nghệ sĩ, tên album */
+/* modalScrollbar: màu của scrollbar trong modal */
+/* playerBg: màu nền của player */
+/* purplePrimary: màu chính của các thành phần như nút play, thanh tiến độ, thanh âm lượng */
+/* primaryBg: màu nền chính của các thành phần như playlist, bài hát, album */
+/* sidebarPopupBg: màu nền của các popup trong sidebar như playlist popup, theme popup */
+/* textColor: màu của text chính */
+/* textItemHover: màu của text khi hover vào các item như tên bài hát, tên nghệ sĩ, tên album */
+/* textSecondary: màu của text phụ như thời lượng bài hát, tên nghệ sĩ trong playlist */
+/* navigationText: màu của text trong navigation như tên tab, tên mục trong sidebar */
+/* placeholderText: màu của text placeholder trong input như ô tìm kiếm */
 :root {
     --black-color: #000;
     --bg-content-color: rgba(255, 255, 255, 0.1);

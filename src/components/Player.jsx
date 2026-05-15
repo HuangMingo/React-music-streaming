@@ -170,7 +170,7 @@ export function Player() {
     };
     //Cập nhật thời gian hiện tại của bài hát khi phát và lưu tiến trình vào localStorage
     const handleTimeUpdate = () => {
-        if (!audioRef.current || !currentSong.audio) return;
+        if (!audioRef.current || !currentSong?.audio) return;
         const newTime = audioRef.current.currentTime;
         setCurrentTime(newTime);
         const audioDuration = audioRef.current.duration;
@@ -274,7 +274,7 @@ export function Player() {
                                 <div className="player__song-body media__info">
                                     <div className="player__song-title info__title">
                                         <div className="player__title-animate">
-                                            <div className="title__item">{currentSong.title}</div>
+                                            <div className="title__item">{currentSong?.title}</div>
                                         </div>
                                     </div>
                                     <div className="player__song-author info__author">
@@ -294,7 +294,7 @@ export function Player() {
                             <div className="media__right hide-on-tablet-mobile">
                                 <div className="player__song-options">
                                     <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}>
-                                        <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong.id) ? "-fill" : ""} primary`} />
+                                        <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong?.id) ? "-fill" : ""} primary`} />
                                     </div>
                                     <div className="player__song-btn option-btn">
                                         <i className="btn--icon bi bi-three-dots" />
@@ -501,7 +501,7 @@ export function Player() {
                                 <div className="media__right hide-on-tablet-mobile">
                                     <div className="player__song-options">
                                         <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}>
-                                            <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds.has(currentSong.id) ? "-fill" : ""} primary`} />
+                                            <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds.has(currentSong?.id) ? "-fill" : ""} primary`} />
                                         </div>
                                         <div className="player__song-btn option-btn">
                                             <i className="btn--icon bi bi-three-dots" />

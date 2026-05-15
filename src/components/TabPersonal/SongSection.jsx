@@ -3,7 +3,6 @@ import { useMusicContext } from "../../context/MusicContext";
 export function SongSection() {
     const {
         selectedPlaylist,
-        currentSongId,
         setCurrentSongId,
         currentSong,
         setCurrentSong,
@@ -27,24 +26,7 @@ export function SongSection() {
                                 <h3>Bài Hát&nbsp;</h3>
                             </a>
                             <h3 className="container__header-subtitle">Bài Hát</h3>
-                            <div className="container__header-actions">
-                                <div className="button is-small container__header-btn hide-on-mobile">
-                                    <input
-                                        type="file"
-                                        name="upload song"
-                                        id="song__upload-input"
-                                        className="container__header-input"
-                                    />
-                                    <label htmlFor="song__upload-input">
-                                        <i className="bi bi-upload container__header-icon" />
-                                        Tải lên
-                                    </label>
-                                </div>
-                                <button className="button is-small button-primary container__header-btn btn--play-all">
-                                    <i className="bi bi-play-fill container__header-icon" />
-                                    <span>Phát tất cả</span>
-                                </button>
-                            </div>
+                            
                         </div>
                     </div>
                     <div className="col l-12 m-12 c-12">
@@ -64,7 +46,7 @@ export function SongSection() {
                                     </div>
                                 ) : (
                                     songs.map((song, index) => {
-                                        const isActiveSong = currentSongId === song.id;
+                                        const isActiveSong = currentSong?.id === song.id;
                                         const songDuration = Number(song.duration_seconds) || 0;
                                         const durationText = `${Math.floor(songDuration / 60)
                                             .toString()

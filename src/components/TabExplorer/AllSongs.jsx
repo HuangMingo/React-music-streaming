@@ -3,6 +3,7 @@ import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { showNotificationToast } from "../../toast";
+import { AddSongToPlaylist } from "../AddSongToPlaylist";
 
 const SONGS_PER_COLUMN = 3;
 const NUM_COLUMNS = 2;
@@ -22,9 +23,9 @@ export function AllSongs() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [userPlaylists, setUserPlaylists] = useState([]);
-    const [openSongMenuId, setOpenSongMenuId] = useState(null);
     const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
     const [isAddingSong, setIsAddingSong] = useState(false);
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
     const playlistMenuRef = useRef(null);
     const fetchSong = function () {
         setIsLoading(true);
@@ -70,9 +71,8 @@ export function AllSongs() {
         }));
     }
 
-    async function handleAddSongToPlaylist(event, songId) {
-        event.stopPropagation();
-        const playlistId = Number(selectedPlaylistBySong[songId]);
+    async function handleAddSongToPlaylist(songId, playlistIdFromChild) {
+        const playlistId = Number(playlistIdFromChild ?? selectedPlaylistBySong[songId]);
 
         if (!playlistId || !songId) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
@@ -93,6 +93,8 @@ export function AllSongs() {
             setIsAddingSong(false);
         }
     }
+
+    
 
     useEffect(() => {
         if (!currentUser?.id || allSongs.length === 0) {
@@ -260,34 +262,15 @@ export function AllSongs() {
                                                     </div>
                                                     <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
                                                         <i className="btn--icon bi bi-three-dots"></i>
-                                                        <div className={`option__log-out ${openSongMenuId === song.id ? "open" : ""}`}>
-                                                            <div className="log-out__action playlist__menu-title">
-                                                                <i className="bi bi-music-note-list log-out__icon" />
-                                                                <span>Thêm vào playlist</span>
-                                                            </div>
-                                                            <div className="playlist__menu-field">
-                                                                <select
-                                                                    className="playlist__menu-select"
-                                                                    value={selectedPlaylistBySong[song.id] ?? ""}
-                                                                    onChange={(event) => handleSelectTargetPlaylist(song.id, event.target.value)}
-                                                                    onClick={(event) => event.stopPropagation()}
-                                                                >
-                                                                    <option value="">Chọn playlist</option>
-                                                                    {userPlaylists.map((item) => (
-                                                                        <option key={item.id} value={item.id}>{item.playlist_name}</option>
-                                                                    ))}
-                                                                </select>
-                                                            </div>
-                                                            <button
-                                                                className="log-out__action playlist__menu-submit"
-                                                                type="button"
-                                                                onClick={(event) => handleAddSongToPlaylist(event, song.id)}
-                                                                disabled={isAddingSong}
-                                                            >
-                                                                <i className="bi bi-plus-circle log-out__icon" />
-                                                                <span>{isAddingSong ? "Đang thêm..." : "Thêm bài hát"}</span>
-                                                            </button>
-                                                        </div>
+                                                        <AddSongToPlaylist
+                                                            songId={song.id}
+                                                            isOpen={openSongMenuId === song.id}
+                                                            playlists={userPlaylists}
+                                                            selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
+                                                            onSelectPlaylist={handleSelectTargetPlaylist}
+                                                            onAddSong={handleAddSongToPlaylist}
+                                                            isAddingSong={isAddingSong}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>

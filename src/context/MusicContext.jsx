@@ -68,7 +68,19 @@ export function MusicProvider({ children }) {
     }
   }
   //Dữ liệu các bài hát của playlist đang được chọn
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(() => {
+    try {
+      const savedPlaylistStr = localStorage.getItem("selectedPlaylist");
+      if (savedPlaylistStr && savedPlaylistStr !== "undefined") {
+        return JSON.parse(savedPlaylistStr);
+      }
+    } catch (error) {
+      console.error("Error restoring selectedPlaylist:", error);
+      localStorage.removeItem("selectedPlaylist");
+    }
+
+    return null;
+  });
 
   useEffect(() => {
     try {
@@ -81,14 +93,6 @@ export function MusicProvider({ children }) {
         }
       }
 
-      // Không lưu selectedPlaylist nữa, chỉ giữ trong state runtime
-      const savedPlaylistStr = localStorage.getItem("selectedPlaylist");
-      if (savedPlaylistStr && savedPlaylistStr !== "undefined") {
-          const savedPlaylist = JSON.parse(savedPlaylistStr);
-          if (savedPlaylist !== null) {
-              setSelectedPlaylist(savedPlaylist);
-          }
-      }
       //Lưu dữ liệu âm lượng vào biến hiện tại
       const savedVolumeStr = localStorage.getItem("currentVolume");
       if (savedVolumeStr && savedVolumeStr !== "undefined") {
@@ -162,6 +166,14 @@ export function MusicProvider({ children }) {
       localStorage.setItem("currentSong", JSON.stringify(currentSong));
     }
   }, [currentSong]);
+  
+  // Auto-save selectedPlaylist to localStorage
+  useEffect(() => {
+    if (selectedPlaylist !== null) {
+      localStorage.setItem("selectedPlaylist", JSON.stringify(selectedPlaylist));
+      return;
+    }
+  }, [selectedPlaylist]);
   // Auto-save isPlaying to localStorage
   useEffect(() => {
     localStorage.setItem("isPlaying", JSON.stringify(isPlaying));

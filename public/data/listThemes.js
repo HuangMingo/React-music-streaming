@@ -7,6 +7,7 @@ const listThemes = [
                 image: '../assets/img/modalThemes/modalTheme1/theme1.jpg',
                 backgroundImage: '../assets/img/themeBgs/listThem1e1/theme1.jpg',
                 colors: {
+                    
                     bgContentColor: "#ffffff1a",
                     borderBox: "rgb(255 255 255 / 20%)",
                     borderPrimary: "rgb(255 255 255 / 10%)",
@@ -184,34 +185,7 @@ const listThemes = [
                     placeholderText: "#757575",
                 }
             },
-            {
-                name: "Trần Lập",
-                image: '../assets/img/modalThemes/modalTheme3/theme9.jpg',
-                backgroundImage: '../assets/img/modalThemes/modalTheme3/theme9.jpg',
-
-                colors: {
-                    bgContentColor: "rgba(255, 255, 255, 0.6)",
-                    borderBox: "rgba(0, 0, 0, 0.1)",
-                    borderPrimary: "rgba(0, 0, 0, 0.05)",
-
-                    layoutBg: "#f2f2f2",
-                    primaryBg: "#ffffff",
-                    sidebarPopupBg: "#eaeaea",
-
-                    textColor: "#1a1a1a",
-                    textItemHover: "#000000",
-                    textSecondary: "rgba(0, 0, 0, 0.5)",
-                    navigationText: "#666666",
-                    placeholderText: "#999999",
-
-                    linkTextHover: "#9b4de0",   // tím nhẹ cho nổi
-                    purplePrimary: "#7200a1",
-
-                    modalScrollbar: "rgba(0, 0, 0, 0.2)",
-                    playerBg: "rgba(255, 255, 255, 0.5)"
-                }
-
-            }
+           
         ]
     },
     {

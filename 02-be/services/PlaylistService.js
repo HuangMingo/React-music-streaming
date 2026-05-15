@@ -109,7 +109,7 @@ const deletePlaylist = async (playlistId, userId) => {
     await pool.query(`
         DELETE FROM song_playlist
         WHERE playlist_id = $1;`, [playlistId]);
-        
+
     const result = await pool.query(`
         DELETE FROM playlist
         WHERE id = $1 AND creator_id = $2
@@ -121,7 +121,7 @@ const deleteSongFromPlaylist = async (playlistId, songId) => {
     const result = await pool.query(`
         DELETE FROM song_playlist
         WHERE playlist_id = $1 AND song_id = $2
-        RETURNING *;`, [playlistId, songId]);
+        `, [playlistId, songId]);
     return result;
 }
 //Thêm bài hát vào playlist 
@@ -132,7 +132,13 @@ const addSongToPlaylist = async (playlistId, songId) => {
         ON CONFLICT DO NOTHING
         RETURNING playlist_id, song_id;
     `, [playlistId, songId]);
-    return result.rows[0] ?? null;
+    if (!result.rows[0]) return null; // Bai hat da ton tai trong playlist
+    await pool.query(`
+        update playlist 
+        set image = (select image from song 
+                        where id = $2)
+        where id = $1
+    `, [playlistId, songId]);
 }
 
 const getDefaultFavouritePlaylistIdByUser = async (userId) => {
