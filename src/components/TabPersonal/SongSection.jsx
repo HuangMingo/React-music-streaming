@@ -54,21 +54,6 @@ export function SongSection() {
                 songs: nextSongs,
             };
         });
-
-        if (currentSong?.id === removedSong.id) {
-            setCurrentSong(
-                nextSongs[0] ?? {
-                    id: undefined,
-                    title: "",
-                    artist_names: [],
-                    image: "",
-                    duration_seconds: 0,
-                }
-            );
-            setCurrentTime(0);
-            setIsPlaying(false);
-        }
-
         handleCloseRemoveSongDialog();
     }
 
@@ -82,6 +67,14 @@ export function SongSection() {
                                 <h3>Bài Hát&nbsp;</h3>
                             </a>
                             <h3 className="container__header-subtitle">Bài Hát</h3>
+                            <div className="container__header-actions">
+
+                                <button
+                                    className="button is-small button-primary container__header-btn btn--play-all">
+                                    <i className="bi bi-play-fill container__header-icon"></i>
+                                    <span>Phát tất cả</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

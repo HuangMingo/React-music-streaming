@@ -73,7 +73,7 @@ export function ThemeModal({ onClose }) {
                                                             <div className="theme__item-img row__item-img" style={{ "background": `url(${theme.image}) no-repeat center center / cover` }}></div>
                                                             <div className="overlay"></div>
                                                             <div className="theme__item-actions row__item-actions">
-                                                                <button className="button theme__actions-btn btn--apply-theme button-primary" onClick={() => applyTheme(theme)}>
+                                                                <button className="button theme__actions-btn btn--apply-theme button-primary" onClick={() => { applyTheme(theme); onClose(); }}>
                                                                     <span className="theme__btn-title">Áp dụng</span>
                                                                 </button>
                                                             </div>

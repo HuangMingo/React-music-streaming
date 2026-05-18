@@ -14,7 +14,7 @@ export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDele
 
         try {
             setIsDeleting(true);
-            await axios.delete("http://localhost:3000/api/playlists/remove-song-from-playlist", {
+            await axios.delete("http://localhost:3000/api/playlists/delete-song-from-playlist", {
                 params: {
                     playlistId,
                     songId: song.id,
@@ -29,7 +29,7 @@ export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDele
 
             onClose();
         } catch (error) {
-            console.error("Remove song from playlist failed:", error);
+            console.error("Delete song from playlist failed:", error);
             alert("Xóa bài hát khỏi playlist thất bại. Vui lòng thử lại.");
             setIsDeleting(false);
         }

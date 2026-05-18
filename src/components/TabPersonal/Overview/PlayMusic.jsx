@@ -190,7 +190,14 @@ export function PlayMusic({ playlist }) {
                             <i className="bi bi-chevron-right container__header-icon" />
                         </NavLink>
                         <h3 className="container__header-subtitle">Bài Hát</h3>
-                        
+                        <div className="container__header-actions">
+                            
+                            <button
+                                className="button is-small button-primary container__header-btn btn--play-all">
+                                <i className="bi bi-play-fill container__header-icon"></i>
+                                <span>Phát tất cả</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div className="col l-12 m-12 c-12">
@@ -264,25 +271,25 @@ export function PlayMusic({ playlist }) {
                                                     </span>
 
                                                     <div className="playlist__song-option song--tab media__right hide-on-mobile">
-                                                            <div className="playlist__song-btn btn--mic option-btn">
-                                                                <i className="btn--icon song__icon bi bi-mic-fill"></i>
-                                                            </div>
-                                                            <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
-                                                                <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
-                                                            </div>
-                                                            <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
-                                                                <i className="btn--icon bi bi-three-dots"></i>
-                                                                <AddSongToPlaylist
-                                                                    songId={song.id}
-                                                                    isOpen={openSongMenuId === song.id}
-                                                                    playlists={userPlaylists}
-                                                                    selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
-                                                                    onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                    onAddSong={handleAddSongToPlaylist}
-                                                                    isAddingSong={isAddingSong}
-                                                                />
-                                                            </div>
+                                                        <div className="playlist__song-btn btn--mic option-btn">
+                                                            <i className="btn--icon song__icon bi bi-mic-fill"></i>
                                                         </div>
+                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
+                                                            <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
+                                                        </div>
+                                                        <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
+                                                            <i className="btn--icon bi bi-three-dots"></i>
+                                                            <AddSongToPlaylist
+                                                                songId={song.id}
+                                                                isOpen={openSongMenuId === song.id}
+                                                                playlists={userPlaylists}
+                                                                selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
+                                                                onSelectPlaylist={handleSelectTargetPlaylist}
+                                                                onAddSong={handleAddSongToPlaylist}
+                                                                isAddingSong={isAddingSong}
+                                                            />
+                                                        </div>
+                                                    </div>
 
                                                 </div>
                                             )

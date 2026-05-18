@@ -35,6 +35,7 @@ const getFavouritePlaylist = async (userId) => {
                     'image', s.image,
                     'artist_names', sa.artist_names
                 )
+                ORDER BY sp.added_at DESC
             ) FILTER (WHERE s.id IS NOT NULL), '[]'::json
         ) AS songs
     FROM playlist p 
@@ -82,6 +83,7 @@ const getUserCreatedPlaylist = async (userId) => {
                     'duration', s.duration_seconds,
                     'artist_names', sa.artist_names
                 )
+                ORDER BY sp.added_at DESC, s.id asc
             ) FILTER (WHERE s.id IS NOT NULL), '[]'::json
         ) AS songs
     FROM playlist p 
@@ -94,7 +96,6 @@ const getUserCreatedPlaylist = async (userId) => {
         `, [userId]);
     return result.rows;
 }
-
 const createPlaylist = async ({ name, creatorId, ispublic, isDefault }) => {
     const result = await pool.query(
         `
@@ -130,7 +131,7 @@ const deleteSongFromPlaylist = async (playlistId, songId) => {
         FROM song_playlist sp
         JOIN song s ON s.id = sp.song_id
         WHERE sp.playlist_id = $1
-        ORDER BY sp.ctid DESC
+        ORDER BY sp.added_at DESC
         LIMIT 1
     `, [playlistId]);
 
@@ -153,28 +154,7 @@ const removeSongFromPlaylist = async (playlistId, songId) => {
 
     return result.rows[0] ?? null;
 }
-//Thêm bài hát vào playlist 
-// const addSongToPlaylist = async (playlistId, songId) => {
-//     const insertResult = await pool.query(`
-//         INSERT INTO song_playlist (playlist_id, song_id)
-//         VALUES ($1, $2)
-//         ON CONFLICT DO NOTHING
-//         RETURNING *
-//     `, [playlistId, songId]);
 
-//     if (insertResult.rowCount === 0) {
-//         return;
-//     }
-
-//     await pool.query(`
-//         UPDATE playlist p
-//         SET image = s.image
-//         FROM song s
-//         WHERE p.id = $1
-//           AND s.id = $2
-//         RETURNING p.*
-//     `, [playlistId, songId]);
-// }
 const addSongToPlaylist = async (playlistId, songId) => {
     const result = await pool.query(`
         INSERT INTO song_playlist (playlist_id, song_id)
@@ -234,6 +214,7 @@ const getPlaylistById = async (playlistId) => {
                         'image', s.image,
                         'artist_names', sa.artist_names
                     )
+                    ORDER BY sp.added_at DESC
                 ) FILTER (WHERE s.id IS NOT NULL), '[]'::json
             ) AS songs
         FROM playlist p
@@ -256,7 +237,6 @@ export const playlistService = {
     deletePlaylist,
     addSongToPlaylist,
     deleteSongFromPlaylist,
-    removeSongFromPlaylist,
     getDefaultFavouritePlaylistIdByUser,
     getPlaylistById
 }

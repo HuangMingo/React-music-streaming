@@ -6,7 +6,7 @@
 	align-items: center;
 	justify-content: center;
 	padding: 16px;
-	background: rgba(0,0,0,0.5);
+	background: rgba(0, 0, 0, 0.5);
 
 }
 
@@ -80,7 +80,8 @@
 }
 
 .create-playlist-input::placeholder {
-	color: rgba(33, 52, 87, 0.55);
+	color: var(--text-color);
+	opacity: 0.5;
 }
 
 .create-playlist-error {
@@ -112,7 +113,7 @@
 	margin: 4px 0 0;
 	font-size: 1.6rem;
 	line-height: 1.4;
-	color: var(--text-secondary);
+	color: var(--text-color);
 }
 
 .create-playlist-switch {
@@ -151,11 +152,11 @@
 	box-shadow: 0 3px 10px rgba(28, 42, 72, 0.25);
 }
 
-.create-playlist-switch input:checked + .create-playlist-slider {
+.create-playlist-switch input:checked+.create-playlist-slider {
 	background: var(--purple-primary);
 }
 
-.create-playlist-switch input:checked + .create-playlist-slider::before {
+.create-playlist-switch input:checked+.create-playlist-slider::before {
 	transform: translateX(24px);
 }
 

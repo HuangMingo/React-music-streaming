@@ -51,7 +51,7 @@ export function AddSongToPlaylist({
         onSelectPlaylist?.(songId, playlistId);
         setIsDropdownOpen(false);
     }
-
+    
     async function handleAddSong(event) {
         event.stopPropagation();
 
@@ -116,8 +116,10 @@ export function AddSongToPlaylist({
                             <div className="playlist__menu-empty">Chưa có playlist nào</div>
                         ) : (
                             playlists.map((item) => {
+                                if(item.isdefault) {
+                                    return null; // Bỏ qua playlist mặc định
+                                }
                                 const isSelected = String(item.id) === String(selectedPlaylistId);
-
                                 return (
                                     <button
                                         key={item.id}

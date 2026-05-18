@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { showNotificationToast } from "../../toast.js";
 import "./CreatePlaylist.css";
 import { useAuthContext } from "../../context/AuthContext.jsx";
 
@@ -36,11 +37,11 @@ export function CreatePlaylist({ onClose, onSuccess }) {
             if (onSuccess) {
                 await onSuccess();
             }
-
             onClose();
+            showNotificationToast("Tạo playlist thành công");
         } catch (error) {
             console.error("Create playlist failed:", error);
-            alert("Tao playlist that bai. Vui long thu lai.");
+            showNotificationToast("Tạo playlist thất bại. Vui lòng thử lại.");
         } finally {
             setIsSubmitting(false);
         }
