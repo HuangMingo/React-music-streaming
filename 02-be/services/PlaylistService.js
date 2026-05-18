@@ -143,6 +143,16 @@ const deleteSongFromPlaylist = async (playlistId, songId) => {
         RETURNING *
     `, [nextImage, playlistId]);
 }
+//Chỉ xóa quan hệ giữa playlist và bài hát
+const removeSongFromPlaylist = async (playlistId, songId) => {
+    const result = await pool.query(`
+        DELETE FROM song_playlist
+        WHERE playlist_id = $1 AND song_id = $2
+        RETURNING playlist_id, song_id
+    `, [playlistId, songId]);
+
+    return result.rows[0] ?? null;
+}
 //Thêm bài hát vào playlist 
 // const addSongToPlaylist = async (playlistId, songId) => {
 //     const insertResult = await pool.query(`
@@ -246,6 +256,7 @@ export const playlistService = {
     deletePlaylist,
     addSongToPlaylist,
     deleteSongFromPlaylist,
+    removeSongFromPlaylist,
     getDefaultFavouritePlaylistIdByUser,
     getPlaylistById
 }

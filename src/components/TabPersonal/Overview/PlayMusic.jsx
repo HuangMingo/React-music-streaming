@@ -119,7 +119,7 @@ export function PlayMusic({ playlist }) {
             isMounted = false;
         };
     }, [currentUser?.id]);
-
+    //--------------Xử lí khi click bên ngoài----------
     useEffect(() => {
         function handleClickOutside(event) {
             if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {

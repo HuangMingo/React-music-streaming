@@ -106,11 +106,32 @@ const addSongToPlaylist = async (req, res) => {
         res.status(500).json({ message: 'Không thể thêm bài hát vào playlist lúc này' });
     }
 }
+const removeSongFromPlaylist = async (req, res) => {
+    try {
+        const playlistId = Number(req.query.playlistId ?? req.body.playlistId);
+        const songId = Number(req.query.songId ?? req.body.songId);
+        if (!playlistId || !songId) {
+            return res.status(400).json({ message: 'Thiếu playlistId hoặc songId' });
+        }
+
+        const removedSong = await playlistService.removeSongFromPlaylist(playlistId, songId);
+        if (!removedSong) {
+            return res.status(404).json({ message: 'Bài hát không còn trong playlist' });
+        }
+
+        res.json({ success: true, playlistId, songId });
+    }
+    catch (error) {
+        console.error('Remove song from playlist failed:', error);
+        res.status(500).json({ message: 'Không thể xóa bài hát khỏi playlist lúc này' });
+    }
+}
 export const PlaylistController = {
     getFavouritePlaylist,
     getUserCreatedPlaylist,
     getPlaylistById,
     createPlaylist,
     deletePlaylist, 
-    addSongToPlaylist
+    addSongToPlaylist,
+    removeSongFromPlaylist
 };

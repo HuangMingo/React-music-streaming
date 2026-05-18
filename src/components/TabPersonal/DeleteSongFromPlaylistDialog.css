@@ -1,0 +1,134 @@
+.delete-song-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 1200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background: rgba(0,0,0,0.5)
+}
+
+.delete-song-dialog {
+	position: relative;
+	width: min(440px, 100%);
+	border-radius: 24px;
+	padding: 22px 22px 20px;
+	background:  linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 96%, #fff 4%), var(--sidebar-popup-bg));
+}
+
+.delete-song-title {
+	margin: 0 42px 0 0;
+	font-size: 2rem;
+	line-height: 1.08;
+	font-weight: 800;
+	letter-spacing: 0.5px;
+	color: var(--text-color);
+}
+
+.delete-song-message {
+	margin: 14px 0 0;
+	font-size: 2rem;
+	line-height: 1.45;
+	color: var(--text-color);
+}
+
+.delete-song-actions {
+	margin-top: 22px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+.delete-song-actions .btn {
+	border: 0;
+	min-width: 112px;
+	height: 48px;
+	border-radius: 999px;
+	font-size: 2rem;
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: 0.3px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+
+.delete-song-actions .btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.delete-song-actions .btn--cancel {
+	color: #4f6288;
+	background: #eef2fb;
+}
+
+.delete-song-actions .btn--confirm {
+	color: #ffffff;
+	background: linear-gradient(95deg, #f16b7a 0%, #ef4f5e 48%, #d72638 100%);
+	
+}
+
+.delete-song-spinner {
+	display: inline-block;
+	margin-right: 8px;
+	animation: delete-song-spin 0.85s linear infinite;
+}
+
+.playlist__song-btn--remove {
+	color: #e14d62;
+}
+
+.playlist__song-btn--remove .btn--icon {
+	color: inherit;
+}
+
+
+
+.playlist__song-option-main {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+@keyframes delete-song-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (max-width: 767px) {
+	.delete-song-overlay {
+		padding: 14px;
+	}
+
+	.delete-song-dialog {
+		width: min(360px, 100%);
+		border-radius: 20px;
+		padding: 18px 16px 16px;
+	}
+
+	.delete-song-title {
+		margin-right: 40px;
+		font-size: 2.8rem;
+	}
+
+	.delete-song-message {
+		margin-top: 12px;
+		font-size: 1.6rem;
+	}
+
+	.delete-song-actions {
+		margin-top: 18px;
+	}
+
+	.delete-song-actions .btn {
+		min-width: 96px;
+		height: 42px;
+		font-size: 5rem;
+	}
+}

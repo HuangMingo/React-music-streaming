@@ -1,5 +1,5 @@
 import { THEME_LIST_STORAGE_KEY } from '../../public/data/listThemes.js'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 export function applyTheme(theme) {
     const app = document.querySelector(".app");
     const player = document.querySelector(".player");
@@ -28,13 +28,26 @@ export function applyTheme(theme) {
     localStorage.setItem("theme", JSON.stringify(theme));
 }
 export function ThemeModal({ onClose }) {
+    const appRef = useRef(null);
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (appRef.current && !appRef.current.contains(event.target)) {
+                onClose();
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     const data = JSON.parse(localStorage.getItem(THEME_LIST_STORAGE_KEY));
     return (
 
         <>
             {/* Theme */}
-            < div className="modal-theme grid" >
-                <div className="modal-container">
+            < div className="modal-theme grid">
+                <div className="modal-container" ref={appRef}>
                     <div className="modal__close-btn" onClick={onClose}>
                         <i className="bi bi-x-lg close close__btn-icon" />
                     </div>
