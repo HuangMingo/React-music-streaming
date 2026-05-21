@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
   const login = async ({ username, password }) => {
     const normalizedUsername = username.trim();
     const normalizedPassword = password.trim();
-
+    
     // Đăng nhập thật dựa trên dữ liệu trong database.
     const result = await requestJson('/api/auth/login', {
       username: normalizedUsername,

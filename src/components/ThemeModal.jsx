@@ -28,7 +28,7 @@ export function applyTheme(theme) {
     localStorage.setItem("theme", JSON.stringify(theme));
 }
 export function ThemeModal({ onClose }) {
-    const appRef = useRef(null);
+    const appRef = useRef(null); const currentTheme = JSON.parse(localStorage.getItem("theme"));
     useEffect(() => {
         function handleClickOutside(event) {
             if (appRef.current && !appRef.current.contains(event.target)) {
@@ -73,9 +73,15 @@ export function ThemeModal({ onClose }) {
                                                             <div className="theme__item-img row__item-img" style={{ "background": `url(${theme.image}) no-repeat center center / cover` }}></div>
                                                             <div className="overlay"></div>
                                                             <div className="theme__item-actions row__item-actions">
-                                                                <button className="button theme__actions-btn btn--apply-theme button-primary" onClick={() => { applyTheme(theme); onClose(); }}>
-                                                                    <span className="theme__btn-title">Áp dụng</span>
-                                                                </button>
+                                                                {
+                                                                    currentTheme?.name !== theme.name &&
+                                                                    (<button className="button theme__actions-btn btn--apply-theme button-primary" onClick={() => { applyTheme(theme); onClose(); }}>
+                                                                        <span className="theme__btn-title">
+                                                                            Áp dụng
+                                                                        </span>
+                                                                    </button>)
+                                                                }
+
                                                             </div>
                                                         </div>
                                                         <div className="theme__item-info">

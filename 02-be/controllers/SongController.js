@@ -5,16 +5,16 @@ const getAllSong = async (req, res) => {
     res.send(result);
 }
 //Kiểm tra bài hát có phải là yêu thích của người dùng hay không
-const isFavourite = async (req, res) => {
+const isFavouriteSong = async (req, res) => {
     try {
-        const userId = Number(req.query.userId);
+        const defaultPlaylistId = Number(req.query.defaultPlaylistId);
         const songId = Number(req.query.songId);
 
-        if (!userId || !songId)
-            return res.status(400).json({ message: 'Thiếu userId hoặc songId' });
+        if (!defaultPlaylistId || !songId)
+            return res.status(400).json({ message: 'Thiếu defaultPlaylistId hoặc songId' });
 
-        const isFav = await songService.isFavouriteSong(userId, songId);
-        res.json({ isFavourite: isFav });
+        const isFav = await songService.isFavouriteSong(defaultPlaylistId, songId);
+        res.json({ isFavouriteSong: isFav });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi hệ thống' });
     }
@@ -22,12 +22,12 @@ const isFavourite = async (req, res) => {
 //Chuyển trạng thái yêu thích của bài hát
 const toggleFavouriteSong = async (req, res) => {
     try {
-        const { userId, songId } = req.body;
-        if (!userId || !songId) {
-            return res.status(400).json({ message: 'Thiếu userId hoặc songId' });
+        const { defaultPlaylistId, songId } = req.body;
+        if (!defaultPlaylistId || !songId) {
+            return res.status(400).json({ message: 'Thiếu defaultPlaylistId hoặc songId' });
         }
-        const newStatus = await songService.toggleFavouriteSong(Number(userId), Number(songId));
-        res.json({ isFavourite: newStatus });
+        const newStatus = await songService.toggleFavouriteSong(Number(defaultPlaylistId), Number(songId));
+        res.json({ isFavouriteSong: newStatus });
     } catch (error) {
         console.error('Toggle favourite failed:', error);
         res.status(500).json({ message: 'Lỗi hệ thống' });
@@ -64,7 +64,7 @@ const incrementPlayCount = async (req, res) => {
 
 export const SongController = {
     getAllSong,
-    isFavourite,
+    isFavouriteSong,
     toggleFavouriteSong,
     getTop10MostPlayedSongs,
     incrementPlayCount

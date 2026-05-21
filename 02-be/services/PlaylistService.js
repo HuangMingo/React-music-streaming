@@ -101,6 +101,7 @@ const createPlaylist = async ({ name, creatorId, ispublic, isDefault }) => {
         `
         INSERT INTO playlist (name, creator_id, ispublic, image, isdefault)
         VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
         `,
         [name, creatorId, ispublic, DEFAULT_PLAYLIST_IMAGE, isDefault]
     );
@@ -144,16 +145,7 @@ const deleteSongFromPlaylist = async (playlistId, songId) => {
         RETURNING *
     `, [nextImage, playlistId]);
 }
-//Chỉ xóa quan hệ giữa playlist và bài hát
-const removeSongFromPlaylist = async (playlistId, songId) => {
-    const result = await pool.query(`
-        DELETE FROM song_playlist
-        WHERE playlist_id = $1 AND song_id = $2
-        RETURNING playlist_id, song_id
-    `, [playlistId, songId]);
 
-    return result.rows[0] ?? null;
-}
 
 const addSongToPlaylist = async (playlistId, songId) => {
     const result = await pool.query(`
@@ -170,17 +162,17 @@ const addSongToPlaylist = async (playlistId, songId) => {
         where id = $1
     `, [playlistId, songId]);
 }
+// Lấy playlist mặc định của user
 
-const getDefaultFavouritePlaylistIdByUser = async (userId) => {
-    const result = await pool.query(`
-        SELECT p.id
-        FROM playlist p
-        JOIN favourite_playlists fp ON fp.playlist_id = p.id
-        WHERE fp.user_id = $1
-          AND p.isdefault = true
-        LIMIT 1;
-    `, [userId]);
-    return result.rows[0]?.id ?? null;
+const getDefaultPlaylistIdByUser = async (userId) => {
+        const result = await pool.query(`
+                SELECT p.id
+                FROM playlist p
+                WHERE p.creator_id = $1
+                    AND p.isdefault = true
+                LIMIT 1;
+        `, [userId]);
+        return result.rows[0]?.id ?? null;
 }
 
 const getPlaylistById = async (playlistId) => {
@@ -200,6 +192,7 @@ const getPlaylistById = async (playlistId) => {
             p.image AS playlist_image,
             TRUE AS isMine,
             p.isdefault AS isdefault,
+            p.ispublic AS ispublic,
             COALESCE(
                 json_agg(
                     json_build_object(
@@ -237,6 +230,6 @@ export const playlistService = {
     deletePlaylist,
     addSongToPlaylist,
     deleteSongFromPlaylist,
-    getDefaultFavouritePlaylistIdByUser,
+    getDefaultPlaylistIdByUser,
     getPlaylistById
 }

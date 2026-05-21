@@ -2,14 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
-import { showNotificationToast } from "../../toast";
 import { AddSongToPlaylist } from "../AddSongToPlaylist";
 export function DreamChart() {
     const [topSongs, setTopSongs] = useState([]);
     const [userPlaylists, setUserPlaylists] = useState([]);
     const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
-    const [isAddingSong, setIsAddingSong] = useState(false);
     const playlistMenuRef = useRef(null);
     const {
         currentSong,
@@ -20,6 +18,8 @@ export function DreamChart() {
         handleClickSong
     } = useMusicContext();
     const { currentUser } = useAuthContext();
+    const defaultPlaylistId = currentUser?.defaultPlaylistId;
+    const isMountedRef = useRef(true);
 
     useEffect(() => {
         axios
@@ -38,32 +38,7 @@ export function DreamChart() {
             return;
         }
 
-        let isMounted = true;
-
-        async function loadUserPlaylists() {
-            try {
-                const response = await axios.get(
-                    `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
-                );
-
-                if (!isMounted) {
-                    return;
-                }
-
-                setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
-            } catch (error) {
-                if (isMounted) {
-                    setUserPlaylists([]);
-                }
-                console.error("Load user playlists failed:", error);
-            }
-        }
-
         loadUserPlaylists();
-
-        return () => {
-            isMounted = false;
-        };
     }, [currentUser?.id]);
 
     useEffect(() => {
@@ -89,26 +64,21 @@ export function DreamChart() {
         }));
     }
 
-    async function handleAddSongToPlaylist(songId, playlistIdFromChild) {
-        const playlistId = Number(playlistIdFromChild ?? selectedPlaylistBySong[songId]);
-
-        if (!playlistId || !songId) {
-            showNotificationToast("Vui lòng chọn playlist trước khi thêm");
+    async function loadUserPlaylists() {
+        if (!currentUser?.id) {
+            setUserPlaylists([]);
             return;
         }
 
         try {
-            setIsAddingSong(true);
-            await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
-                params: { playlistId, songId },
-            });
-            showNotificationToast("Đã thêm bài hát vào playlist");
-            setOpenSongMenuId(null);
+            const response = await axios.get(
+                `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+            );
+
+            setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
         } catch (error) {
-            console.error("Add song to playlist failed:", error);
-            showNotificationToast("Không thể thêm bài hát vào playlist");
-        } finally {
-            setIsAddingSong(false);
+            console.error("Load user playlists failed:", error);
+            setUserPlaylists([]);
         }
     }
 
@@ -125,9 +95,9 @@ export function DreamChart() {
                 const checks = await Promise.all(
                     topSongs.map(async (song) => {
                         const response = await axios.get(
-                            `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${song.id}`
+                            `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${song.id}`
                         );
-                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavourite) };
+                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
                     })
                 );
 
@@ -252,8 +222,8 @@ export function DreamChart() {
                                                                         playlists={userPlaylists}
                                                                         selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
                                                                         onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                        onAddSong={handleAddSongToPlaylist}
-                                                                        isAddingSong={isAddingSong}
+                                                                        onCloseMenu={() => setOpenSongMenuId(null)}
+                                                                        onPlaylistsChanged={loadUserPlaylists}
                                                                     />
                                                                 </div>
                                                             </div>

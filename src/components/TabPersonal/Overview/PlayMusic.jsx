@@ -4,7 +4,6 @@ import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
 import { AddSongToPlaylist } from "../../AddSongToPlaylist.jsx";
 import axios from "axios";
-import { showNotificationToast } from "../../../toast.js";
 export function PlayMusic({ playlist }) {
     const { currentSong,
         setCurrentSong,
@@ -60,9 +59,9 @@ export function PlayMusic({ playlist }) {
                 const checks = await Promise.all(
                     visibleSongs.map(async (song) => {
                         const response = await axios.get(
-                            `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${song.id}`
+                            `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${currentUser.defaultPlaylistId}&songId=${song.id}`
                         );
-                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavourite) };
+                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
                     })
                 );
 

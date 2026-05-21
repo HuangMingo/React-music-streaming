@@ -14,32 +14,24 @@ const getAllSong = async () => {
     `);
     return result.rows;
 }
-const isFavouriteSong = async (userId, songId) => {
+const isFavouriteSong = async (defaultPlaylistId, songId) => {
     const result = await pool.query(`
         SELECT * 
-        FROM favourite_song fs
-        where fs.user_id = $1 and fs.song_id = $2`, [userId, songId]);
+        FROM playlist p join song_playlist sp on p.id = sp.playlist_id
+        JOIN song s on s.id = sp.song_id
+        where p.id = $1 and s.id = $2`, [defaultPlaylistId, songId]);
     return result.rows.length > 0;
 }
 // Toggle trạng thái yêu thích của bài hát cho người dùng.
-const toggleFavouriteSong = async (userId, songId) => {
-    const defaultPlaylistId = await playlistService.getDefaultFavouritePlaylistIdByUser(userId);
-    const isFavourite = await isFavouriteSong(userId, songId);
+const toggleFavouriteSong = async (defaultPlaylistId, songId) => {
+    console.log(defaultPlaylistId);
+    const isFavourite = await isFavouriteSong(defaultPlaylistId, songId);
     if (isFavourite) {
-        await pool.query(
-            `DELETE FROM favourite_song WHERE user_id = $1 AND song_id = $2`,
-            [userId, songId]
-        );
         if (defaultPlaylistId) {
             await playlistService.deleteSongFromPlaylist(defaultPlaylistId, songId);
         }
         return false;
     }
-
-    await pool.query(
-        `INSERT INTO favourite_song (user_id, song_id) VALUES ($1, $2)`,
-        [userId, songId]
-    );
     if (defaultPlaylistId) {
         await playlistService.addSongToPlaylist(defaultPlaylistId, songId);
     }

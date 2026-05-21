@@ -2,8 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
-import { showNotificationToast } from "../../toast";
 import { AddSongToPlaylist } from "../AddSongToPlaylist";
+// Component: AllSongs
+// Chức năng: Hiển thị các bài hát gợi ý, cho phép mở menu "Thêm vào playlist"
+// Các điểm chính:
+// - Tải danh sách bài hát từ API (`fetchSong`)
+// - Tải playlist do user tạo (dùng cho menu thêm bài)
+// - Quản lý trạng thái menu cho từng bài (`openSongMenuId`)
 
 const SONGS_PER_COLUMN = 3;
 const NUM_COLUMNS = 2;
@@ -19,14 +24,16 @@ export function AllSongs() {
         setFavouriteSongIds,
         toggleFavouriteSong } = useMusicContext();
     const { currentUser } = useAuthContext();
+    const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const [allSongs, setAllSongs] = useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
+    // Danh sách playlist do người dùng tạo (dùng để render menu thêm bài)
     const [userPlaylists, setUserPlaylists] = useState([]);
     const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
-    const [isAddingSong, setIsAddingSong] = useState(false);
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     const playlistMenuRef = useRef(null);
+    const isMountedRef = useRef(true);
     const fetchSong = function () {
         setIsLoading(true);
         axios
@@ -42,6 +49,9 @@ export function AllSongs() {
                 setIsLoading(false);
             });
     };
+
+    // Lấy danh sách bài hát từ backend
+    // Lưu ý: fetchSong được gọi trong effect khởi tạo phía dưới
 
     // Chia bài hát thành 2 cột, mỗi cột 3 bài hát
     const songColumns = useMemo(() => {
@@ -71,30 +81,26 @@ export function AllSongs() {
         }));
     }
 
-    async function handleAddSongToPlaylist(songId, playlistIdFromChild) {
-        const playlistId = Number(playlistIdFromChild ?? selectedPlaylistBySong[songId]);
-
-        if (!playlistId || !songId) {
-            showNotificationToast("Vui lòng chọn playlist trước khi thêm");
+    async function loadUserPlaylists() {
+        if (!currentUser?.id) {
+            setUserPlaylists([]);
             return;
         }
 
         try {
-            setIsAddingSong(true);
-            await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
-                params: { playlistId, songId },
-            });
-            showNotificationToast("Đã thêm bài hát vào playlist");
-            setOpenSongMenuId(null);
+            const response = await axios.get(
+                `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+            );
+
+            setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
         } catch (error) {
-            console.error("Add song to playlist failed:", error);
-            showNotificationToast("Không thể thêm bài hát vào playlist");
-        } finally {
-            setIsAddingSong(false);
+            console.error("Load user playlists failed:", error);
+            setUserPlaylists([]);
         }
     }
 
-    
+    // Gọi API lấy playlist do user tạo.
+    // Sẽ được truyền xuống component AddSongToPlaylist để render list và xử lý tạo mới.
 
     useEffect(() => {
         if (!currentUser?.id || allSongs.length === 0) {
@@ -107,9 +113,9 @@ export function AllSongs() {
                 const checks = await Promise.all(
                     allSongs.map(async (song) => {
                         const response = await axios.get(
-                            `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${song.id}`
+                            `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${song.id}`
                         );
-                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavourite) };
+                        return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
                     })
                 );
 
@@ -134,51 +140,36 @@ export function AllSongs() {
     }, [allSongs, currentUser?.id]);
 
     useEffect(() => {
+                
+        // Khi user thay đổi (login/logout), tải lại playlist
         if (!currentUser?.id) {
             setUserPlaylists([]);
             return;
         }
 
-        let isMounted = true;
-
-        async function loadUserPlaylists() {
-            try {
-                const response = await axios.get(
-                    `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
-                );
-
-                if (!isMounted) {
-                    return;
-                }
-
-                setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
-            } catch (error) {
-                if (isMounted) {
-                    setUserPlaylists([]);
-                }
-                console.error("Load user playlists failed:", error);
-            }
-        }
-
         loadUserPlaylists();
-
-        return () => {
-            isMounted = false;
-        };
     }, [currentUser?.id]);
 
     useEffect(() => {
         function handleClickOutside(event) {
             if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
+                // Nếu click ngoài menu, đóng menu hiện đang mở
+                if (!isMountedRef.current) {
+                    return;
+                }
                 setOpenSongMenuId(null);
             }
         }
+        // Khởi tạo: fetch danh sách bài hát
         fetchSong();
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+    // Đánh dấu component vẫn mounted; dùng trong các callback async để tránh setState sau unmount
+    isMountedRef.current = true;
+
 
     return (
         <>
@@ -268,8 +259,8 @@ export function AllSongs() {
                                                             playlists={userPlaylists}
                                                             selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
                                                             onSelectPlaylist={handleSelectTargetPlaylist}
-                                                            onAddSong={handleAddSongToPlaylist}
-                                                            isAddingSong={isAddingSong}
+                                                                onCloseMenu={() => setOpenSongMenuId(null)}
+                                                                onPlaylistsChanged={loadUserPlaylists}
                                                         />
                                                     </div>
                                                 </div>

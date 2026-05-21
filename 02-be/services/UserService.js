@@ -27,7 +27,9 @@ export async function getUserByCredentials({ username, password }) {
     LIMIT 1
   `;
   const result = await pool.query(query, [username, password]);
-  return mapUserAttributes(result.rows[0]);
+  const user = mapUserAttributes(result.rows[0]);
+  const defaultPlaylistId = await playlistService.getDefaultPlaylistIdByUser(user.id);
+  return { ...user, defaultPlaylistId };
 }
 
 // Lấy thông tin user theo id.
@@ -63,13 +65,13 @@ export async function createUser({ username, password }) {
     RETURNING id, username, role, avatar
   `;
   const result = await pool.query(query, [username, password, USER_DEFAULT_AVATAR]);
-  await playlistService.createPlaylist({
+  const defaultPlaylistId = await playlistService.createPlaylist({
     name: `Nhạc của ${username}`,
     creatorId: result.rows[0].id,
     ispublic: false,
     isDefault: true
   });
-  return mapUserAttributes(result.rows[0]);
+  return { ...mapUserAttributes(result.rows[0]), defaultPlaylistId };
 }
 
 // Export dạng object để tiện import theo service tổng hợp.

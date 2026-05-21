@@ -13,6 +13,7 @@
 /* textSecondary: màu của text phụ như thời lượng bài hát, tên nghệ sĩ trong playlist */
 /* navigationText: màu của text trong navigation như tên tab, tên mục trong sidebar */
 /* placeholderText: màu của text placeholder trong input như ô tìm kiếm */
+/* white-color: màu trắng chính, thường dùng cho text và icon trên nền tối như nút play, tên bài hát, tên nghệ sĩ, tên album trên nền tối như playlist, bài hát, album, theme popup, delete playlist dialog, mv popup, artist popup, album popup, song popup, personal info popup, setting popup, notification popup, confirm popup, toast notification. */
 :root {
     --black-color: #000;
     --bg-content-color: rgba(255, 255, 255, 0.1);

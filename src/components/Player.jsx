@@ -31,6 +31,7 @@ export function Player() {
         toggleFavouriteSong,
     } = useMusicContext();
     const { currentUser } = useAuthContext();
+    const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const audioRef = useRef();
     const incrementedSongIdRef = useRef(null); // Lưu ID bài hát đã được tăng play_count để tránh tăng nhiều lần cho cùng một bài hát trong cùng một phiên nghe
     const playSessionRef = useRef(null); //Lưu số thứ tự lần phát để
@@ -90,7 +91,7 @@ export function Player() {
         async function loadFavouriteStatus() {
             try {
                 const response = await axios.get(
-                    `http://localhost:3000/api/songs/is-favourite?userId=${currentUser.id}&songId=${currentSong.id}`
+                    `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${currentSong.id}`
                 );
 
                 if (!isMounted) {

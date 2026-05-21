@@ -15,7 +15,7 @@
 	width: min(430px, 100%);
 	border-radius: 24px;
 	padding: 22px 22px 20px;
-	background: linear-gradient(140deg, #e8edf6 0%, #d9e2f3 100%);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 96%, #fff 4%), var(--sidebar-popup-bg));
 	box-shadow:
 		0 22px 45px rgba(20, 30, 70, 0.35),
 		0 0 0 1px rgba(255, 255, 255, 0.55) inset;
@@ -33,7 +33,7 @@
 	border: 0;
 	border-radius: 50%;
 	cursor: pointer;
-	color: #27406f;
+	color: var(--text-color);
 	background: rgba(255, 255, 255, 0.9);
 	box-shadow: 0 8px 18px rgba(20, 30, 70, 0.12);
 	transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
@@ -56,14 +56,14 @@
 	line-height: 1.08;
 	font-weight: 800;
 	letter-spacing: 0.5px;
-	color: #22365f;
+	color: var(--text-color);
 }
 
 .delete-playlist-message {
 	margin: 14px 0 0;
 	font-size: 1.8rem;
 	line-height: 1.45;
-	color: #5b6d90;
+	color: var(--text-color);
 }
 
 .delete-playlist-actions {
@@ -86,9 +86,7 @@
 	transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
-.delete-playlist-actions .btn:hover:not(:disabled) {
-	transform: translateY(-1px);
-}
+
 
 .delete-playlist-actions .btn:disabled {
 	opacity: 0.6;
@@ -96,15 +94,13 @@
 }
 
 .delete-playlist-actions .btn--cancel {
-	color: #4f6288;
-	background: #eef2fb;
-	box-shadow: 0 10px 20px rgba(35, 52, 94, 0.15);
+	color: var(--text-color);
+	background: var(--player-bg);
 }
 
 .delete-playlist-actions .btn--confirm {
-	color: #ffffff;
-	background: linear-gradient(95deg, #4ea6f0 0%, #5378f0 48%, #a54ced 100%);
-	box-shadow: 0 14px 22px rgba(83, 120, 240, 0.35);
+	color: var(--white-color);
+	background: var(--purple-primary);
 }
 
 @media (max-width: 767px) {

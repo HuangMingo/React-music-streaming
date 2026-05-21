@@ -43,10 +43,10 @@ export function DeletePlaylistDialog({ playlistId, onClose, currentUser, onDelet
                     <p className="delete-playlist-message">Bạn có chắc chắn muốn xóa playlist này không?</p>
                     <div className="delete-playlist-actions">
                         <button className="btn btn--cancel" onClick={onClose}>
-                            Hủy
+                            Không
                         </button>
                         <button className="btn btn--confirm" onClick={handleDeletePlaylist} disabled={isDeleting}>
-                            {isDeleting ? "Đang xóa..." : "Xóa"}
+                            {isDeleting ? "Đang xóa..." : "Có"}
                         </button>
                     </div>
                 </div>

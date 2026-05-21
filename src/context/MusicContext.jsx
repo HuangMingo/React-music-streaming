@@ -26,11 +26,11 @@ export function MusicProvider({ children }) {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:3000/api/songs/toggle-favourite", {
-        userId: currentUser.id,
+      const response = await axios.post("http://localhost:3000/api/songs/toggle-favourite-song", {
+        defaultPlaylistId: currentUser?.defaultPlaylistId,
         songId: songId,
       });
-      const nextIsFavourite = Boolean(response?.data?.isFavourite);
+      const nextIsFavourite = Boolean(response?.data?.isFavouriteSong);
       showNotificationToast(
         nextIsFavourite
           ? "Đã thêm bài hát vào " + `Nhạc của ${currentUser.username}`
@@ -46,6 +46,7 @@ export function MusicProvider({ children }) {
         return next;
       });
     } catch (error) {
+      console.log(currentUser);
       console.error("Toggle favourite failed:", error);
     }
   }
@@ -166,7 +167,7 @@ export function MusicProvider({ children }) {
       localStorage.setItem("currentSong", JSON.stringify(currentSong));
     }
   }, [currentSong]);
-  
+
   // Auto-save selectedPlaylist to localStorage
   useEffect(() => {
     if (selectedPlaylist !== null) {
@@ -203,11 +204,6 @@ export function useMusicContext() {
 
 // Function to clear all music-related localStorage when user logs out
 export function clearMusicStorage() {
-  localStorage.removeItem("currentSongIndex");
   localStorage.removeItem("playlistIndex");
   localStorage.removeItem("selectedPlaylist");
-  localStorage.removeItem("currentSong");
-  localStorage.removeItem("isPlaying");
-  localStorage.removeItem("currentVolume");
-  localStorage.removeItem("currentTime");
 }
