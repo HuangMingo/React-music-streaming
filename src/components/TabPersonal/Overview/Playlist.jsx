@@ -75,7 +75,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function handleClickPlaylist(playlist, index) {
+    function handleClickPlaylistPersonal(playlist, index) {
         scrollPersonalContainerToTop();
         const firstSong = playlist?.songs?.[0];
         const hasSongs = Boolean(firstSong);
@@ -148,7 +148,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                     <div
                                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`}
                                                         key={`${absoluteIndex}`}
-                                                        onClick={() => handleClickPlaylist(playlist, absoluteIndex)}
+                                                        onClick={() => handleClickPlaylistPersonal(playlist, absoluteIndex)}
                                                     >
                                                         <div className="row__item item--playlist">
                                                             <div className="row__item-container flex--top-left">

@@ -3,21 +3,21 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { useMusicContext } from "../../context/MusicContext";
 import { DeletePlaylistDialog } from "./DeletePlaylistDialog";
+import "./../../../public/assets/img/SongActiveAnimation/icon-playing.gif";
 
 export function PlaylistSection() {
     const { playlists, onPlaylistsChanged } = useOutletContext();
     const { currentUser } = useAuthContext();
-    const { 
+    const {
+        selectedPlaylist,
         setSelectedPlaylist,
         setCurrentSong,
         setCurrentTime,
-        setCurrentSongId,
+        isPlaying,
         setIsPlaying } = useMusicContext();
     const navigate = useNavigate();
-
     const [isDeleting, setIsDeleting] = useState(false);
     const [playlistIdToDelete, setPlaylistIdToDelete] = useState(null);
-
     function handleClickDeletePlaylist(playlistId) {
         setPlaylistIdToDelete(playlistId);
         setIsDeleting(true);
@@ -28,7 +28,7 @@ export function PlaylistSection() {
         setPlaylistIdToDelete(null);
     }
 
-    function handleClickPlaylist(playlist, index) {
+    function handleClickPlaylistPersonal(playlist, index) {
         const firstSong = playlist?.songs?.[0];
         const hasSongs = Boolean(firstSong);
         setSelectedPlaylist(playlist);
@@ -55,19 +55,22 @@ export function PlaylistSection() {
                     <div className="col l-12 m-12 c-12">
                         <div className="row playlist--container">
                             {playlists.map((playlist, playlistIndex) => {
+                                const isPlaylistActive = selectedPlaylist?.id === playlist.id;
+                                const isPlaylistPlaying = isPlaylistActive && isPlaying;
                                 return (
                                     <div
-                                        className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 ? "mb-30" : ""}`}
+                                        className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 ? "mb-30" : ""} `}
                                         key={`${playlist.id ?? playlistIndex}`}
-                                        onClick={() => handleClickPlaylist(playlist, playlistIndex)}
+                                        onClick={() => handleClickPlaylistPersonal(playlist, playlistIndex)}
                                     >
-                                        <div className="row__item item--playlist">
+                                        <div className={`row__item item--playlist ${isPlaylistActive ? "active" : ""} ${isPlaylistPlaying ? "playing" : ""} `}>
                                             <div className="row__item-container flex--top-left">
                                                 <div className="row__item-display br-5">
                                                     <div
                                                         className="row__item-img img--square"
-                                                        style={{ background: `url(${playlist.playlist_image}) no-repeat center center / cover` }}
+                                                        style={{ background: `url(${playlist.playlist_image}) no-repeat center center / cover`, overflow: "hidden" }}
                                                     />
+
                                                     <div className="row__item-actions">
                                                         {playlist.isdefault === true ? "" : (
                                                             <div
@@ -84,9 +87,18 @@ export function PlaylistSection() {
                                                             </div>
                                                         )}
 
-                                                        <div className="btn--play-playlist">
+                                                        <div className={`btn--play-playlist `}>
                                                             <div className="control-btn btn-toggle-play">
                                                                 <i className="bi bi-play-fill" />
+                                                            </div>
+                                                            <span className="song-note note-1">♪</span>
+                                                            <span className="song-note note-2">♫</span>
+                                                            <span className="song-note note-3">♪</span>
+                                                            <span className="song-note note-4">♫</span>
+                                                            <div className="thumb--animate" >
+                                                                <div className="thumb--animate-img" style={{ "background": "url('./../../../public/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
+
+                                                                </div>
                                                             </div>
                                                         </div>
 

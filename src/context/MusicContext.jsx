@@ -68,6 +68,11 @@ export function MusicProvider({ children }) {
       setCurrentTime(0);
     }
   }
+  //Active playlist
+  function handleClickPlaylist(playlist) {
+    
+  }
+
   //Dữ liệu các bài hát của playlist đang được chọn
   const [selectedPlaylist, setSelectedPlaylist] = useState(() => {
     try {

@@ -1,0 +1,287 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import axios from "axios";
+import { CreatePlaylist } from "./../Sidebar/CreatePlaylist/CreatePlaylist.jsx";
+import {
+    autoUpdate, //Middleware để tự động cập nhật vị trí của popup/menu khi có sự thay đổi về kích thước hoặc vị trí của phần tử tham chiếu hoặc popup/menu.
+    flip, // Middleware để tự động điều chỉnh vị trí nếu popup/menu bị tràn ra ngoài viewport.
+    offset, // Tạo khoảng cách giữa button và menu.
+    shift, //Middleware để đảm bảo popup/menu luôn nằm trong viewport bằng cách đẩy nó vào trong nếu cần thiết.
+    useFloating, //Hook chính để tính vị trí popup/menu.
+} from "@floating-ui/react";
+import { showNotificationToast } from "../../toast.js";
+import "./AddSongToPlaylist.css";
+
+export function AddSongToPlaylist({
+    songId,
+    isOpen,
+    playlists = [],
+    selectedPlaylistId = "",
+    currentPlaylistId = "",
+    onSelectPlaylist,
+    onAddSong,
+    onRemoveFromPlaylist,
+    canRemoveFromCurrentPlaylist = false,
+    isAddingSong = false,
+}) {
+    const [isAddSubmenuOpen, setIsAddSubmenuOpen] = useState(false);
+    const [playlistSearch, setPlaylistSearch] = useState("");
+    const rootRef = useRef(null); // Ref để gắn vào phần tử gốc của menu nhằm theo dõi sự kiện click bên ngoài
+    const submenuTriggerRef = useRef(null); // Ref để gắn vào button "Thêm vào playlist" nhằm làm reference cho submenu
+    const [isOpenForm, setOpenForm] = useState(false); // State để quản lý việc hiển thị form tạo playlist mới
+    function toggleOpenForm() {
+        setOpenForm(!isOpenForm);
+    }
+    const {
+        refs: menuRefs,
+        floatingStyles: menuFloatingStyles,
+    } = useFloating({
+        placement: "left-start",
+        whileElementsMounted: autoUpdate,
+        middleware: [
+            offset(8),
+            flip({
+                fallbackPlacements: ["right-start", "left-start", "bottom-start", "top-start"],
+            }),
+            shift({ padding: 8 }),
+        ],
+        transform: false,
+    });
+
+    const {
+        refs: submenuRefs,
+        floatingStyles: submenuFloatingStyles,
+    } = useFloating({
+        placement: "right-start",
+        whileElementsMounted: autoUpdate,
+        middleware: [
+            offset(8),
+            flip({
+                fallbackPlacements: ["left-start", "right-start", "bottom-start", "top-start"],
+            }),
+            shift({ padding: 8 }),
+        ],
+        transform: false,
+    });
+
+    const filteredPlaylists = useMemo(() => {
+        const searchValue = playlistSearch.trim().toLowerCase();
+
+        return playlists.filter((item) => {
+            if (item.isdefault) {
+                return false;
+            }
+
+            if (!searchValue) {
+                return true;
+            }
+
+            return String(item.playlist_name ?? "").toLowerCase().includes(searchValue);
+        });
+    }, [playlists, playlistSearch]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setIsAddSubmenuOpen(false);
+            setPlaylistSearch("");
+            menuRefs.setReference(null);
+            return;
+        }
+
+        menuRefs.setReference(rootRef.current?.parentElement ?? null);
+    }, [isOpen, menuRefs]);
+
+    useEffect(() => {
+        submenuRefs.setReference(isAddSubmenuOpen ? submenuTriggerRef.current : null);
+    }, [isAddSubmenuOpen, submenuRefs]);
+
+    useEffect(() => {
+        function handleOutsideClick(event) {
+            if (rootRef.current && !rootRef.current.contains(event.target)) {
+                setIsAddSubmenuOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
+    }, []);
+
+    if (!isOpen) {
+        return null;
+    }
+    function openSubmenu(event) {
+        event.stopPropagation();
+        setIsAddSubmenuOpen(true);
+    }
+
+
+
+
+    async function handleAddSongToPlaylist(event, playlistId) {
+        event.stopPropagation();
+        const targetPlaylistId = playlistId ?? selectedPlaylistId;
+
+        if (!targetPlaylistId) {
+            showNotificationToast("Vui lòng chọn playlist trước khi thêm");
+            return;
+        }
+
+        await onSelectPlaylist?.(songId, targetPlaylistId);
+
+        if (typeof onAddSong === "function") {
+            await onAddSong(songId, targetPlaylistId);
+            setIsAddSubmenuOpen(false);
+            return;
+        }
+
+        const playlistIdNumber = Number(targetPlaylistId);
+        if (!playlistIdNumber || !songId) {
+            showNotificationToast("Vui lòng chọn playlist trước khi thêm");
+            return;
+        }
+
+        try {
+            await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
+                params: { playlistId: playlistIdNumber, songId },
+            });
+            showNotificationToast(`Đã thêm bài hát vào playlist "${targetPlaylistId}"`);
+            setIsAddSubmenuOpen(false);
+        } catch (error) {
+            console.error("Add song to playlist failed:", error);
+            showNotificationToast("Không thể thêm bài hát vào playlist");
+        }
+    }
+
+    function handleCreatePlaylistClick(event) {
+        event.stopPropagation();
+        toggleOpenForm();
+    }
+
+    async function handleRemoveFromCurrentPlaylist(event) {
+        event.stopPropagation();
+
+        if (typeof onRemoveFromPlaylist === "function" && currentPlaylistId) {
+            await onRemoveFromPlaylist(songId, currentPlaylistId);
+            setIsAddSubmenuOpen(false);
+            return;
+        }
+
+        // TODO: connect remove-from-current-playlist logic here
+    }
+
+    return (
+        <div
+            className="option__log-out open playlist__menu-popup"
+            ref={rootRef}
+            style={{ ...menuFloatingStyles }}
+            onClick={(event) => {
+                event.stopPropagation();
+
+            }}
+        >
+            <button
+                type="button"
+                className="log-out__action playlist__menu-title"
+                ref={submenuTriggerRef}
+                onClick={openSubmenu}
+                aria-haspopup="menu"
+                aria-expanded={isAddSubmenuOpen}
+                disabled={isAddingSong}
+            >
+                <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
+                    <i className="bi bi-music-note-list log-out__icon" />
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Thêm vào playlist</span>
+                    <i className="bi bi-chevron-right" style={{ fontSize: "1.4rem", marginLeft: "10px", opacity: 0.8 }} />
+                </span>
+            </button>
+
+            {canRemoveFromCurrentPlaylist ? (
+                <button
+                    type="button"
+                    className="log-out__action playlist__menu-title"
+                    onClick={handleRemoveFromCurrentPlaylist}
+                    disabled={isAddingSong}
+                >
+                    <i className="bi bi-trash3 log-out__icon" />
+                    <span>Xóa khỏi playlist này</span>
+                </button>
+            ) : null}
+
+            <div
+                className={`playlist__menu-panel ${isAddSubmenuOpen ? "open" : ""}`}
+                ref={submenuRefs.setFloating}
+                role="menu"
+                aria-label="Thêm vào playlist"
+                style={{ ...submenuFloatingStyles, right: "auto", width: "280px" }}
+                onClick={(event) => event.stopPropagation()}
+                onMouseEnter={openSubmenu}
+            // onMouseLeave={scheduleCloseSubmenu}
+            >
+                <div className="playlist__menu-field" style={{ paddingTop: 12 }}>
+                    <input
+                        type="text"
+                        value={playlistSearch}
+                        onChange={(event) => setPlaylistSearch(event.target.value)}
+                        onClick={(event) => event.stopPropagation()}
+                        onFocus={openSubmenu}
+                        placeholder="Tìm playlist"
+                        aria-label="Tìm playlist"
+                        style={{
+                            width: "100%",
+                            height: "38px",
+                            borderRadius: "10px",
+                            border: "1px solid var(--border-primary)",
+                            padding: "0 12px",
+                            background: "color-mix(in srgb, var(--bg-content-color) 86%, transparent)",
+                            color: "var(--text-color)",
+                            outline: "none",
+                        }}
+                    />
+                </div>
+
+                <button
+                    type="button"
+                    className="playlist__menu-option"
+                    onClick={handleCreatePlaylistClick}
+                    disabled={isAddingSong}
+                    style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}
+                >
+                    <i className="bi bi-plus-circle" style={{ fontSize: "1.4rem" }} />
+                    <span className="playlist__menu-option-title">Tạo playlist mới</span>
+                </button>
+                {
+                    isOpenForm && (
+                        <CreatePlaylist
+                            onClose={() => setOpenForm(false)}
+                            // onSuccess={onPlaylistsChanged}
+                        />
+                    )
+                }
+                <div className="playlist__menu-options-scroll">
+                    {filteredPlaylists.length === 0 ? (
+                        <div className="playlist__menu-empty">
+                            {playlistSearch.trim() ? "Không tìm thấy playlist nào" : "Chưa có playlist nào"}
+                        </div>
+                    ) : (
+                        filteredPlaylists.map((item) => {
+                            const isSelected = String(item.id) === String(selectedPlaylistId);
+
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className={`playlist__menu-option ${isSelected ? "is-selected" : ""}`}
+                                    onClick={(event) => handleAddSongToPlaylist(event, item.id)}
+                                    disabled={isAddingSong}
+                                >
+                                    <span className="playlist__menu-option-title">{item.playlist_name}</span>
+                                </button>
+                            );
+                        })
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

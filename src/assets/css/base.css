@@ -783,6 +783,10 @@ a {
 .play-song--actions .btn-toggle-play i {
     color: var(--white-color);
 }
+.play-song--actions:hover .btn-toggle-play{
+    color: var(--link-text-hover);
+    border-color: var(--link-text-hover);
+}
 
 
 /* Playlist info */

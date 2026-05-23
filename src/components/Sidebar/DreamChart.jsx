@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
-import { AddSongToPlaylist } from "../AddSongToPlaylist";
+import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 export function DreamChart() {
     const [topSongs, setTopSongs] = useState([]);
     const [userPlaylists, setUserPlaylists] = useState([]);
-    const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
+    const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({}); //
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     const playlistMenuRef = useRef(null);
     const {

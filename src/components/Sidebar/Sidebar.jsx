@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { NavLink } from "react-router-dom"
-import { CreatePlaylist } from "./CreatePlaylist";
+import { CreatePlaylist } from "./CreatePlaylist/CreatePlaylist.jsx";
 export function Sidebar({ onPlaylistsChanged }) {
-    const [isActive, setActive] = useState(false);
     const [isOpenForm, setOpenForm] = useState(false);
 
     function toggleOpenForm() {

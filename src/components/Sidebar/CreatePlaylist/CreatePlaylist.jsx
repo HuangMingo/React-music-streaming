@@ -1,8 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import { showNotificationToast } from "../../toast.js";
+import { showNotificationToast } from "../../../toast.js";
 import "./CreatePlaylist.css";
-import { useAuthContext } from "../../context/AuthContext.jsx";
+import { useAuthContext } from "../../../context/AuthContext.jsx";
 
 export function CreatePlaylist({ onClose, onSuccess }) {
     const [playlistName, setPlaylistName] = useState("");

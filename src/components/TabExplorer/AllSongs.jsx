@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
-import { AddSongToPlaylist } from "../AddSongToPlaylist";
+import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 // Component: AllSongs
 // Chức năng: Hiển thị các bài hát gợi ý, cho phép mở menu "Thêm vào playlist"
 // Các điểm chính:
@@ -32,8 +32,8 @@ export function AllSongs() {
     const [userPlaylists, setUserPlaylists] = useState([]);
     const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
-    const playlistMenuRef = useRef(null);
-    const isMountedRef = useRef(true);
+    const playlistMenuRef = useRef(null); // Ref để click ngoài menu và đóng menu
+    const isMountedRef = useRef(true); // Ref để đánh dấu component vẫn mounted, tránh setState sau unmount 
     const fetchSong = function () {
         setIsLoading(true);
         axios

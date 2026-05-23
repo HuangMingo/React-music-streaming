@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
-import { AddSongToPlaylist } from "../../AddSongToPlaylist.jsx";
+import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx";
 import axios from "axios";
 export function PlayMusic({ playlist }) {
     const { currentSong,
