@@ -75,6 +75,61 @@ export function Player() {
     const [isFavouriteCurrentSong, setIsFavouriteCurrentSong] = useState(false);
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
     const songs = selectedPlaylist?.songs || [];
+    const [openPlayerPopup, setOpenPlayerPopup] = useState(false);
+    function handleOpenPlayerPopup(event) {
+        const player = event.currentTarget;
+        //Kiểm tra nếu click vào nút heart hoặc "Khác" thì không mở popup
+        const heartBtn = event.target.closest(".btn--heart");
+        const threeDotsBtn = event.target.closest(".btn-three-dots");
+        //Kiểm tra nếu click vào các nút điều khiển  thì không mở popup
+        const randomBtn = event.target.closest(".btn-random");
+        const prevBtn = event.target.closest(".btn-prev");
+        const togglePlayBtn = event.target.closest(".btn-toggle-play");
+        const nextBtn = event.target.closest(".btn-next");
+        const repeatBtn = event.target.closest(".btn-repeat");
+        //Kiểm tra nếu click vào thanh tiến trình thì không mở popup
+        const volumeBtn = event.target.closest(".btn-volume");
+        const progressNode = event.target.closest(".progress-block");
+        const volumeNode = event.target.closest(".player__volume-progress");
+        const popupNode = event.target.closest(".player__popup");
+
+        if (
+            heartBtn ||
+            randomBtn ||
+            prevBtn ||
+            togglePlayBtn ||
+            nextBtn ||
+            repeatBtn ||
+            progressNode ||
+            volumeNode ||
+            volumeBtn ||
+            popupNode
+        ) {
+            return;
+        }
+        setOpenPlayerPopup(true);
+        // if (!player.classList.contains("open-popup")) {
+        //     setOpenPlayerPopup(true);
+        // }
+        
+    }
+    function handleClosePlayerPopup(event) {
+        event.stopPropagation();
+        setOpenPlayerPopup(false);
+    }
+    async function handleToggleFullscreen(event) {
+    event.stopPropagation();
+
+    try {
+        if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+        } else {
+            await document.exitFullscreen();
+        }
+    } catch (error) {
+        console.error("Fullscreen failed:", error);
+    }
+}
     //Khôi phục trạng thái phát nhạc khi reload trang nếu có dữ liệu hợp lệ trong localStorage
     useEffect(() => {
         if (audioRef.current && currentSong?.audio) {
@@ -254,8 +309,8 @@ export function Player() {
 
     return (
         <>
-            < div className={`player grid${isPlaying ? " playing" : ""}`} >
-                <div className="player__container">
+            < div className={`player grid ${isPlaying ? " playing" : ""} ${openPlayerPopup ? "open-popup" : ""}`} >
+                <div className="player__container" onClick={(e) => handleOpenPlayerPopup(e)}>
                     <div className="player__container-song">
                         <div className={`player__song-info media${isPlaying ? " playing" : ""}`}>
                             <div className="media__left">
@@ -322,10 +377,10 @@ export function Player() {
                                 <div className="player__song-options">
                                     <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}
                                         title={favouriteSongIds?.has(currentSong?.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}
-                                        >
+                                    >
                                         <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong?.id) ? "-fill" : ""} primary`} />
                                     </div>
-                                    <div className="player__song-btn option-btn" onClick={(event) => handleToggleSongMenu(event, currentSong.id)} ref={openSongMenuId === currentSong?.id ? playlistMenuRef : null}
+                                    <div className="player__song-btn option-btn btn-three-dots" onClick={(event) => handleToggleSongMenu(event, currentSong.id)} ref={openSongMenuId === currentSong?.id ? playlistMenuRef : null}
                                         title="Khác">
                                         <i className="btn--icon bi bi-three-dots" />
                                     </div>
@@ -345,7 +400,7 @@ export function Player() {
                     <div className="player__control">
                         <div className="player__control-btn">
                             <div className={`control-btn btn-random is-small${isRandom ? " active" : ""}`} onClick={toggleRandom}
-                                title = {
+                                title={
                                     isRandom ? "Tắt phát ngẫu nhiên" : "Bật phát ngẫu nhiên"
                                 }
                             >
@@ -365,7 +420,7 @@ export function Player() {
                                 <i className="bi bi-skip-end-fill" />
                             </div>
                             <div className={`control-btn btn-repeat is-small is-medium${isRepeat ? " active" : ""}`} onClick={toggleRepeat}
-                                title = {
+                                title={
                                     isRepeat ? "Tắt lặp lại" : "Bật lặp lại"
                                 }
                             >
@@ -392,13 +447,10 @@ export function Player() {
                     </div>
                     <div className="player__options hide-on-mobile">
                         <div className="player__options-container">
-                            <div className="player__options-btn option-btn hide-on-tablet-mobile">
-                                <i className="bi bi-camera-video btn--icon" />
-                            </div>
-                            <div className="player__options-btn option-btn hide-on-tablet-mobile">
+                            <div className="player__options-btn option-btn hide-on-tablet-mobile" title="Xem lời bài hát" onClick = {(e) => handleOpenPlayerPopup(e)}>
                                 <i className="bi bi-mic btn--icon" />
                             </div>
-                            <div className="player__options-btn volume option-btn">
+                            <div className="player__options-btn volume option-btn btn-volume">
                                 <i className="bi bi-volume-up btn--icon" />
                             </div>
                             <div className="player__volume-progress">
@@ -449,33 +501,17 @@ export function Player() {
                     <div className="player__popup-header">
                         <div className="player__popup-logo">
                             <img
-                                src="./assets/img/logos/small-logo.svg"
+                                src="./assets/img/logos/main-logo.png"
                                 alt="Logo"
                                 className="player__logo-img"
                             />
                         </div>
-                        <div className="player__popup-container">
-                            <ul className="player__popup-menu">
-                                <li className="player__popup-item active">
-                                    <a href="#">Danh Sách Phát</a>
-                                </li>
-                                <li className="player__popup-item">
-                                    <a href="#">Karaoke</a>
-                                </li>
-                                <li className="player__popup-item hide-on-mobile">
-                                    <a href="#">Lời Bài Hát</a>
-                                </li>
-                            </ul>
-                        </div>
                         <div className="player__popup-action">
                             <ul className="popup__action-menu">
-                                <li className="popup__action-btn hide-on-tablet-mobile">
+                                <li className="popup__action-btn hide-on-tablet-mobile" onClick={handleToggleFullscreen}>
                                     <i className="bi bi-arrows-angle-expand popup__action-btn-icon" />
                                 </li>
-                                <li className="popup__action-btn hide-on-tablet-mobile">
-                                    <i className="bi bi-gear popup__action-btn-icon" />
-                                </li>
-                                <li className="popup__action-btn btn--pop-down">
+                                <li className="popup__action-btn btn--pop-down" onClick={(e) => handleClosePlayerPopup(e)}>
                                     <i className="bi bi-chevron-down popup__action-btn-icon" />
                                 </li>
                             </ul>
@@ -486,14 +522,25 @@ export function Player() {
                             className="player__popup-cd-img"
                             style={{
                                 background:
-                                    'url("./assets/img/music/listSong1/song1.jpg") no-repeat center center / cover'
+                                    `url(${currentSong?.image || "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg"}) no-repeat center center / cover`
                             }}
                         />
                     </div>
                     <div className="player__popup-cd-info">
                         <h4>Now playing</h4>
-                        <h2 className="is-twoline" />
-                        <h3 />
+                        <h2 className="is-twoline">{currentSong?.title || "Unknown Song"}</h2>
+                        <div className="player__song-author info__author">
+                            {
+                                currentSong?.artist_names?.map((artist, index) => {
+                                    return (
+                                        <span key={index}>
+                                            <a href="#" className="is-ghost">{artist}</a>
+                                            {index < currentSong?.artist_names?.length - 1 && ", "}
+                                        </span>
+                                    )
+                                })
+                            }
+                        </div>
                     </div>
                     <div className="player__popup-footer">
                         <div className="player__container-song hide-on-mobile">
@@ -504,7 +551,7 @@ export function Player() {
                                             className="thumb-img"
                                             style={{
                                                 background:
-                                                    'url("https://i.ytimg.com/vi/kTJczUoc26U/maxresdefault.jpg") no-repeat center center / cover'
+                                                    `url(${currentSong?.image || "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg"}) no-repeat center center / cover`
                                             }}
                                         />
                                         <svg
@@ -542,7 +589,7 @@ export function Player() {
                                         <div className="player__song-title info__title">
                                             <div className="player__title-animate">
                                                 <div className="title__item">{currentSong?.title || 'Unknown Song'}</div>
-                                                <div className="title__item">{currentSong?.title || 'Unknown Song'}</div>
+
                                             </div>
                                         </div>
                                         <div className="player__song-author info__author">{currentSong?.artist_names?.join(', ') || 'Unknown Artist'}</div>
@@ -599,10 +646,10 @@ export function Player() {
                         </div>
                         <div className="player__options hide-on-mobile">
                             <div className="player__options-container">
-                                <div className="player__options-btn option-btn hide-on-tablet-mobile">
+                                {/* <div className="player__options-btn option-btn hide-on-tablet-mobile" >
                                     <i className="bi bi-camera-video btn--icon" />
-                                </div>
-                                <div className="player__options-btn option-btn hide-on-tablet-mobile">
+                                </div> */}
+                                <div className="player__options-btn option-btn hide-on-tablet-mobile" onClick={(e) => handleOpenPlayerPopup(e)}>
                                     <i className="bi bi-mic btn--icon" />
                                 </div>
                                 <div className="player__options-btn volume option-btn">
