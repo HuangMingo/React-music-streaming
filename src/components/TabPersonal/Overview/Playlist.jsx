@@ -2,9 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext";
 import { useAuthContext } from "../../../context/AuthContext";
-import { DeletePlaylistDialog } from "../DeletePlaylistDialog";
+import { DeletePlaylistDialog } from "./../../DeletePlaylistDialog/DeletePlaylistDialog.jsx";
 export function Playlist({ playlists = [], onPlaylistsChanged }) {
-    const { setPlaylistIndex, setSelectedPlaylist, setCurrentTime, setCurrentSong, setIsPlaying } = useMusicContext();
+    const {
+        selectedPlaylist,
+        setSelectedPlaylist,
+        setCurrentTime,
+        setCurrentSong,
+        setIsPlaying,
+        isPlaying
+    } = useMusicContext();
     const { currentUser } = useAuthContext();
     const navigate = useNavigate();
     //Phân trang cho playlist
@@ -144,13 +151,16 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                         <div className="playlist__page" key={`playlist-page-${pageIndex}`}>
                                             {pagePlaylists.map((playlist, playlistIndex) => {
                                                 const absoluteIndex = pageIndex * itemsPerPage + playlistIndex;
+                                                const isPlaylistActive = selectedPlaylist?.id === playlist.id;
+                                                const isPlaylistPlaying = isPlaylistActive && isPlaying;
                                                 return (
+
                                                     <div
                                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`}
                                                         key={`${absoluteIndex}`}
                                                         onClick={() => handleClickPlaylistPersonal(playlist, absoluteIndex)}
                                                     >
-                                                        <div className="row__item item--playlist">
+                                                        <div className={`row__item item--playlist ${isPlaylistActive ? "active" : ""} ${isPlaylistPlaying ? "playing" : ""}`}>
                                                             <div className="row__item-container flex--top-left">
                                                                 <div className="row__item-display br-5">
                                                                     <div className="row__item-img img--square" style={
@@ -174,11 +184,21 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                                 </div>
                                                                             )
                                                                         }
-                                                                        <div className="btn--play-playlist">
+                                                                        <div className={`btn--play-playlist `}>
                                                                             <div className="control-btn btn-toggle-play">
-                                                                                <i className="bi bi-play-fill"></i>
+                                                                                <i className="bi bi-play-fill" />
+                                                                            </div>
+                                                                            <span className="song-note note-1">♪</span>
+                                                                            <span className="song-note note-2">♫</span>
+                                                                            <span className="song-note note-3">♪</span>
+                                                                            <span className="song-note note-4">♫</span>
+                                                                            <div className="thumb--animate" >
+                                                                                <div className="thumb--animate-img" style={{ "background": "url('./../../../public/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
+
+                                                                                </div>
                                                                             </div>
                                                                         </div>
+                                                        
                                                                         {
                                                                             playlist.isdefault != null && playlist.isdefault === true ? '' : (
                                                                                 <div className="action-btn">

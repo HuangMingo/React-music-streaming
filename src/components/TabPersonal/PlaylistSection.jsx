@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { useMusicContext } from "../../context/MusicContext";
-import { DeletePlaylistDialog } from "./DeletePlaylistDialog";
+import { DeletePlaylistDialog } from "./../../components/DeletePlaylistDialog/DeletePlaylistDialog.jsx";
 import "./../../../public/assets/img/SongActiveAnimation/icon-playing.gif";
 
 export function PlaylistSection() {
     const { playlists, onPlaylistsChanged } = useOutletContext();
     const { currentUser } = useAuthContext();
+    const outletContext = useOutletContext();
+    console.log("PlaylistSection outletContext:", outletContext);
     const {
         selectedPlaylist,
         setSelectedPlaylist,

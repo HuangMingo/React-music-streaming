@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { useMusicContext } from "../../context/MusicContext";
 import { DeleteSongFromPlaylistDialog } from "./DeleteSongFromPlaylistDialog";
-
+import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 function formatDuration(durationSeconds) {
     const duration = Number(durationSeconds) || 0;
     const minutes = Math.floor(duration / 60)
@@ -26,36 +26,42 @@ export function SongSection() {
         favouriteSongIds,
         toggleFavouriteSong,
         handleClickSong,
+        songToRemove,
+        setSongToRemove,
+        handleOpenRemoveSongDialog,
+        handleCloseRemoveSongDialog,
+        playlistMenuRef,
+        handleSelectTargetPlaylist,
+        selectedPlaylistBySong,
+        userPlaylists,
+        isAddingSong,
+        handleSongRemoved
     } = useMusicContext();
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
+    //Mở menu khi click vào 3 chấm của bài hát
+    function handleToggleSongMenu(event, songId) {
+        event.stopPropagation();
 
-    const [songToRemove, setSongToRemove] = useState(null);
+        setOpenSongMenuId((prevSongId) =>
+            prevSongId === songId ? null : songId
+        );
+    }
+     //--------------Xử lí khi click bên ngoài----------
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
+                setOpenSongMenuId(null);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
     const songs = selectedPlaylist?.songs ?? [];
 
-    function handleOpenRemoveSongDialog(event, song) {
-        event.preventDefault();
-        event.stopPropagation();
-        setSongToRemove(song);
-    }
-
-    function handleCloseRemoveSongDialog() {
-        setSongToRemove(null);
-    }
-
-    function handleSongRemoved(removedSong) {
-        const nextSongs = (selectedPlaylist?.songs ?? []).filter((song) => song.id !== removedSong.id);
-
-        setSelectedPlaylist((prevPlaylist) => {
-            if (!prevPlaylist) {
-                return prevPlaylist;
-            }
-
-            return {
-                ...prevPlaylist,
-                songs: nextSongs,
-            };
-        });
-        handleCloseRemoveSongDialog();
-    }
+   
 
     return (
         <>
@@ -90,7 +96,7 @@ export function SongSection() {
                                 {songs.length === 0 ? (
                                     <div className="box--no-content">
                                         <div className="no-content-image" />
-                                        <span className="no-content-text">Chưa có bài hát trong playlist được chọn.</span>
+                                        <span className="no-content-text">Chưa có bài hát nào trong playlist này!</span>
                                     </div>
                                 ) : (
                                     songs.map((song, index) => {
@@ -153,23 +159,28 @@ export function SongSection() {
                                                         <div className="playlist__song-btn btn--mic option-btn">
                                                             <i className="btn--icon song__icon bi bi-mic-fill" />
                                                         </div>
-                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
+                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}
+                                                            title={favouriteSongIds.has(song.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}>
                                                             <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? "-fill" : ""} primary`} />
                                                         </div>
-                                                        <div className="playlist__song-btn option-btn">
+                                                        <div className="playlist__song-btn option-btn" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
+                                                                title="Khác"
+                                                            >
                                                             <i className="btn--icon bi bi-three-dots" />
+                                                            <AddSongToPlaylist
+                                                                song={song}
+                                                                isOpen={openSongMenuId === song.id}
+                                                                playlists={userPlaylists}
+                                                                selectedPlaylist={selectedPlaylistBySong[song.id] ?? ""}
+                                                                onCloseMenu={() => setOpenSongMenuId(null)}
+                                                                onSelectPlaylist={handleSelectTargetPlaylist}
+                                                                canRemoveFromCurrentPlaylist={true}
+                                                                isAddingSong={isAddingSong}
+                                                            />
                                                         </div>
                                                     </div>
 
-                                                    <button
-                                                        type="button"
-                                                        className="playlist__song-btn playlist__song-btn--remove option-btn"
-                                                        onClick={(event) => handleOpenRemoveSongDialog(event, song)}
-                                                        aria-label={`Xóa ${song.title} khỏi playlist`}
-                                                        title="Xóa khỏi playlist"
-                                                    >
-                                                        <i className="btn--icon bi bi-trash3" />
-                                                    </button>
+                                                  
                                                 </div>
                                             </div>
                                         );
@@ -183,7 +194,7 @@ export function SongSection() {
 
             {songToRemove ? (
                 <DeleteSongFromPlaylistDialog
-                    playlistId={selectedPlaylist?.id}
+                    playlist={selectedPlaylist}
                     song={songToRemove}
                     onClose={handleCloseRemoveSongDialog}
                     onDeleted={handleSongRemoved}

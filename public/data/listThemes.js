@@ -1,3 +1,4 @@
+import {} from "../assets/img/modalThemes/modalTheme1/theme1.jpg"
 const listThemes = [
     {
         type: 'Chủ Đề',
@@ -5,7 +6,7 @@ const listThemes = [
             {
                 name: 'Zing Music Awards',
                 image: '../assets/img/modalThemes/modalTheme1/theme1.jpg',
-                backgroundImage: '../assets/img/themeBgs/listThem1e1/theme1.jpg',
+                backgroundImage: '../assets/img/themeBgs/listTheme1/theme1.svg',
                 colors: {
                     
                     bgContentColor: "#ffffff1a",

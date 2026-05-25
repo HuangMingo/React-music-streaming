@@ -659,7 +659,9 @@ a {
     transform: scale(1.12, 1.12);
 }
 
-
+.row__item.playing.active .overlay{
+    visibility: visible;
+}
 .row__item-actions {
     position: absolute;
     top: 0;
@@ -672,6 +674,9 @@ a {
     align-items: center;
     justify-content: space-evenly;
     visibility: hidden;
+}
+.row__item.playing.active .row__item-actions{
+    visibility: visible;
 }
 
 

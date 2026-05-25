@@ -22,7 +22,19 @@ export function AllSongs() {
         handleClickSong,
         favouriteSongIds,
         setFavouriteSongIds,
-        toggleFavouriteSong } = useMusicContext();
+        toggleFavouriteSong,
+        playlistMenuRef,
+        handleSelectTargetPlaylist,
+        selectedPlaylistBySong, } = useMusicContext();
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
+    //Mở menu khi click vào 3 chấm của bài hát
+    function handleToggleSongMenu(event, songId) {
+        event.stopPropagation();
+
+        setOpenSongMenuId((prevSongId) =>
+            prevSongId === songId ? null : songId
+        );
+    }
     const { currentUser } = useAuthContext();
     const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const [allSongs, setAllSongs] = useState([]);
@@ -30,9 +42,6 @@ export function AllSongs() {
     const [isLoading, setIsLoading] = useState(false);
     // Danh sách playlist do người dùng tạo (dùng để render menu thêm bài)
     const [userPlaylists, setUserPlaylists] = useState([]);
-    const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
-    const [openSongMenuId, setOpenSongMenuId] = useState(null);
-    const playlistMenuRef = useRef(null); // Ref để click ngoài menu và đóng menu
     const isMountedRef = useRef(true); // Ref để đánh dấu component vẫn mounted, tránh setState sau unmount 
     const fetchSong = function () {
         setIsLoading(true);
@@ -69,17 +78,6 @@ export function AllSongs() {
         return columns;
     }, [allSongs]);
 
-    function handleToggleSongMenu(event, songId) {
-        event.stopPropagation();
-        setOpenSongMenuId((prevSongId) => (prevSongId === songId ? null : songId));
-    }
-
-    function handleSelectTargetPlaylist(songId, playlistId) {
-        setSelectedPlaylistBySong((prev) => ({
-            ...prev,
-            [songId]: playlistId,
-        }));
-    }
 
     async function loadUserPlaylists() {
         if (!currentUser?.id) {
@@ -140,7 +138,7 @@ export function AllSongs() {
     }, [allSongs, currentUser?.id]);
 
     useEffect(() => {
-                
+
         // Khi user thay đổi (login/logout), tải lại playlist
         if (!currentUser?.id) {
             setUserPlaylists([]);
@@ -248,10 +246,17 @@ export function AllSongs() {
                                                     <div className="playlist__song-btn btn--mic option-btn">
                                                         <i className="btn--icon song__icon bi bi-mic-fill"></i>
                                                     </div>
-                                                    <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
+                                                    <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}
+                                                        title={
+                                                            favouriteSongIds.has(song.id)
+                                                                ? "Bỏ thích bài hát"
+                                                                : "Thêm vào bài hat yêu thích"
+                                                        }
+                                                    >
                                                         <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
                                                     </div>
-                                                    <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
+                                                    <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
+                                                         title="Khác">
                                                         <i className="btn--icon bi bi-three-dots"></i>
                                                         <AddSongToPlaylist
                                                             songId={song.id}
@@ -259,8 +264,8 @@ export function AllSongs() {
                                                             playlists={userPlaylists}
                                                             selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
                                                             onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                onCloseMenu={() => setOpenSongMenuId(null)}
-                                                                onPlaylistsChanged={loadUserPlaylists}
+                                                            onCloseMenu={() => setOpenSongMenuId(null)}
+                                                            onPlaylistsChanged={loadUserPlaylists}
                                                         />
                                                     </div>
                                                 </div>

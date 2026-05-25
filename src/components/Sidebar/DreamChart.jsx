@@ -6,21 +6,30 @@ import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 export function DreamChart() {
     const [topSongs, setTopSongs] = useState([]);
     const [userPlaylists, setUserPlaylists] = useState([]);
-    const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({}); //
-    const [openSongMenuId, setOpenSongMenuId] = useState(null);
-    const playlistMenuRef = useRef(null);
+
     const {
         currentSong,
         isPlaying,
         favouriteSongIds,
         setFavouriteSongIds,
         toggleFavouriteSong,
-        handleClickSong
+        handleClickSong,
+        playlistMenuRef,
+        handleSelectTargetPlaylist,
+        selectedPlaylistBySong,
     } = useMusicContext();
     const { currentUser } = useAuthContext();
     const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const isMountedRef = useRef(true);
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
+    //Mở menu khi click vào 3 chấm của bài hát
+    function handleToggleSongMenu(event, songId) {
+        event.stopPropagation();
 
+        setOpenSongMenuId((prevSongId) =>
+            prevSongId === songId ? null : songId
+        );
+    }
     useEffect(() => {
         axios
             .get("http://localhost:3000/api/songs/top10-most-played-songs")
@@ -41,6 +50,7 @@ export function DreamChart() {
         loadUserPlaylists();
     }, [currentUser?.id]);
 
+     //--------------Xử lí khi click bên ngoài----------
     useEffect(() => {
         function handleClickOutside(event) {
             if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
@@ -49,21 +59,10 @@ export function DreamChart() {
         }
 
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
-
-    function handleToggleSongMenu(event, songId) {
-        event.stopPropagation();
-        setOpenSongMenuId((prevSongId) => (prevSongId === songId ? null : songId));
-    }
-
-    function handleSelectTargetPlaylist(songId, playlistId) {
-        setSelectedPlaylistBySong((prev) => ({
-            ...prev,
-            [songId]: playlistId,
-        }));
-    }
-
     async function loadUserPlaylists() {
         if (!currentUser?.id) {
             setUserPlaylists([]);
@@ -149,15 +148,13 @@ export function DreamChart() {
                                                             <div className="playlist__song-info media__left">
                                                                 <div className="playlist__song-rank">
                                                                     <div className={`playlist__rank-number
-                                                                            ${songIndex === 0 && 'is-outline--blue'}
-                                                                            ${songIndex === 1 && 'is-outline--green'}
-                                                                            ${songIndex === 2 && 'is-outline--red'}
-                                                                            ${songIndex > 2 && 'is-outline--text'}`}>
+                                                                                ${songIndex === 0 && 'is-outline--blue'}
+                                                                                ${songIndex === 1 && 'is-outline--green'}
+                                                                                ${songIndex === 2 && 'is-outline--red'}
+                                                                                ${songIndex > 2 && 'is-outline--text'}`}>
                                                                         {songIndex + 1}
                                                                     </div>
-                                                                    <div className="playlist__rank-icon">
-                                                                        <i className="bi bi-dash-lg"></i>
-                                                                    </div>
+
                                                                     <div className="playlist__song-thumb media__thumb mr-10" style={
                                                                         {
                                                                             background: `url(${song.image}) no-repeat center center / cover`
@@ -211,10 +208,13 @@ export function DreamChart() {
                                                                 <div className="playlist__song-btn btn--mic option-btn">
                                                                     <i className="btn--icon song__icon bi bi-mic-fill"></i>
                                                                 </div>
-                                                                <div className="playlist__song-btn btn--heart option-btn" onClick={(e) => toggleFavouriteSong(e, song.id)}>
+                                                                <div className="playlist__song-btn btn--heart option-btn" onClick={(e) => toggleFavouriteSong(e, song.id)}
+                                                                    title={favouriteSongIds.has(song.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}>
                                                                     <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
                                                                 </div>
-                                                                <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
+                                                                <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
+                                                                        title="Khác"
+                                                                    >
                                                                     <i className="btn--icon bi bi-three-dots"></i>
                                                                     <AddSongToPlaylist
                                                                         songId={song.id}

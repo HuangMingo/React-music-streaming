@@ -278,67 +278,7 @@ export function Header({ onClose }) {
                                 </svg>
                             </div>
                         </li>
-                        <li className="header__nav-item hide-on-mobile">
-                            <div className="header__nav-btn btn--nav-setting" >
-                                <i className="bi bi-gear header__nav-icon" onClick={() => setOpen(!isOpen)} />
-                                <div className={`setting__menu ${isOpen ? "open" : ""}`}  >
-                                    <div className="setting__nav">
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-shield-lock setting__item-icon" />
-                                                <span>Danh sách chặn</span>
-                                            </div>
-                                        </div>
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-badge-hd setting__item-icon" />
-                                                <span>Chất lượng nhạc</span>
-                                            </div>
-                                            <i className="bi bi-chevron-right setting__item-icon" />
-                                        </div>
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-play-circle setting__item-icon" />
-                                                <span>Trình phát nhạc</span>
-                                            </div>
-                                            <i className="bi bi-chevron-right setting__item-icon" />
-                                        </div>
-                                    </div>
-                                    <div className="setting__subnav">
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-exclamation-circle setting__item-icon" />
-                                                <span>Giới thiệu</span>
-                                            </div>
-                                        </div>
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-flag setting__item-icon" />
-                                                <span>Góp ý</span>
-                                            </div>
-                                        </div>
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-telephone setting__item-icon" />
-                                                <span>Liên hệ</span>
-                                            </div>
-                                        </div>
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-badge-ad setting__item-icon" />
-                                                <span>Quảng cáo</span>
-                                            </div>
-                                        </div>
-                                        <div className="setting__item">
-                                            <div className="setting__item-content">
-                                                <i className="bi bi-file-text setting__item-icon" />
-                                                <span>Thỏa thuận sử dụng</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
+                        
                         {!isAuthenticated ? (
                             <>
                                 <li className="header__nav-item">

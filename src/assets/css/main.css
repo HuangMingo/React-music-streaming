@@ -2186,6 +2186,7 @@ label .container__header-icon {
     font-size: 1.2rem;
     text-align: center;
     color: var(--text-color);
+    z-index: 5;
 }
 
 
@@ -2701,8 +2702,6 @@ label .container__header-icon {
     border-radius: 8px;
 }
 
-
-.explore__slide-img {}
 
 .row__item-display:hover .row__item-img.explore__slide-img {
     transform: none;

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useMusicContext } from "../context/MusicContext";
 import { useAuthContext } from "../context/AuthContext";
 import axios from "axios";
+import { AddSongToPlaylist } from "./AddSongToPlaylist/AddSongToPlaylist.jsx";
 import { showNotificationToast } from "../toast";
 const formatTime = (seconds = 0) => {
     const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
@@ -29,7 +30,34 @@ export function Player() {
         favouriteSongIds,
         setIsFavouriteSongIds,
         toggleFavouriteSong,
+        playlistMenuRef,
+        handleSelectTargetPlaylist,
+        selectedPlaylistBySong,
+        userPlaylists,
+        isAddingSong,
     } = useMusicContext();
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
+    //--------------Xử lí khi click bên ngoài----------
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
+                setOpenSongMenuId(null);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+    //Mở menu khi click vào 3 chấm của bài hát
+    function handleToggleSongMenu(event, songId) {
+        event.stopPropagation();
+
+        setOpenSongMenuId((prevSongId) =>
+            prevSongId === songId ? null : songId
+        );
+    }
     const { currentUser } = useAuthContext();
     const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const audioRef = useRef();
@@ -292,32 +320,55 @@ export function Player() {
                             </div>
                             <div className="media__right hide-on-tablet-mobile">
                                 <div className="player__song-options">
-                                    <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}>
+                                    <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}
+                                        title={favouriteSongIds?.has(currentSong?.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}
+                                        >
                                         <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong?.id) ? "-fill" : ""} primary`} />
                                     </div>
-                                    <div className="player__song-btn option-btn">
+                                    <div className="player__song-btn option-btn" onClick={(event) => handleToggleSongMenu(event, currentSong.id)} ref={openSongMenuId === currentSong?.id ? playlistMenuRef : null}
+                                        title="Khác">
                                         <i className="btn--icon bi bi-three-dots" />
                                     </div>
+                                    <AddSongToPlaylist
+                                        songId={currentSong?.id}
+                                        isOpen={openSongMenuId === currentSong?.id}
+                                        playlists={userPlaylists}
+                                        selectedPlaylistId={selectedPlaylistBySong[currentSong?.id] ?? ""}
+                                        onCloseMenu={() => setOpenSongMenuId(null)}
+                                        onSelectPlaylist={handleSelectTargetPlaylist}
+                                        isAddingSong={isAddingSong}
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="player__control">
                         <div className="player__control-btn">
-                            <div className={`control-btn btn-random is-small${isRandom ? " active" : ""}`} onClick={toggleRandom}>
+                            <div className={`control-btn btn-random is-small${isRandom ? " active" : ""}`} onClick={toggleRandom}
+                                title = {
+                                    isRandom ? "Tắt phát ngẫu nhiên" : "Bật phát ngẫu nhiên"
+                                }
+                            >
                                 <i className="bi bi-shuffle" />
                             </div>
-                            <div className="control-btn btn-prev" onClick={handlePrevSong}>
+                            <div className="control-btn btn-prev" onClick={handlePrevSong}
+                                title="Phát bài trước">
                                 <i className="bi bi-skip-start-fill" />
                             </div>
                             <div className="control-btn btn-toggle-play btn--play-song is-medium" onClick={togglePlay}>
                                 <i className="bi bi-pause icon-pause" />
                                 <i className="bi bi-play-fill icon-play" />
                             </div>
-                            <div className="control-btn btn-next" onClick={handleNextSong}>
+                            <div className="control-btn btn-next" onClick={handleNextSong}
+                                title="Phát bài tiếp theo"
+                            >
                                 <i className="bi bi-skip-end-fill" />
                             </div>
-                            <div className={`control-btn btn-repeat is-small is-medium${isRepeat ? " active" : ""}`} onClick={toggleRepeat}>
+                            <div className={`control-btn btn-repeat is-small is-medium${isRepeat ? " active" : ""}`} onClick={toggleRepeat}
+                                title = {
+                                    isRepeat ? "Tắt lặp lại" : "Bật lặp lại"
+                                }
+                            >
                                 <i className="bi bi-arrow-repeat" />
                             </div>
                         </div>

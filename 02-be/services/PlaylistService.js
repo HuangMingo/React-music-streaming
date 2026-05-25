@@ -32,6 +32,7 @@ const getFavouritePlaylist = async (userId) => {
                     'release_date', s.release_date,
                     'lyrics', s.lyrics,
                     'audio', s.audio,
+                    'added_at', sp.added_at,
                     'image', s.image,
                     'artist_names', sa.artist_names
                 )
@@ -79,6 +80,7 @@ const getUserCreatedPlaylist = async (userId) => {
                     'release_date', s.release_date,
                     'lyrics', s.lyrics,
                     'audio', s.audio,
+                    'added_at', sp.added_at,
                     'image', s.image,
                     'duration', s.duration_seconds,
                     'artist_names', sa.artist_names
@@ -204,6 +206,7 @@ const getPlaylistById = async (playlistId) => {
                         'release_date', s.release_date,
                         'lyrics', s.lyrics,
                         'audio', s.audio,
+                        'added_at', sp.added_at,
                         'image', s.image,
                         'artist_names', sa.artist_names
                     )

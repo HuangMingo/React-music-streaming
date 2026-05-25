@@ -6,7 +6,7 @@
 	align-items: center;
 	justify-content: center;
 	padding: 20px;
-	background: rgba(0,0,0,0.5)
+	background: rgba(0, 0, 0, 0.5)
 }
 
 .delete-song-dialog {
@@ -14,7 +14,7 @@
 	width: min(440px, 100%);
 	border-radius: 24px;
 	padding: 22px 22px 20px;
-	background:  linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 96%, #fff 4%), var(--sidebar-popup-bg));
+	background: linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 96%, #fff 4%), var(--sidebar-popup-bg));
 }
 
 .delete-song-title {
@@ -53,6 +53,9 @@
 	transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
+.delete-song-actions .btn:hover {
+	opacity:0.8;
+}
 
 .delete-song-actions .btn:disabled {
 	opacity: 0.6;
@@ -60,14 +63,14 @@
 }
 
 .delete-song-actions .btn--cancel {
-	color: #4f6288;
-	background: #eef2fb;
+	color: var(--text-color);
+	background: var(--player-bg);
 }
 
 .delete-song-actions .btn--confirm {
-	color: #ffffff;
-	background: linear-gradient(95deg, #f16b7a 0%, #ef4f5e 48%, #d72638 100%);
-	
+	color: var(--white-color);
+	background: var(--purple-primary);
+
 }
 
 .delete-song-spinner {
@@ -96,6 +99,7 @@
 	from {
 		transform: rotate(0deg);
 	}
+
 	to {
 		transform: rotate(360deg);
 	}

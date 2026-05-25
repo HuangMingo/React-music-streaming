@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { useAuthContext } from './AuthContext';
 import axios from 'axios';
 import { showNotificationToast } from '../toast.js';
@@ -58,6 +58,16 @@ export function MusicProvider({ children }) {
   const [currentVolume, setCurrentVolume] = useState(0);
   //Chạy bài hoặc dừng
   const [isPlaying, setIsPlaying] = useState(false);
+  //State trigger form Xóa bài hát khỏi playlist
+  const [songToRemove, setSongToRemove] = useState(null);
+  function handleOpenRemoveSongDialog(event, song) {
+    event.preventDefault();
+    event.stopPropagation();
+    setSongToRemove(song);
+  }
+  function handleCloseRemoveSongDialog() {
+    setSongToRemove(null);
+  }
   //Dữ liệu bài hát được chọn
   const [currentSong, setCurrentSong] = useState(EMPTY_SONG);
   // --------------Active song-------------
@@ -68,9 +78,93 @@ export function MusicProvider({ children }) {
       setCurrentTime(0);
     }
   }
+   // Sau khi xóa bài hát khỏi playlist thành công, cập nhật lại danh sách bài hát trong playlist đã chọn
+    function handleSongRemoved(removedSong) {
+        const nextSongs = (selectedPlaylist?.songs ?? []).filter((song) => song.id !== removedSong.id);
+
+        setSelectedPlaylist((prevPlaylist) => {
+            if (!prevPlaylist) {
+                return prevPlaylist;
+            }
+
+            return {
+                ...prevPlaylist,
+                songs: nextSongs,
+            };
+        });
+        handleCloseRemoveSongDialog();
+    }
+  //State để lưu id của bài hát đang mở menu
+  
+  //State để lưu thông tin playlist đang mở menu khi click vào 3 chấm ở mỗi bài hát
+  const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
+  //State để lưu tất cả playlist của người dùng
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  //tai du lieu cac playlist cua user khi login vao userPlaylists
+  useEffect(() => {
+        if (!currentUser?.id) {
+            setUserPlaylists([]);
+            return;
+        }
+
+        let isMounted = true;
+        //Tải danh sách playlist của người dùng
+        async function loadUserPlaylists() {
+            try {
+                const response = await axios.get(
+                    `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
+            } catch (error) {
+                if (isMounted) {
+                    setUserPlaylists([]);
+                }
+                console.error("Load user playlists failed:", error);
+            }
+        }
+
+        loadUserPlaylists();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [currentUser?.id]);
+  //Ref trỏ về menu của mỗi bài hát để kiểm tra click bên ngoài đóng menu
+  const playlistMenuRef = useRef(null);
+  
+  //lưu playlist mà người dùng đã chọn cho từng bài hát.
+  function handleSelectTargetPlaylist(songId, playlistId) {
+    setSelectedPlaylistBySong((prev) => ({
+      ...prev,
+      [songId]: playlistId,
+    }));
+  }
+  //Đóng menu khi click bên ngoài
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        playlistMenuRef.current &&
+        !playlistMenuRef.current.contains(event.target)
+      ) {
+        setOpenSongMenuId(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   //Active playlist
   function handleClickPlaylist(playlist) {
-    
+
   }
 
   //Dữ liệu các bài hát của playlist đang được chọn
@@ -193,7 +287,32 @@ export function MusicProvider({ children }) {
     localStorage.setItem("currentTime", JSON.stringify(currentTime));
   }, [currentTime]);
   return (
-    <MusicContext.Provider value={{ favouriteSongIds, setFavouriteSongIds, toggleFavouriteSong, currentSong, setCurrentSong, selectedPlaylist, setSelectedPlaylist, currentVolume, setCurrentVolume, currentTime, setCurrentTime, isPlaying, setIsPlaying, handleClickSong }}>
+    <MusicContext.Provider value={{
+      favouriteSongIds,
+      setFavouriteSongIds,
+      toggleFavouriteSong,
+      currentSong,
+      setCurrentSong,
+      selectedPlaylist,
+      setSelectedPlaylist,
+      currentVolume,
+      setCurrentVolume,
+      currentTime,
+      setCurrentTime,
+      isPlaying,
+      setIsPlaying,
+      handleClickSong,
+      handleClickPlaylist,
+      songToRemove,
+      setSongToRemove,
+      handleOpenRemoveSongDialog,
+      handleCloseRemoveSongDialog,
+      refreshPlaylists,
+      selectedPlaylistBySong,
+      userPlaylists,
+      playlistMenuRef,
+      handleSelectTargetPlaylist,
+    }}>
       {children}
     </MusicContext.Provider>
   );

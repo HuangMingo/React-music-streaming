@@ -8,21 +8,29 @@ import {
     shift, //Middleware để đảm bảo popup/menu luôn nằm trong viewport bằng cách đẩy nó vào trong nếu cần thiết.
     useFloating, //Hook chính để tính vị trí popup/menu.
 } from "@floating-ui/react";
-import { showNotificationToast } from "../../toast.js";
+import { showNotificationToast } from "./../../../src/toast.js";
 import "./AddSongToPlaylist.css";
-
+import { useMusicContext } from "../../context/MusicContext.jsx";
+import { DeleteSongFromPlaylistDialog } from "../TabPersonal/DeleteSongFromPlaylistDialog.jsx";
 export function AddSongToPlaylist({
-    songId,
+    song,
     isOpen,
     playlists = [],
-    selectedPlaylistId = "",
+    selectedPlaylist = "",
     currentPlaylistId = "",
     onSelectPlaylist,
     onAddSong,
     onRemoveFromPlaylist,
     canRemoveFromCurrentPlaylist = false,
     isAddingSong = false,
+    handleSongRemoved   
 }) {
+    const {
+        songToRemove,
+        setSongToRemove,
+        handleOpenRemoveSongDialog,
+        handleCloseRemoveSongDialog,
+    } = useMusicContext();
     const [isAddSubmenuOpen, setIsAddSubmenuOpen] = useState(false);
     const [playlistSearch, setPlaylistSearch] = useState("");
     const rootRef = useRef(null); // Ref để gắn vào phần tử gốc của menu nhằm theo dõi sự kiện click bên ngoài
@@ -118,9 +126,9 @@ export function AddSongToPlaylist({
 
 
 
-    async function handleAddSongToPlaylist(event, playlistId) {
+    async function handleAddSongToPlaylist(event, playlist) {
         event.stopPropagation();
-        const targetPlaylistId = playlistId ?? selectedPlaylistId;
+        const targetPlaylistId = playlist?.id ?? selectedPlaylistId;
 
         if (!targetPlaylistId) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
@@ -145,8 +153,9 @@ export function AddSongToPlaylist({
             await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
                 params: { playlistId: playlistIdNumber, songId },
             });
-            showNotificationToast(`Đã thêm bài hát vào playlist "${targetPlaylistId}"`);
+            showNotificationToast(`Đã thêm bài hát thành công vào playlist "${playlist?.playlist_name}"`);
             setIsAddSubmenuOpen(false);
+            setOpenForm(false);
         } catch (error) {
             console.error("Add song to playlist failed:", error);
             showNotificationToast("Không thể thêm bài hát vào playlist");
@@ -171,117 +180,132 @@ export function AddSongToPlaylist({
     }
 
     return (
-        <div
-            className="option__log-out open playlist__menu-popup"
-            ref={rootRef}
-            style={{ ...menuFloatingStyles }}
-            onClick={(event) => {
-                event.stopPropagation();
-
-            }}
-        >
-            <button
-                type="button"
-                className="log-out__action playlist__menu-title"
-                ref={submenuTriggerRef}
-                onClick={openSubmenu}
-                aria-haspopup="menu"
-                aria-expanded={isAddSubmenuOpen}
-                disabled={isAddingSong}
-            >
-                <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
-                    <i className="bi bi-music-note-list log-out__icon" />
-                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Thêm vào playlist</span>
-                    <i className="bi bi-chevron-right" style={{ fontSize: "1.4rem", marginLeft: "10px", opacity: 0.8 }} />
-                </span>
-            </button>
-
-            {canRemoveFromCurrentPlaylist ? (
-                <button
-                    type="button"
-                    className="log-out__action playlist__menu-title"
-                    onClick={handleRemoveFromCurrentPlaylist}
-                    disabled={isAddingSong}
-                >
-                    <i className="bi bi-trash3 log-out__icon" />
-                    <span>Xóa khỏi playlist này</span>
-                </button>
-            ) : null}
-
+        <>
             <div
-                className={`playlist__menu-panel ${isAddSubmenuOpen ? "open" : ""}`}
-                ref={submenuRefs.setFloating}
-                role="menu"
-                aria-label="Thêm vào playlist"
-                style={{ ...submenuFloatingStyles, right: "auto", width: "280px" }}
-                onClick={(event) => event.stopPropagation()}
-                onMouseEnter={openSubmenu}
-            // onMouseLeave={scheduleCloseSubmenu}
+                className="option__log-out open playlist__menu-popup"
+                ref={(node) => {
+                    rootRef.current = node;
+                    menuRefs.setFloating(node);
+                }}
+                style={{ ...menuFloatingStyles }}
+                onClick={(event) => {
+                    event.stopPropagation();
+
+                }}
             >
-                <div className="playlist__menu-field" style={{ paddingTop: 12 }}>
-                    <input
-                        type="text"
-                        value={playlistSearch}
-                        onChange={(event) => setPlaylistSearch(event.target.value)}
-                        onClick={(event) => event.stopPropagation()}
-                        onFocus={openSubmenu}
-                        placeholder="Tìm playlist"
-                        aria-label="Tìm playlist"
-                        style={{
-                            width: "100%",
-                            height: "38px",
-                            borderRadius: "10px",
-                            border: "1px solid var(--border-primary)",
-                            padding: "0 12px",
-                            background: "color-mix(in srgb, var(--bg-content-color) 86%, transparent)",
-                            color: "var(--text-color)",
-                            outline: "none",
-                        }}
-                    />
-                </div>
 
                 <button
                     type="button"
-                    className="playlist__menu-option"
-                    onClick={handleCreatePlaylistClick}
+                    className="playlist__menu-title playlist__menu-option"
+                    ref={submenuTriggerRef}
+                    onClick={openSubmenu}
+                    aria-haspopup="menu"
+                    aria-expanded={isAddSubmenuOpen}
                     disabled={isAddingSong}
-                    style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}
                 >
-                    <i className="bi bi-plus-circle" style={{ fontSize: "1.4rem" }} />
-                    <span className="playlist__menu-option-title">Tạo playlist mới</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
+                        <i className="bi bi-music-note-list log-out__icon" />
+                        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Thêm vào playlist</span>
+                        <i className="bi bi-chevron-right" style={{ fontSize: "1.4rem", marginLeft: "10px", opacity: 0.8 }} />
+                    </span>
                 </button>
-                {
-                    isOpenForm && (
-                        <CreatePlaylist
-                            onClose={() => setOpenForm(false)}
-                            // onSuccess={onPlaylistsChanged}
-                        />
-                    )
-                }
-                <div className="playlist__menu-options-scroll">
-                    {filteredPlaylists.length === 0 ? (
-                        <div className="playlist__menu-empty">
-                            {playlistSearch.trim() ? "Không tìm thấy playlist nào" : "Chưa có playlist nào"}
-                        </div>
-                    ) : (
-                        filteredPlaylists.map((item) => {
-                            const isSelected = String(item.id) === String(selectedPlaylistId);
 
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    className={`playlist__menu-option ${isSelected ? "is-selected" : ""}`}
-                                    onClick={(event) => handleAddSongToPlaylist(event, item.id)}
-                                    disabled={isAddingSong}
-                                >
-                                    <span className="playlist__menu-option-title">{item.playlist_name}</span>
-                                </button>
-                            );
-                        })
-                    )}
+                {canRemoveFromCurrentPlaylist ? (
+                    <button
+                        type="button"
+                        className="playlist__menu-title playlist__menu-option"
+                        onClick={(event) => handleOpenRemoveSongDialog(event, song)}
+                        disabled={isAddingSong}
+                    >
+                        <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: "1", minWidth: "0" }}>
+                            <i className="fa-solid fa-trash log-out__icon"></i>
+                            <span>Xóa khỏi playlist này</span>
+                        </span>
+                    </button>
+                ) : null}
+
+                <div
+                    className={`playlist__menu-panel ${isAddSubmenuOpen ? "open" : ""}`}
+                    ref={submenuRefs.setFloating}
+                    role="menu"
+                    aria-label="Thêm vào playlist"
+                    style={{ ...submenuFloatingStyles, right: "auto", width: "280px" }}
+                    onClick={(event) => event.stopPropagation()}
+                    onMouseEnter={openSubmenu}
+                // onMouseLeave={scheduleCloseSubmenu}
+                >
+                    <div className="playlist__menu-field" style={{ paddingTop: 12 }}>
+                        <input
+                            type="text"
+                            value={playlistSearch}
+                            onChange={(event) => setPlaylistSearch(event.target.value)}
+                            onClick={(event) => event.stopPropagation()}
+                            onFocus={openSubmenu}
+                            placeholder="Tìm playlist"
+                            aria-label="Tìm playlist"
+                            style={{
+                                width: "100%",
+                                height: "38px",
+                                borderRadius: "10px",
+                                border: "1px solid var(--border-primary)",
+                                padding: "0 12px",
+                                background: "color-mix(in srgb, var(--bg-content-color) 86%, transparent)",
+                                color: "var(--text-color)",
+                                outline: "none",
+                            }}
+                        />
+                    </div>
+
+                    <button
+                        type="button"
+                        className="playlist__menu-option"
+                        onClick={handleCreatePlaylistClick}
+                        disabled={isAddingSong}
+                        style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}
+                    >
+                        <i className="bi bi-plus-circle" style={{ fontSize: "1.4rem" }} />
+                        <span className="playlist__menu-option-title">Tạo playlist mới</span>
+                    </button>
+                    <div className="playlist__menu-options-scroll">
+                        {filteredPlaylists.length === 0 ? (
+                            <div className="playlist__menu-empty">
+                                {playlistSearch.trim() ? "Không tìm thấy playlist nào" : "Chưa có playlist nào"}
+                            </div>
+                        ) : (
+                            filteredPlaylists.map((item) => {
+                                const isSelected = String(item.id) === String(selectedPlaylist.id);
+
+                                return (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        className={`playlist__menu-option ${isSelected ? "is-selected" : ""}`}
+                                        onClick={(event) => handleAddSongToPlaylist(event, item)}
+                                        disabled={isAddingSong}
+                                    >
+                                        <span className="playlist__menu-option-title">{item.playlist_name}</span>
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+            {isOpenForm && (
+                <CreatePlaylist
+                    onClose={() => setOpenForm(false)}
+                />
+            )}
+            {songToRemove ? (
+                <DeleteSongFromPlaylistDialog
+                    playlist={selectedPlaylist}
+                    song={songToRemove}
+                    onClose={handleCloseRemoveSongDialog}
+                    onDeleted={handleSongRemoved}
+                />
+            ) : null}
+
+        </>
+
     );
 }

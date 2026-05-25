@@ -1,4 +1,5 @@
 .option__log-out {
+    border: 1px solid var(--border-box);
     right: 0;
     width: 50px;
     min-height: 50px;
@@ -10,6 +11,7 @@
     justify-content: center;
     color: var(--navigation-text);
     background-color: var(--primary-bg);
+    cursor: pointer;
     z-index: 999;
 }
 
@@ -24,6 +26,7 @@
     line-height: 1;
     -webkit-text-stroke: 0.5px var(--primary-bg);
 }
+
 .playlist__song-more .option__log-out {
     width: 260px;
     z-index: 999;
@@ -35,6 +38,7 @@
     border: 1px solid var(--border-primary);
     background: linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 96%, #fff 4%), var(--sidebar-popup-bg));
     backdrop-filter: blur(16px);
+    cursor: pointer;
 }
 
 .log-out__action {
@@ -52,6 +56,7 @@
     background: transparent;
     color: var(--navigation-text);
 }
+
 .log-out__action:hover {
     background-color: var(--bg-content-color);
 }
@@ -69,7 +74,9 @@
     padding: 0 12px 8px;
     position: relative;
 }
-
+.playlist__menu-field input{
+    font-size: 1.4rem;
+}
 .playlist__menu-panel {
     position: absolute;
     max-height: 0;
@@ -84,6 +91,7 @@
     transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease, max-height 220ms ease;
     z-index: 1000;
 }
+
 
 .playlist__menu-panel.open {
     max-height: 260px;
@@ -137,12 +145,14 @@
 .playlist__menu-option {
     cursor: pointer;
     color: var(--navigation-text);
+    font-size: 1.4rem;
 }
+
 
 .playlist__menu-option:hover,
 .playlist__menu-option:focus-visible,
 .playlist__menu-option.is-selected {
-    color: var(--text-color);
+    color: var(--link-text-hover);
     background-color: var(--bg-content-color);
 }
 
@@ -182,30 +192,9 @@
     }
 }
 
-.playlist__menu-panel {
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    top: calc(100% + 8px);
-    max-height: 0;
-    opacity: 0;
-    visibility: hidden;
-    overflow: hidden;
-    border-radius: 12px;
-    border: 1px solid var(--border-primary);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--primary-bg) 92%, #fff 8%), var(--sidebar-popup-bg));
-    transform: translateY(-6px) scale(0.98);
-    transform-origin: top center;
-    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease, max-height 220ms ease;
-    z-index: 1000;
-}
 
-.playlist__menu-panel.open {
-    max-height: 260px;
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-}
+
+
 
 input::placeholder {
     color: var(--text-secondary);

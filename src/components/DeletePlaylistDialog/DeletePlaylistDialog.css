@@ -52,16 +52,16 @@
 
 .delete-playlist-title {
 	margin: 0 42px 0 0;
-	font-size: 3rem;
 	line-height: 1.08;
 	font-weight: 800;
 	letter-spacing: 0.5px;
 	color: var(--text-color);
+	font-size: 2rem;
 }
 
 .delete-playlist-message {
 	margin: 14px 0 0;
-	font-size: 1.8rem;
+	font-size: 2rem;
 	line-height: 1.45;
 	color: var(--text-color);
 }
@@ -127,7 +127,7 @@
 
 	.delete-playlist-title {
 		margin-right: 40px;
-		font-size: 3rem;
+		font-size: 2rem;
 	}
 
 	.delete-playlist-message {

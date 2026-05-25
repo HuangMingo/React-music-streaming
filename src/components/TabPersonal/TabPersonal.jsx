@@ -8,7 +8,6 @@ export function TabPersonal({ playlists, onPlaylistsChanged }) {
     const {
         selectedPlaylist,
         setSelectedPlaylist,
-        setPlaylistIndex,
         setCurrentSong,
         setCurrentSongId,
         setCurrentTime,
@@ -25,6 +24,7 @@ export function TabPersonal({ playlists, onPlaylistsChanged }) {
                     setSelectedPlaylist={setSelectedPlaylist}
                     playlists={playlists}
                     onPlaylistsChanged={onPlaylistsChanged}
+                    canRemoveFromCurrentPlaylist = {true}
                 />
             </div>
         </>

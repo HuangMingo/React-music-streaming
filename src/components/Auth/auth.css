@@ -17,9 +17,17 @@
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .auth-entry-page .auth-card--split {
@@ -93,10 +101,13 @@
 .auth-card p {
   margin-top: 12px;
   margin-bottom: 20px;
-  color: rgba(43, 49, 96, 0.8);
   font-size: 1.4rem;
   line-height: 2rem;
   text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .auth-form {
@@ -326,10 +337,12 @@
 }
 
 @keyframes authFloat {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }

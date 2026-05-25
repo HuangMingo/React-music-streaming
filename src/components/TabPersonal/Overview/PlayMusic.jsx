@@ -4,7 +4,7 @@ import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
 import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx";
 import axios from "axios";
-export function PlayMusic({ playlist }) {
+export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
     const { currentSong,
         setCurrentSong,
         setCurrentTime,
@@ -12,14 +12,24 @@ export function PlayMusic({ playlist }) {
         toggleFavouriteSong,
         favouriteSongIds,
         setFavouriteSongIds,
-        handleClickSong } = useMusicContext();
+        handleClickSong,
+        playlistMenuRef,
+        handleSelectTargetPlaylist,
+        selectedPlaylistBySong, } = useMusicContext();
+    const [openSongMenuId, setOpenSongMenuId] = useState(null);
+    //Mở menu khi click vào 3 chấm của bài hát
+    function handleToggleSongMenu(event, songId) {
+        event.stopPropagation();
+
+        setOpenSongMenuId((prevSongId) =>
+            prevSongId === songId ? null : songId
+        );
+    }
     const { currentUser } = useAuthContext();
     const [slideIndex, setSlideIndex] = useState(0);
     const [userPlaylists, setUserPlaylists] = useState([]);
-    const [openSongMenuId, setOpenSongMenuId] = useState(null);
-    const [selectedPlaylistBySong, setSelectedPlaylistBySong] = useState({});
     const [isAddingSong, setIsAddingSong] = useState(false);
-    const playlistMenuRef = useRef(null);
+
     const visibleSongs = useMemo(() => (playlist?.songs ?? []), [playlist]);
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
 
@@ -132,41 +142,6 @@ export function PlayMusic({ playlist }) {
         };
     }, []);
 
-    function handleToggleSongMenu(event, songId) {
-        event.stopPropagation();
-        setOpenSongMenuId((prevSongId) => (prevSongId === songId ? null : songId));
-    }
-
-    function handleSelectTargetPlaylist(songId, playlistId) {
-        setSelectedPlaylistBySong((prev) => ({
-            ...prev,
-            [songId]: playlistId,
-        }));
-    }
-
-    async function handleAddSongToPlaylist(songId, playlistIdFromChild) {
-        const playlistId = Number(playlistIdFromChild ?? selectedPlaylistBySong[songId]);
-
-        if (!playlistId || !songId) {
-            showNotificationToast("Vui lòng chọn playlist trước khi thêm");
-            return;
-        }
-
-        try {
-            setIsAddingSong(true);
-            await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
-                params: { playlistId, songId },
-            });
-            showNotificationToast("Đã thêm bài hát vào playlist");
-            setOpenSongMenuId(null);
-        } catch (error) {
-            console.error("Add song to playlist failed:", error);
-            showNotificationToast("Không thể thêm bài hát vào playlist");
-        } finally {
-            setIsAddingSong(false);
-        }
-    }
-
     const currentSlideClasses = (index) => {
         if (!slideshowActive || visibleSongs.length < 2) {
             return "container__slide-item single";
@@ -190,7 +165,7 @@ export function PlayMusic({ playlist }) {
                         </NavLink>
                         <h3 className="container__header-subtitle">Bài Hát</h3>
                         <div className="container__header-actions">
-                            
+
                             <button
                                 className="button is-small button-primary container__header-btn btn--play-all">
                                 <i className="bi bi-play-fill container__header-icon"></i>
@@ -205,7 +180,7 @@ export function PlayMusic({ playlist }) {
                             <div className="box--no-content">
                                 <div className="no-content-image" />
                                 <span className="no-content-text">
-                                    Chưa có bài hát nào được chọn!
+                                    Chưa có bài hát nào trong playlist này!
                                 </span>
                             </div>
                         ) : (
@@ -273,10 +248,14 @@ export function PlayMusic({ playlist }) {
                                                         <div className="playlist__song-btn btn--mic option-btn">
                                                             <i className="btn--icon song__icon bi bi-mic-fill"></i>
                                                         </div>
-                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}>
+                                                        <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}
+                                                            title={favouriteSongIds.has(song.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}
+                                                        >
                                                             <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
                                                         </div>
-                                                        <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}>
+                                                        <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
+                                                            title="Khác"
+                                                        >
                                                             <i className="btn--icon bi bi-three-dots"></i>
                                                             <AddSongToPlaylist
                                                                 songId={song.id}
@@ -284,7 +263,7 @@ export function PlayMusic({ playlist }) {
                                                                 playlists={userPlaylists}
                                                                 selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                onAddSong={handleAddSongToPlaylist}
+                                                                canRemoveFromCurrentPlaylist={true}
                                                                 isAddingSong={isAddingSong}
                                                             />
                                                         </div>
