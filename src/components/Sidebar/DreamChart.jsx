@@ -205,9 +205,9 @@ export function DreamChart() {
                                                                 }
                                                             </span>
                                                             <div className="playlist__song-option song--tab media__right hide-on-mobile">
-                                                                <div className="playlist__song-btn btn--mic option-btn">
+                                                                {/* <div className="playlist__song-btn btn--mic option-btn" title= "Xem lời bài hát">
                                                                     <i className="btn--icon song__icon bi bi-mic-fill"></i>
-                                                                </div>
+                                                                </div> */}
                                                                 <div className="playlist__song-btn btn--heart option-btn" onClick={(e) => toggleFavouriteSong(e, song.id)}
                                                                     title={favouriteSongIds.has(song.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}>
                                                                     <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>

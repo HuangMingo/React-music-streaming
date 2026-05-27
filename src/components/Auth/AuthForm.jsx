@@ -67,18 +67,6 @@ export function AuthForm({ title, submitLabel, footerText, footerAction, onSubmi
           <p className="auth-footer">
             {footerText} <Link to={footerAction.to}>{footerAction.label}</Link>
           </p>
-
-          <div className="auth-socials" aria-label="social links">
-            <a href="#" className="auth-social-link" aria-label="Facebook">
-              <i className="bi bi-facebook" />
-            </a>
-            <a href="#" className="auth-social-link" aria-label="Whatsapp">
-              <i className="bi bi-whatsapp" />
-            </a>
-            <a href="#" className="auth-social-link" aria-label="Telegram">
-              <i className="bi bi-telegram" />
-            </a>
-          </div>
         </div>
 
         <div className="auth-panel auth-panel--visual" aria-hidden="true">

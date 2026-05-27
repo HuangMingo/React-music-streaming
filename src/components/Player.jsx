@@ -36,6 +36,18 @@ export function Player() {
         userPlaylists,
         isAddingSong,
     } = useMusicContext();
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    useEffect(() => {
+        function handleFullscreenChange() {
+            setIsFullscreen(!!document.fullscreenElement);
+        }
+
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+        return () => {
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        };
+    }, []);
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //--------------Xử lí khi click bên ngoài----------
     useEffect(() => {
@@ -111,25 +123,25 @@ export function Player() {
         // if (!player.classList.contains("open-popup")) {
         //     setOpenPlayerPopup(true);
         // }
-        
+
     }
     function handleClosePlayerPopup(event) {
         event.stopPropagation();
         setOpenPlayerPopup(false);
     }
     async function handleToggleFullscreen(event) {
-    event.stopPropagation();
+        event.stopPropagation();
 
-    try {
-        if (!document.fullscreenElement) {
-            await document.documentElement.requestFullscreen();
-        } else {
-            await document.exitFullscreen();
+        try {
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+            } else {
+                await document.exitFullscreen();
+            }
+        } catch (error) {
+            console.error("Fullscreen failed:", error);
         }
-    } catch (error) {
-        console.error("Fullscreen failed:", error);
     }
-}
     //Khôi phục trạng thái phát nhạc khi reload trang nếu có dữ liệu hợp lệ trong localStorage
     useEffect(() => {
         if (audioRef.current && currentSong?.audio) {
@@ -447,7 +459,7 @@ export function Player() {
                     </div>
                     <div className="player__options hide-on-mobile">
                         <div className="player__options-container">
-                            <div className="player__options-btn option-btn hide-on-tablet-mobile" title="Xem lời bài hát" onClick = {(e) => handleOpenPlayerPopup(e)}>
+                            <div className="player__options-btn option-btn hide-on-tablet-mobile" title="Xem lời bài hát" onClick={(e) => handleOpenPlayerPopup(e)}>
                                 <i className="bi bi-mic btn--icon" />
                             </div>
                             <div className="player__options-btn volume option-btn btn-volume">
@@ -509,11 +521,22 @@ export function Player() {
                         <div className="player__popup-action">
                             <ul className="popup__action-menu">
                                 <li className="popup__action-btn hide-on-tablet-mobile" onClick={handleToggleFullscreen}>
-                                    <i className="bi bi-arrows-angle-expand popup__action-btn-icon" />
+                                    {
+                                        document.fullscreenElement
+                                            ? <i className="bi bi-arrows-angle-contract popup__action-btn-icon" />
+                                            : <i className="bi bi-arrows-angle-expand popup__action-btn-icon" />
+                                    }
+
+
                                 </li>
-                                <li className="popup__action-btn btn--pop-down" onClick={(e) => handleClosePlayerPopup(e)}>
-                                    <i className="bi bi-chevron-down popup__action-btn-icon" />
-                                </li>
+                                {
+                                     !isFullscreen && (
+                                        <li className="popup__action-btn btn--pop-down" onClick={(e) => handleClosePlayerPopup(e)}>
+                                            <i className="bi bi-chevron-down popup__action-btn-icon" />
+                                        </li>
+                                    )
+                                }
+
                             </ul>
                         </div>
                     </div>

@@ -11,26 +11,28 @@ import {
 import { showNotificationToast } from "./../../../src/toast.js";
 import "./AddSongToPlaylist.css";
 import { useMusicContext } from "../../context/MusicContext.jsx";
+import { useAuthContext } from "../../context/AuthContext.jsx";
 import { DeleteSongFromPlaylistDialog } from "../TabPersonal/DeleteSongFromPlaylistDialog.jsx";
 export function AddSongToPlaylist({
-    song,
+    songId,
     isOpen,
     playlists = [],
-    selectedPlaylist = "",
+    selectedPlaylist = {},
     currentPlaylistId = "",
     onSelectPlaylist,
     onAddSong,
     onRemoveFromPlaylist,
     canRemoveFromCurrentPlaylist = false,
     isAddingSong = false,
-    handleSongRemoved   
 }) {
     const {
         songToRemove,
         setSongToRemove,
         handleOpenRemoveSongDialog,
         handleCloseRemoveSongDialog,
+        handleSongRemoved,
     } = useMusicContext();
+    const { currentUser } = useAuthContext();
     const [isAddSubmenuOpen, setIsAddSubmenuOpen] = useState(false);
     const [playlistSearch, setPlaylistSearch] = useState("");
     const rootRef = useRef(null); // Ref để gắn vào phần tử gốc của menu nhằm theo dõi sự kiện click bên ngoài
@@ -122,13 +124,10 @@ export function AddSongToPlaylist({
         event.stopPropagation();
         setIsAddSubmenuOpen(true);
     }
-
-
-
-
     async function handleAddSongToPlaylist(event, playlist) {
+     
         event.stopPropagation();
-        const targetPlaylistId = playlist?.id ?? selectedPlaylistId;
+        const targetPlaylistId = playlist?.id ?? selectedPlaylist.id;
 
         if (!targetPlaylistId) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
@@ -163,6 +162,11 @@ export function AddSongToPlaylist({
     }
 
     function handleCreatePlaylistClick(event) {
+        const userid = currentUser?.id;
+        if (!userid) {
+            showNotificationToast("Vui lòng đăng nhập để tạo playlist", "error");
+            return;
+        }
         event.stopPropagation();
         toggleOpenForm();
     }
@@ -298,7 +302,7 @@ export function AddSongToPlaylist({
             )}
             {songToRemove ? (
                 <DeleteSongFromPlaylistDialog
-                    playlist={selectedPlaylist}
+                    playlistId={selectedPlaylist.id}
                     song={songToRemove}
                     onClose={handleCloseRemoveSongDialog}
                     onDeleted={handleSongRemoved}

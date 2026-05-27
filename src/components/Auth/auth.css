@@ -268,28 +268,6 @@
   gap: 12px;
 }
 
-.auth-social-link {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  cursor: pointer;
-}
-
-.auth-social-link:hover {
-  transform: translateY(-4px) scale(1.1);
-  background: linear-gradient(135deg, #f093fb 0%, #764ba2 100%);
-  box-shadow: 0 8px 28px rgba(240, 147, 251, 0.4);
-}
-
 .auth-panel--visual {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   display: flex;

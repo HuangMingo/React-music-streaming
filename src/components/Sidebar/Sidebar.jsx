@@ -1,10 +1,17 @@
 import { useState } from "react"
 import { NavLink } from "react-router-dom"
 import { CreatePlaylist } from "./CreatePlaylist/CreatePlaylist.jsx";
+import {useAuthContext} from "../../context/AuthContext.jsx";
+import {showNotificationToast} from "../../toast.js";
 export function Sidebar({ onPlaylistsChanged }) {
     const [isOpenForm, setOpenForm] = useState(false);
-
+    const { currentUser } = useAuthContext();
     function toggleOpenForm() {
+        const userid = currentUser?.id;
+        if (!userid) {
+            showNotificationToast("Vui lòng đăng nhập để tạo playlist", "error");
+            return;
+        }
         setOpenForm(!isOpenForm);
     }   
     return (

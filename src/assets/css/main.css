@@ -2358,6 +2358,7 @@ label .container__header-icon {
     justify-content: flex-start;
     background-size: 1920px auto;
     background-color: var(--primary-bg);
+    background: 
 }
 
 .player.open-popup .player__popup {

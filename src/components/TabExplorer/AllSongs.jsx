@@ -243,9 +243,9 @@ export function AllSongs() {
                                                     }
                                                 </span>
                                                 <div className="playlist__song-option song--tab media__right hide-on-mobile">
-                                                    <div className="playlist__song-btn btn--mic option-btn">
+                                                    {/* <div className="playlist__song-btn btn--mic option-btn">
                                                         <i className="btn--icon song__icon bi bi-mic-fill"></i>
-                                                    </div>
+                                                    </div> */}
                                                     <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}
                                                         title={
                                                             favouriteSongIds.has(song.id)

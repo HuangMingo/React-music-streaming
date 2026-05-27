@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext";
 import { useAuthContext } from "../../../context/AuthContext";
 import { DeletePlaylistDialog } from "./../../DeletePlaylistDialog/DeletePlaylistDialog.jsx";
+import axios from "axios";
 export function Playlist({ playlists = [], onPlaylistsChanged }) {
     const {
         selectedPlaylist,
@@ -10,8 +11,38 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         setCurrentTime,
         setCurrentSong,
         setIsPlaying,
-        isPlaying
+        isPlaying,
     } = useMusicContext();
+    async function handleClickPlaylistPersonal(playlist, index) {
+        scrollPersonalContainerToTop();
+
+        try {
+            const response = await axios.get(
+                "http://localhost:3000/api/playlists/playlist-details",
+                {
+                    params: {
+                        playlistId: playlist.id
+                    }
+                }
+            );
+
+            const playlistData = response.data;
+
+            setSelectedPlaylist(playlistData);
+
+            const firstSong = playlistData?.songs?.[0];
+            const hasSongs = Boolean(firstSong);
+
+            if (hasSongs) {
+                setCurrentSong(firstSong);
+                setCurrentTime(0);
+                setIsPlaying(true);
+            }
+        } catch (error) {
+            console.error("Load playlist failed:", error);
+        }
+    }
+
     const { currentUser } = useAuthContext();
     const navigate = useNavigate();
     //Phân trang cho playlist
@@ -82,17 +113,6 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function handleClickPlaylistPersonal(playlist, index) {
-        scrollPersonalContainerToTop();
-        const firstSong = playlist?.songs?.[0];
-        const hasSongs = Boolean(firstSong);
-        setSelectedPlaylist(playlist);
-        if (hasSongs) {
-            setCurrentSong(firstSong);
-            setCurrentTime(0);
-            setIsPlaying(true);
-        }
-    }
 
     function handlePrevPage() {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
@@ -152,7 +172,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                             {pagePlaylists.map((playlist, playlistIndex) => {
                                                 const absoluteIndex = pageIndex * itemsPerPage + playlistIndex;
                                                 const isPlaylistActive = selectedPlaylist?.id === playlist.id;
-                                                const isPlaylistPlaying = isPlaylistActive && isPlaying;
+                                                const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
                                                 return (
 
                                                     <div
@@ -198,7 +218,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                        
+
                                                                         {
                                                                             playlist.isdefault != null && playlist.isdefault === true ? '' : (
                                                                                 <div className="action-btn">

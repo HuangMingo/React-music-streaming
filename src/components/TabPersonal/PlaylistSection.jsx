@@ -4,12 +4,12 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useMusicContext } from "../../context/MusicContext";
 import { DeletePlaylistDialog } from "./../../components/DeletePlaylistDialog/DeletePlaylistDialog.jsx";
 import "./../../../public/assets/img/SongActiveAnimation/icon-playing.gif";
-
+import axios from "axios";
 export function PlaylistSection() {
     const { playlists, onPlaylistsChanged } = useOutletContext();
     const { currentUser } = useAuthContext();
     const outletContext = useOutletContext();
-    console.log("PlaylistSection outletContext:", outletContext);
+    // console.log("PlaylistSection outletContext:", outletContext);
     const {
         selectedPlaylist,
         setSelectedPlaylist,
@@ -30,16 +30,35 @@ export function PlaylistSection() {
         setPlaylistIdToDelete(null);
     }
 
-    function handleClickPlaylistPersonal(playlist, index) {
-        const firstSong = playlist?.songs?.[0];
-        const hasSongs = Boolean(firstSong);
-        setSelectedPlaylist(playlist);
-        if (hasSongs) {
-            setCurrentSong(firstSong);
+    async function handleClickPlaylistPersonal(playlist, index) {
+        try {
+            const response = await axios.get(
+                "http://localhost:3000/api/playlists/playlist-details",
+                {
+                    params: {
+                        playlistId: playlist.id
+                    }
+                }
+            );
+
+            const playlistData = response.data;
+
+            setSelectedPlaylist(playlistData);
+
+            const firstSong = playlistData?.songs?.[0];
+            const hasSongs = Boolean(firstSong);
+
+            if (hasSongs) {
+                setCurrentSong(firstSong);
+                setCurrentTime(0);
+                setIsPlaying(true);
+                
+            }
+        } catch (error) {
+            console.error("Load playlist failed:", error);
         }
-        setCurrentTime(0);
-        setIsPlaying(hasSongs);
         navigate("/personal");
+
     }
 
     return (
@@ -58,7 +77,7 @@ export function PlaylistSection() {
                         <div className="row playlist--container">
                             {playlists.map((playlist, playlistIndex) => {
                                 const isPlaylistActive = selectedPlaylist?.id === playlist.id;
-                                const isPlaylistPlaying = isPlaylistActive && isPlaying;
+                                const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
                                 return (
                                     <div
                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 ? "mb-30" : ""} `}

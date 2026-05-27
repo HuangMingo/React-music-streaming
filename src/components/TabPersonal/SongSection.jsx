@@ -35,7 +35,6 @@ export function SongSection() {
         selectedPlaylistBySong,
         userPlaylists,
         isAddingSong,
-        handleSongRemoved
     } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //Mở menu khi click vào 3 chấm của bài hát
@@ -156,9 +155,9 @@ export function SongSection() {
 
                                                 <div className="playlist__song-option song--tab media__right">
                                                     <div className="playlist__song-option-main hide-on-mobile">
-                                                        <div className="playlist__song-btn btn--mic option-btn">
+                                                        {/* <div className="playlist__song-btn btn--mic option-btn">
                                                             <i className="btn--icon song__icon bi bi-mic-fill" />
-                                                        </div>
+                                                        </div> */}
                                                         <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}
                                                             title={favouriteSongIds.has(song.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}>
                                                             <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? "-fill" : ""} primary`} />
@@ -171,11 +170,12 @@ export function SongSection() {
                                                                 song={song}
                                                                 isOpen={openSongMenuId === song.id}
                                                                 playlists={userPlaylists}
-                                                                selectedPlaylist={selectedPlaylistBySong[song.id] ?? ""}
+                                                                selectedPlaylist={selectedPlaylist}
                                                                 onCloseMenu={() => setOpenSongMenuId(null)}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={true}
+                                                                canRemoveFromCurrentPlaylist={!selectedPlaylist?.isdefault}
                                                                 isAddingSong={isAddingSong}
+                                                                ondeleteSong={handleOpenRemoveSongDialog}
                                                             />
                                                         </div>
                                                     </div>
@@ -191,15 +191,6 @@ export function SongSection() {
                     </div>
                 </div>
             </div>
-
-            {songToRemove ? (
-                <DeleteSongFromPlaylistDialog
-                    playlist={selectedPlaylist}
-                    song={songToRemove}
-                    onClose={handleCloseRemoveSongDialog}
-                    onDeleted={handleSongRemoved}
-                />
-            ) : null}
         </>
     );
 }

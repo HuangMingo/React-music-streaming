@@ -2,7 +2,10 @@ import axios from "axios";
 import { useState } from "react";
 import "./DeletePlaylistDialog.css";
 import "./../Sidebar/CreatePlaylist/CreatePlaylist.css";
-export function DeletePlaylistDialog({ playlistId, onClose, currentUser, onDeleted }) {
+export function DeletePlaylistDialog({ playlistId,
+    onClose,
+    currentUser,
+    onDeleted }) {
     const [isDeleting, setIsDeleting] = useState(false);
     //Xử lí nút xóa playlist
 

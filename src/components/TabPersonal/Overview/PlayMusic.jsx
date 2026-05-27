@@ -15,6 +15,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
         handleClickSong,
         playlistMenuRef,
         handleSelectTargetPlaylist,
+        selectedPlaylist,
         selectedPlaylistBySong, } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //Mở menu khi click vào 3 chấm của bài hát
@@ -245,9 +246,9 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                                     </span>
 
                                                     <div className="playlist__song-option song--tab media__right hide-on-mobile">
-                                                        <div className="playlist__song-btn btn--mic option-btn">
+                                                        {/* <div className="playlist__song-btn btn--mic option-btn">
                                                             <i className="btn--icon song__icon bi bi-mic-fill"></i>
-                                                        </div>
+                                                        </div> */}
                                                         <div className="playlist__song-btn btn--heart option-btn" onClick={(event) => toggleFavouriteSong(event, song.id)}
                                                             title={favouriteSongIds.has(song.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}
                                                         >
@@ -261,9 +262,9 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                                                 songId={song.id}
                                                                 isOpen={openSongMenuId === song.id}
                                                                 playlists={userPlaylists}
-                                                                selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
+                                                                selectedPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={true}
+                                                                canRemoveFromCurrentPlaylist={!selectedPlaylist.isdefault}
                                                                 isAddingSong={isAddingSong}
                                                             />
                                                         </div>
