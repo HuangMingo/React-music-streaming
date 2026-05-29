@@ -12,7 +12,7 @@ var listArtist = [
         image: "./assets/img/artists/artist2.jpg"
     },
     {
-        id: 3, 
+        id: 3,
         name: "AMEE",
         followers: 317000,
         image: "./assets/img/artists/artist3.jpg"
@@ -29,7 +29,6 @@ var listArtist = [
         followers: 2100000,
         image: "./assets/img/artists/artist5.jpg"
     },
-
     {
         id: 6,
         name: "Mr. Siro",
@@ -62,6 +61,6 @@ var listArtist = [
     },
 ];
 
-export const ARTIST_STORAGE_KEY = 'ARTIST_STORAGE_KEY';
+export const ARTIST_STORAGE_KEY = "ARTIST_STORAGE_KEY";
 
 localStorage.setItem(ARTIST_STORAGE_KEY, JSON.stringify(listArtist));

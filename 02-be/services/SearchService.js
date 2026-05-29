@@ -19,7 +19,7 @@ async function searchSongs(like, limit) {
     const result = await pool.query(
         `
         ${songSelectWithArtists}
-        WHERE unaccent(s.title) ILIKE unaccent($1) or unaccent(art.name) ILIKE unaccent($1)
+        WHERE unaccent(s.title) ILIKE unaccent($1)
         GROUP BY s.id
         ORDER BY s.play_count DESC NULLS LAST, s.title ASC
         LIMIT $2

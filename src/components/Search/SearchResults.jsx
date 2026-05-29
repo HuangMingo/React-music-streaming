@@ -10,8 +10,7 @@ const SEARCH_TABS = [
   { slug: 'tat-ca', label: 'Tất cả' },
   { slug: 'bai-hat', label: 'Bài hát' },
   { slug: 'nghe-si', label: 'Nghệ sĩ' },
-  { slug: 'playlist', label: 'Playlist' },
-  { slug: 'album', label: 'Album' },
+  { slug: 'playlist', label: 'Playlist/ Album' },
 ];
 
 const VALID_TABS = new Set(SEARCH_TABS.map((tab) => tab.slug));
@@ -396,7 +395,13 @@ export function SearchResults() {
                                     <span className="song-note note-3">♪</span>
                                     <span className="song-note note-4">♫</span>
                                   </div>
-                                  <div className="action-btn"><i className="btn--icon bi bi-three-dots" /></div>
+                                  <div className="playlist-actions">
+                                    {pl.creator_id === currentUser?.id && (
+                                      <button className="playlist-more-btn">
+                                        ...
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="overlay" />
                               </div>

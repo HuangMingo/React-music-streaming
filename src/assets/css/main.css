@@ -1757,6 +1757,7 @@ label .container__header-icon {
 
 .artist__container {
     align-items: stretch;
+    overflow: hidden !important;
 }
 
 .artist__viewport {
@@ -1776,40 +1777,148 @@ label .container__header-icon {
     flex: 0 0 100%;
     display: flex;
     flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 0;
 }
 
-.artist__page>.col {
+.artist__page>.artist__col {
     flex: 0 0 20%;
     max-width: 20%;
+    min-width: 0;
+    padding: 0 14px;
 }
 
 @media (max-width: 1023px) {
-    .artist__page>.col {
+    .artist__page>.artist__col {
         flex: 0 0 25%;
         max-width: 25%;
     }
 }
 
 @media (max-width: 739px) {
-    .artist__page>.col {
+    .artist__page>.artist__col {
         flex: 0 0 50%;
         max-width: 50%;
+        padding: 0 8px;
     }
 }
 
+.artist__card {
+    align-items: center;
+}
+
+.artist__card-inner {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.artist__avatar {
+    width: min(100%, 240px);
+    max-width: 240px;
+    aspect-ratio: 1;
+    margin: 0 auto;
+    box-shadow: none;
+}
+
+.artist__avatar .overlay {
+    border-radius: 50%;
+}
+
+.artist__avatar-img {
+    background-size: cover !important;
+}
+
+.artist__info {
+    flex: unset;
+    margin-top: 20px;
+}
+
+.artist__info .media__left {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.artist__name {
+    margin: 0 0 8px;
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 2.4rem;
+}
+
+.artist__followers {
+    color: var(--text-secondary);
+    font-size: 1.6rem;
+    line-height: 2rem;
+}
+
+.artist__button-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 24px 0 0;
+}
+
 .artist__follow-btn {
-    min-width: 126px;
+    min-width: 212px;
+    height: 40px !important;
+    gap: 6px;
+    padding: 0 24px !important;
+    border-radius: 999px;
+    font-size: 1.4rem !important;
+    font-weight: 700;
     transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
 .artist__follow-btn--ghost {
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--purple-primary) !important;
     background: transparent;
     color: var(--text-color);
 }
 
 .artist__follow-btn:hover {
     transform: translateY(-1px);
+}
+
+.artist__follow-btn i {
+    font-size: 1.9rem;
+    line-height: 1;
+    transform: none;
+}
+
+.artist__follow-btn span {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+@media (max-width: 739px) {
+    .artist__avatar {
+        max-width: 180px;
+    }
+
+    .artist__name {
+        font-size: 1.7rem;
+        line-height: 2.1rem;
+    }
+
+    .artist__followers {
+        font-size: 1.4rem;
+    }
+
+    .artist__follow-btn {
+        min-width: 150px;
+        height: 34px !important;
+        padding: 0 14px !important;
+        font-size: 1.2rem !important;
+    }
+
+    .artist__follow-btn span {
+        font-size: 1.2rem;
+    }
 }
 
 
