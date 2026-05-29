@@ -57,7 +57,8 @@ export function SearchResults() {
       }
       setLoading(true);
       try {
-        const res = await axios.get(`http://localhost:3000/api/search/all?q=${encodeURIComponent(q)}`);
+        const userParam = currentUser?.id ? `&userId=${encodeURIComponent(currentUser.id)}` : '';
+        const res = await axios.get(`http://localhost:3000/api/search/all?q=${encodeURIComponent(q)}${userParam}`);
         if (!mounted) return;
         const data = res.data || {};
         setResults({
@@ -77,7 +78,7 @@ export function SearchResults() {
     return () => {
       mounted = false;
     };
-  }, [q]);
+  }, [q, currentUser?.id]);
 
   useEffect(() => {
     async function loadUserPlaylists() {
@@ -357,7 +358,7 @@ export function SearchResults() {
               {showPlaylists && (
                 <section className="search-page__section">
                   <div className="search-page__section-header">
-                    <h3 className="search-page__section-title">Playlist</h3>
+                    <h3 className="search-page__section-title">Playlist/ Album</h3>
                     {activeTab === 'tat-ca' && (
                       <button className="search-page__see-all" type="button" onClick={() => goToTab('playlist')}>
                         Xem tất cả
@@ -376,6 +377,18 @@ export function SearchResults() {
                               <div className="row__item-display br-5 search-page__card-display">
                                 <div className="row__item-img img--square" style={{ background: `url(${getImage(pl)}) no-repeat center center / cover`, overflow: 'hidden' }} />
                                 <div className="row__item-actions">
+                                  <div
+                                    className="action-btn btn--heart"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    {pl.ismine != null && pl.ismine === true ? (
+                                      <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(pl.id)} />
+                                    ) : (
+                                      <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                                    )}
+                                  </div>
                                   <div className="btn--play-playlist">
                                     <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
                                     <span className="song-note note-1">♪</span>
@@ -400,51 +413,7 @@ export function SearchResults() {
                 </section>
               )}
 
-              {showAlbums && (
-                <section className="search-page__section">
-                  <div className="search-page__section-header">
-                    <h3 className="search-page__section-title">Album</h3>
-                    {activeTab === 'tat-ca' && (
-                      <button className="search-page__see-all" type="button" onClick={() => goToTab('album')}>
-                        Xem tất cả
-                      </button>
-                    )}
-                  </div>
 
-                  {topAlbums.length === 0 ? (
-                    <div className="search-page__empty">Không tìm thấy album phù hợp</div>
-                  ) : (
-                    <div className="search-page__card-track">
-                      {topAlbums.map((album, idx) => (
-                        <div className="search-page__card-col" key={album.id ?? `album-${idx}`}>
-                          <div className="row__item item--playlist search-page__card" onClick={() => navigate(`/tim-kiem/album?q=${encodeURIComponent(album.name || album.title || '')}`)}>
-                            <div className="row__item-container flex--top-left">
-                              <div className="row__item-display br-5 search-page__card-display">
-                                <div className="row__item-img img--square" style={{ background: `url(${getImage(album)}) no-repeat center center / cover`, overflow: 'hidden' }} />
-                                <div className="row__item-actions">
-                                  <div className="btn--play-playlist">
-                                    <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
-                                    <span className="song-note note-1">♪</span>
-                                    <span className="song-note note-2">♫</span>
-                                    <span className="song-note note-3">♪</span>
-                                    <span className="song-note note-4">♫</span>
-                                  </div>
-                                  <div className="action-btn"><i className="btn--icon bi bi-three-dots" /></div>
-                                </div>
-                                <div className="overlay" />
-                              </div>
-                              <div className="row__item-info search-page__card-info">
-                                <span className="row__info-name is-twoline">{album.title || album.name || album.playlist_name}</span>
-                                <h3 className="row__info-creator">Album</h3>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
             </div>
           </div>
         )}

@@ -45,22 +45,23 @@ async function searchArtists(like, limit) {
     return result.rows;
 }
 //----------TÌM KIẾM PLAYLIST CÔNG KHAI----------------
-async function searchPlaylists(like, limit) {
+async function searchPlaylists(like, limit, userId) {
     const result = await pool.query(
         `
-        SELECT *
-        FROM playlist
+        SELECT p.*, u.username
+        FROM playlist p join "user"  u on p.creator_id = u.id
         WHERE unaccent(name) ILIKE unaccent($1) and ispublic = TRUE
+            AND ($3::int IS NULL OR p.creator_id != $3)
         ORDER BY name ASC
         LIMIT $2
         `,
-        [like, limit]
+        [like, limit, userId ?? null]
     );
 
     return result.rows;
 }
 // ------------------TÌM KIẾM THEO TỪ KHÓA----------------
-async function searchByKeyword(q, limits) {
+async function searchByKeyword(q, limits, userId) {
     const keyword = q?.trim();
 
     if (!keyword) {
@@ -72,7 +73,7 @@ async function searchByKeyword(q, limits) {
     const [songs, artists, playlists] = await Promise.all([
         searchSongs(like, limits.songs),
         searchArtists(like, limits.artists),
-        searchPlaylists(like, limits.playlists),
+        searchPlaylists(like, limits.playlists, userId)
     ]);
     return {
         songs,
@@ -81,20 +82,20 @@ async function searchByKeyword(q, limits) {
     };
 }
 
-const suggest = async (q) => {
+const suggest = async (q, userId) => {
     return searchByKeyword(q, {
         songs: 5,
         artists: 3,
         playlists: 3,
-    });
+    }, userId);
 };
 
-const searchAll = async (q) => {
+const searchAll = async (q, userId) => {
     return searchByKeyword(q, {
         songs: 50,
         artists: 50,
         playlists: 50,
-    });
+    }, userId);
 };
 
 export const searchService = {

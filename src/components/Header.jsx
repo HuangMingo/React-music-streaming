@@ -87,7 +87,8 @@ export function Header({ onClose }) {
         }
         debounceRef.current = setTimeout(async () => {
             try {
-                const res = await axios.get(`http://localhost:3000/api/search/suggest?q=${encodeURIComponent(q)}`);
+                const userParam = currentUser?.id ? `&userId=${encodeURIComponent(currentUser.id)}` : '';
+                const res = await axios.get(`http://localhost:3000/api/search/suggest?q=${encodeURIComponent(q)}${userParam}`);
                 setSuggestions(res.data || { songs: [], artists: [], playlists: [] });
                 setShowSuggest(true);
                 setActiveIndex(-1);
@@ -97,7 +98,7 @@ export function Header({ onClose }) {
             }
         }, 300);
         return () => clearTimeout(debounceRef.current);
-    }, [searchTerm]);
+    }, [searchTerm, currentUser?.id]);
 
     function buildFlatList(list) {
         const out = [];

@@ -2668,6 +2668,15 @@ label .container__header-icon {
     padding: 0;
 }
 
+.app__container.tab--search {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.app__container.tab--search::-webkit-scrollbar {
+    display: none;
+}
+
 .search-page {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
@@ -2675,6 +2684,12 @@ label .container__header-icon {
     height: 100%;
     padding: 40px 60px 140px;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.search-page::-webkit-scrollbar {
+    display: none;
 }
 
 .search-results {
@@ -2780,26 +2795,25 @@ label .container__header-icon {
 
 .search-page__artist-track,
 .search-page__card-track {
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 18px;
     padding-bottom: 6px;
-    scroll-snap-type: x proximity;
+    overflow: visible;
 }
 
-.search-page__artist-track::-webkit-scrollbar,
+/* .search-page__artist-track::-webkit-scrollbar,
 .search-page__card-track::-webkit-scrollbar {
     display: none;
-}
+} */
 
 .search-page__artist-col,
 .search-page__card-col {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
+    min-width: 0;
 }
 
 .search-page__artist-col {
-    width: 140px;
+    max-width: 180px;
 }
 
 .search-page__artist-card {
@@ -2826,10 +2840,6 @@ label .container__header-icon {
 .search-page__artist-info .row__info-creator {
     margin-top: 2px;
     font-size: 1.1rem;
-}
-
-.search-page__card-col {
-    width: 148px;
 }
 
 .search-page__card {
@@ -2938,7 +2948,7 @@ label .container__header-icon {
 
     .search-page__artist-col,
     .search-page__card-col {
-        width: 120px;
+        max-width: none;
     }
 
     .search-page__songs .playlist__song-body {
