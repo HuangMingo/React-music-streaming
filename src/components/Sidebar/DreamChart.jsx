@@ -217,10 +217,10 @@ export function DreamChart() {
                                                                     >
                                                                     <i className="btn--icon bi bi-three-dots"></i>
                                                                     <AddSongToPlaylist
-                                                                        songId={song.id}
+                                                                        song={song}
                                                                         isOpen={openSongMenuId === song.id}
                                                                         playlists={userPlaylists}
-                                                                        selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
+                                                                        selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                                         onSelectPlaylist={handleSelectTargetPlaylist}
                                                                         onCloseMenu={() => setOpenSongMenuId(null)}
                                                                         onPlaylistsChanged={loadUserPlaylists}

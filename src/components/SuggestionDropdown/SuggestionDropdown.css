@@ -1,0 +1,139 @@
+.header__search-history {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    z-index: 300;
+    display: none;
+    padding-top: 40px;
+    border-radius: 20px;
+    background-color: var(--primary-bg);
+}
+
+.header__search-input:focus~.header__search-history {
+    display: block;
+}
+
+.header__search-list {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    list-style: none;
+    padding: 13px 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.header__search-item {
+    width: 100%;
+    display: flex;
+    padding: 8px 10px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.header__search-item:hover,
+.header__search-item.active {
+    background-color: var(--bg-content-color);
+}
+
+.header__item-icon {
+    font-size: 1.6rem;
+    margin-right: 10px;
+    line-height: 1.6rem;
+    color: var(--text-secondary);
+}
+
+.header__item-link {
+    flex: 1;
+    font-size: 1.4rem;
+    line-height: 2.1rem;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.search-suggestion-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-content-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 800;
+    padding: 10px;
+    max-height: 60vh;
+    overflow: auto;
+}
+
+.search-suggestion-dropdown .suggestion-section {
+    margin-bottom: 8px;
+}
+
+.search-suggestion-dropdown .suggestion-title {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 6px 8px;
+}
+
+.search-suggestion-dropdown .suggestion-item {
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    align-items: center;
+    cursor: pointer;
+}
+
+.search-suggestion-dropdown .suggestion-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.search-suggestion-dropdown .suggestion-item.active {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.search-suggestion-dropdown .suggestion-thumb {
+    width: 46px;
+    height: 46px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.search-suggestion-dropdown .suggestion-type-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.search-suggestion-dropdown .suggestion-meta .suggestion-name {
+    font-weight: 600;
+}
+
+.search-suggestion-dropdown .suggestion-meta .suggestion-sub {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 520px) {
+    .search-suggestion-dropdown .suggestion-thumb {
+        width: 36px;
+        height: 36px;
+    }
+
+    .search-suggestion-dropdown .suggestion-type-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 1rem;
+    }
+
+    .search-suggestion-dropdown {
+        max-height: 50vh;
+    }
+}

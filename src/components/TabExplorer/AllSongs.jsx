@@ -198,7 +198,7 @@ export function AllSongs() {
                                             <div
                                                 className={`playlist__list-song media media mb-15 ${currentSong.id === song.id ? 'active' : ''} ${currentSong.id === song.id && isPlaying ? 'playing' : ''}`}
                                                 key={`${colIndex}-${rowIndex}`}
-                                                onClick={() => handleClickSong(song)}
+                                                onClick={() => {handleClickSong(song); setSelectedPlaylist(null);} }
                                                 style={{ cursor: "pointer" }}
                                             >
                                                 <div className="playlist__song-info media__left">
@@ -259,10 +259,10 @@ export function AllSongs() {
                                                          title="Khác">
                                                         <i className="btn--icon bi bi-three-dots"></i>
                                                         <AddSongToPlaylist
-                                                            songId={song.id}
+                                                            song={song}
                                                             isOpen={openSongMenuId === song.id}
                                                             playlists={userPlaylists}
-                                                            selectedPlaylistId={selectedPlaylistBySong[song.id] ?? ""}
+                                                            selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                             onSelectPlaylist={handleSelectTargetPlaylist}
                                                             onCloseMenu={() => setOpenSongMenuId(null)}
                                                             onPlaylistsChanged={loadUserPlaylists}

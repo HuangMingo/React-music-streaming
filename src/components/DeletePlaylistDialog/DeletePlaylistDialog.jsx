@@ -8,7 +8,6 @@ export function DeletePlaylistDialog({ playlistId,
     onDeleted }) {
     const [isDeleting, setIsDeleting] = useState(false);
     //Xử lí nút xóa playlist
-
     async function handleDeletePlaylist() {
         if (!playlistId || !currentUser?.id) {
             alert("Thông tin không hợp lệ");

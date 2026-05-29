@@ -16,7 +16,9 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
         playlistMenuRef,
         handleSelectTargetPlaylist,
         selectedPlaylist,
-        selectedPlaylistBySong, } = useMusicContext();
+        selectedPlaylistBySong, 
+        setSelectedPlaylist,
+    } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //Mở menu khi click vào 3 chấm của bài hát
     function handleToggleSongMenu(event, songId) {
@@ -202,7 +204,11 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                     <div className="playlist__list">
                                         {playlist?.songs?.map((song, index) => {
                                             return (
-                                                <div className={`playlist__list-song media ${currentSong?.id === song.id ? 'active' : ''} ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`} key={song.id} onClick={() => handleClickSong(song)}>
+                                                <div className={`playlist__list-song media ${currentSong?.id === song.id ? 'active' : ''} ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`} key={song.id} onClick={() => {
+                                                    handleClickSong(song);
+                                                    setSelectedPlaylist(playlist);  
+                                                }
+                                                }>
                                                     <div className="playlist__song-info media__left">
                                                         <div className="playlist__song-thumb media__thumb mr-10"
                                                             style={{
@@ -259,12 +265,12 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                                         >
                                                             <i className="btn--icon bi bi-three-dots"></i>
                                                             <AddSongToPlaylist
-                                                                songId={song.id}
+                                                                song={song}
                                                                 isOpen={openSongMenuId === song.id}
                                                                 playlists={userPlaylists}
-                                                                selectedPlaylist={selectedPlaylistBySong[song.id] ?? ""}
+                                                                selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={!selectedPlaylist.isdefault}
+                                                                canRemoveFromCurrentPlaylist={!playlist.isdefault}
                                                                 isAddingSong={isAddingSong}
                                                             />
                                                         </div>

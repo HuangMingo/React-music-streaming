@@ -13,6 +13,7 @@ export function PlaylistSection() {
     const {
         selectedPlaylist,
         setSelectedPlaylist,
+        currentSong,
         setCurrentSong,
         setCurrentTime,
         isPlaying,

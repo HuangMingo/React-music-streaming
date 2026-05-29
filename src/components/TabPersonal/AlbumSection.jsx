@@ -18,7 +18,9 @@ export function AlbumSection() {
                         <div className="row album--container">
                             {albums.length === 0 ? (
                                 <div className="box--no-content">
-                                    <div className="no-content-image" />
+                                    <div className="no-content-image">
+                                       <i className="bi bi-music-note-beamed" style= {{color: "black"}}></i>
+                                    </div>
                                     <span className="no-content-text">Chua co album nao.</span>
                                 </div>
                             ) : (

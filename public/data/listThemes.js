@@ -1,4 +1,4 @@
-import {} from "../assets/img/modalThemes/modalTheme1/theme1.jpg"
+import { } from "../assets/img/modalThemes/modalTheme1/theme1.jpg"
 const listThemes = [
     {
         type: 'Chủ Đề',
@@ -8,7 +8,7 @@ const listThemes = [
                 image: '../assets/img/modalThemes/modalTheme1/theme1.jpg',
                 backgroundImage: '../assets/img/themeBgs/listTheme1/theme1.svg',
                 colors: {
-                    
+
                     bgContentColor: "#ffffff1a",
                     borderBox: "rgb(255 255 255 / 20%)",
                     borderPrimary: "rgb(255 255 255 / 10%)",
@@ -186,7 +186,7 @@ const listThemes = [
                     placeholderText: "#757575",
                 }
             },
-           
+
         ]
     },
     {

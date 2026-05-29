@@ -12,7 +12,9 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         setCurrentSong,
         setIsPlaying,
         isPlaying,
+        currentSong,
     } = useMusicContext();
+    // console.log(selectedPlaylist);
     async function handleClickPlaylistPersonal(playlist, index) {
         scrollPersonalContainerToTop();
 
@@ -178,7 +180,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                     <div
                                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`}
                                                         key={`${absoluteIndex}`}
-                                                        onClick={() => handleClickPlaylistPersonal(playlist, absoluteIndex)}
+                                                        
                                                     >
                                                         <div className={`row__item item--playlist ${isPlaylistActive ? "active" : ""} ${isPlaylistPlaying ? "playing" : ""}`}>
                                                             <div className="row__item-container flex--top-left">
@@ -205,7 +207,11 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                             )
                                                                         }
                                                                         <div className={`btn--play-playlist `}>
-                                                                            <div className="control-btn btn-toggle-play">
+                                                                            <div className="control-btn btn-toggle-play" onClick={(e) => {
+                                                                                handleClickPlaylistPersonal(playlist, absoluteIndex);
+                                                                                e.stopPropagation();
+
+                                                                            }}>
                                                                                 <i className="bi bi-play-fill" />
                                                                             </div>
                                                                             <span className="song-note note-1">♪</span>

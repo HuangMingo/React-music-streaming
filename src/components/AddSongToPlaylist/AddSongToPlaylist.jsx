@@ -14,10 +14,10 @@ import { useMusicContext } from "../../context/MusicContext.jsx";
 import { useAuthContext } from "../../context/AuthContext.jsx";
 import { DeleteSongFromPlaylistDialog } from "../TabPersonal/DeleteSongFromPlaylistDialog.jsx";
 export function AddSongToPlaylist({
-    songId,
+    song,
     isOpen,
     playlists = [],
-    selectedPlaylist = {},
+    selectedTargetPlaylist = {},
     currentPlaylistId = "",
     onSelectPlaylist,
     onAddSong,
@@ -31,6 +31,7 @@ export function AddSongToPlaylist({
         handleOpenRemoveSongDialog,
         handleCloseRemoveSongDialog,
         handleSongRemoved,
+        selectedPlaylist
     } = useMusicContext();
     const { currentUser } = useAuthContext();
     const [isAddSubmenuOpen, setIsAddSubmenuOpen] = useState(false);
@@ -45,6 +46,7 @@ export function AddSongToPlaylist({
         refs: menuRefs,
         floatingStyles: menuFloatingStyles,
     } = useFloating({
+        strategy: "fixed",
         placement: "left-start",
         whileElementsMounted: autoUpdate,
         middleware: [
@@ -61,6 +63,7 @@ export function AddSongToPlaylist({
         refs: submenuRefs,
         floatingStyles: submenuFloatingStyles,
     } = useFloating({
+        strategy: "fixed",
         placement: "right-start",
         whileElementsMounted: autoUpdate,
         middleware: [
@@ -134,23 +137,23 @@ export function AddSongToPlaylist({
             return;
         }
 
-        await onSelectPlaylist?.(songId, targetPlaylistId);
+        await onSelectPlaylist?.(song.id, targetPlaylistId);
 
         if (typeof onAddSong === "function") {
-            await onAddSong(songId, targetPlaylistId);
+            await onAddSong(song.id, targetPlaylistId);
             setIsAddSubmenuOpen(false);
             return;
         }
 
         const playlistIdNumber = Number(targetPlaylistId);
-        if (!playlistIdNumber || !songId) {
+        if (!playlistIdNumber || !song.id) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
             return;
         }
 
         try {
             await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
-                params: { playlistId: playlistIdNumber, songId },
+                params: { playlistId: playlistIdNumber, songId: song.id },
             });
             showNotificationToast(`Đã thêm bài hát thành công vào playlist "${playlist?.playlist_name}"`);
             setIsAddSubmenuOpen(false);
@@ -170,19 +173,6 @@ export function AddSongToPlaylist({
         event.stopPropagation();
         toggleOpenForm();
     }
-
-    async function handleRemoveFromCurrentPlaylist(event) {
-        event.stopPropagation();
-
-        if (typeof onRemoveFromPlaylist === "function" && currentPlaylistId) {
-            await onRemoveFromPlaylist(songId, currentPlaylistId);
-            setIsAddSubmenuOpen(false);
-            return;
-        }
-
-        // TODO: connect remove-from-current-playlist logic here
-    }
-
     return (
         <>
             <div
@@ -191,7 +181,7 @@ export function AddSongToPlaylist({
                     rootRef.current = node;
                     menuRefs.setFloating(node);
                 }}
-                style={{ ...menuFloatingStyles }}
+                style={{ ...menuFloatingStyles, zIndex: 5000 }}
                 onClick={(event) => {
                     event.stopPropagation();
 
@@ -233,7 +223,7 @@ export function AddSongToPlaylist({
                     ref={submenuRefs.setFloating}
                     role="menu"
                     aria-label="Thêm vào playlist"
-                    style={{ ...submenuFloatingStyles, right: "auto", width: "280px" }}
+                    style={{ ...submenuFloatingStyles, right: "auto", width: "280px", zIndex: 5001 }}
                     onClick={(event) => event.stopPropagation()}
                     onMouseEnter={openSubmenu}
                 // onMouseLeave={scheduleCloseSubmenu}

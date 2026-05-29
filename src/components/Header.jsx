@@ -1,16 +1,25 @@
 import '../assets/css/main.css';
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation, useNavigationType } from 'react-router-dom';
+import axios from 'axios';
+import { SuggestionDropdown } from './SuggestionDropdown/SuggestionDropdown.jsx';
 import { useAuthContext } from '../context/AuthContext';
 export function Header({ onClose }) {
-    const [isOpen, setOpen] = useState(false);
     const [isOpenLogout, setOpenLogout] = useState(false);
     // Trạng thái bật/tắt của nút quay lại và tiến tới trên header.
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const navigationType = useNavigationType();
     const { currentUser, isAuthenticated, isAdmin, logout } = useAuthContext();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [suggestions, setSuggestions] = useState({ songs: [], artists: [], playlists: [] });
+    const [showSuggest, setShowSuggest] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
+    const debounceRef = useRef(null);
+    const inputRef = useRef(null);
+    const userMenuRef = useRef(null);
 
     // Đồng bộ trạng thái nút back/forward theo history index của browser
     useEffect(() => {
@@ -19,14 +28,16 @@ export function Header({ onClose }) {
         const maxIdxKey = 'maxHistoryIdx';
         // Lưu lại idx lớn nhất đã đi qua để biết còn trang forward hay không.
         const savedMaxIdx = Number(sessionStorage.getItem(maxIdxKey) ?? currentIdx);
-        const maxIdx = Math.max(savedMaxIdx, currentIdx);
+        const maxIdx = navigationType === 'PUSH'
+            ? currentIdx
+            : Math.max(savedMaxIdx, currentIdx);
 
         sessionStorage.setItem(maxIdxKey, String(maxIdx));
 
         // Có thể lùi khi không ở vị trí đầu; có thể tiến khi chưa ở idx lớn nhất.
         setCanGoBack(currentIdx > 0);
         setCanGoForward(currentIdx < maxIdx);
-    }, [location]);
+    }, [location, navigationType]);
 
     //Chuyển trang cũ
     function handleBack() {
@@ -41,6 +52,107 @@ export function Header({ onClose }) {
         if (canGoForward) {
             navigate(1);
         }
+    }
+
+    useEffect(() => {
+        // hide suggestion when clicking outside
+        function handleClick(e) {
+            if (!inputRef.current?.contains(e.target)) {
+                setShowSuggest(false);
+            }
+        }
+        document.addEventListener('click', handleClick);
+        return () => document.removeEventListener('click', handleClick);
+    }, []);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+                setOpenLogout(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const q = searchTerm.trim();
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (!q) {
+            setSuggestions({ songs: [], artists: [], playlists: [] });
+            setShowSuggest(false);
+            setActiveIndex(-1);
+            return;
+        }
+        debounceRef.current = setTimeout(async () => {
+            try {
+                const res = await axios.get(`http://localhost:3000/api/search/suggest?q=${encodeURIComponent(q)}`);
+                setSuggestions(res.data || { songs: [], artists: [], playlists: [] });
+                setShowSuggest(true);
+                setActiveIndex(-1);
+            } catch (err) {
+                console.error('Suggest error', err);
+                setSuggestions({ songs: [], artists: [], playlists: [] });
+            }
+        }, 300);
+        return () => clearTimeout(debounceRef.current);
+    }, [searchTerm]);
+
+    function buildFlatList(list) {
+        const out = [];
+        (list.songs || []).forEach((s) => out.push({ type: 'song', item: s }));
+        (list.artists || []).forEach((a) => out.push({ type: 'artist', item: a }));
+        (list.playlists || []).forEach((p) => out.push({ type: 'playlist', item: p }));
+        return out;
+    }
+
+    function handleInputKeyDown(e) {
+        const flat = buildFlatList(suggestions);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (flat.length === 0) return;
+            setActiveIndex((idx) => Math.min(idx + 1, flat.length - 1));
+            setShowSuggest(true);
+            return;
+        }
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (flat.length === 0) return;
+            setActiveIndex((idx) => Math.max(idx - 1, 0));
+            setShowSuggest(true);
+            return;
+        }
+        if (e.key === 'Escape') {
+            setShowSuggest(false);
+            setActiveIndex(-1);
+            return;
+        }
+        if (e.key === 'Enter') {
+            const q = searchTerm.trim();
+            if (activeIndex >= 0) {
+                const sel = flat[activeIndex];
+                if (sel) {
+                    const val = encodeURIComponent(sel.item.title || sel.item.name || sel.item.playlist_name || '');
+                    setShowSuggest(false);
+                    setActiveIndex(-1);
+                    navigate(`/tim-kiem/tat-ca?q=${val}`);
+                }
+                return;
+            }
+            if (q) {
+                setShowSuggest(false);
+                navigate(`/tim-kiem/tat-ca?q=${encodeURIComponent(q)}`);
+            }
+        }
+    }
+
+    function handleSubmitSearch() {
+        const q = searchTerm.trim();
+        if (!q) return;
+        setShowSuggest(false);
+        setActiveIndex(-1);
+        navigate(`/tim-kiem/tat-ca?q=${encodeURIComponent(q)}`);
     }
 
     function handleLogout() {
@@ -58,73 +170,53 @@ export function Header({ onClose }) {
             {/* Header */}
             < header className="header grid" >
                 <div className="header__with-search">
-                    <button 
-                        className="header__button" 
-                        type="button" 
+                    <button
+                        className="header__button"
+                        type="button"
                         onClick={handleBack}
                         disabled={!canGoBack}
                         title={canGoBack ? 'Trang trước' : 'Không có trang trước'}
                     >
                         <i className="bi bi-arrow-left header__button-icon" />
                     </button>
-                    <button 
-                        className="header__button" 
-                        type="button" 
+                    <button
+                        className="header__button"
+                        type="button"
                         onClick={handleForward}
                         disabled={!canGoForward}
                         title={canGoForward ? 'Trang tiếp theo' : 'Không có trang tiếp theo'}
                     >
                         <i className="bi bi-arrow-right header__button-icon" />
                     </button>
-                    <div className="header__search">
+                    <div className="header__search" ref={inputRef}>
                         <input
                             type="text"
                             placeholder="Nhập tên bài hát, nghệ sĩ hoặc MV..."
                             className="header__search-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={handleInputKeyDown}
                         />
-                        <div className="header__search-btn">
+                        <div className="header__search-btn" onClick={handleSubmitSearch}>
                             <i className="bi bi-search header__search-icon" />
                         </div>
-                        <div className="header__search-history">
-                            <ul className="header__search-list">
-                                <li className="header__search-item">
-                                    <i className="bi bi-search header__item-icon" />
-                                    <a href="#" className="header__item-link">
-                                        Tình bạn diệu kì
-                                    </a>
-                                </li>
-                                <li className="header__search-item">
-                                    <i className="bi bi-search header__item-icon" />
-                                    <a href="#" className="header__item-link">
-                                        Gác lại âu lo
-                                    </a>
-                                </li>
-                                <li className="header__search-item">
-                                    <i className="bi bi-search header__item-icon" />
-                                    <a href="#" className="header__item-link">
-                                        Hongkong1
-                                    </a>
-                                </li>
-                                <li className="header__search-item">
-                                    <i className="bi bi-search header__item-icon" />
-                                    <a href="#" className="header__item-link">
-                                        #zingchart
-                                    </a>
-                                </li>
-                                <li className="header__search-item">
-                                    <i className="bi bi-search header__item-icon" />
-                                    <a href="#" className="header__item-link">
-                                        Cheating on You
-                                    </a>
-                                </li>
-                                <li className="header__search-item">
-                                    <i className="bi bi-search header__item-icon" />
-                                    <a href="#" className="header__item-link">
-                                        BlackJack
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        {showSuggest && (
+                            <SuggestionDropdown
+                                suggestions={suggestions}
+                                activeIndex={activeIndex}
+                                onHoverIndex={(i) => setActiveIndex(i)}
+                                onSelect={(type, item) => {
+                                    const val = encodeURIComponent(item.title || item.name || item.playlist_name || '');
+                                    const text = item.title || item.name || item.playlist_name || '';
+                                    setSearchTerm(text);
+                                    setShowSuggest(false);
+                                    setActiveIndex(-1);
+                                    navigate(`/tim-kiem/tat-ca?q=${val}`);
+                                }}
+                            />
+                        )}
+
+
                     </div>
                 </div>
                 <div className="header__nav">
@@ -278,7 +370,7 @@ export function Header({ onClose }) {
                                 </svg>
                             </div>
                         </li>
-                        
+
                         {!isAuthenticated ? (
                             <>
                                 <li className="header__nav-item">
@@ -293,7 +385,7 @@ export function Header({ onClose }) {
                                 </li>
                             </>
                         ) : (
-                            <li className="header__nav-item">
+                            <li className="header__nav-item" ref={userMenuRef}>
                                 <img
                                     src={currentUser?.avatar || '/assets/img/avatars/avatar.jpg'}
                                     alt={currentUser?.username || 'avatar'}

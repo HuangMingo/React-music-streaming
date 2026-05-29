@@ -7,8 +7,14 @@ export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDele
     const [isDeleting, setIsDeleting] = useState(false);
 
     async function handleDeleteSong() {
-        if (!playlistId || !song?.id) {
-            alert("Thông tin không hợp lệ");
+
+        if (!playlistId) {
+            alert("Playlist không hợp lệ");
+            return;
+        }
+        if(!song?.id)
+        {
+            alert("Bài hát không hợp lệ");  
             return;
         }
 

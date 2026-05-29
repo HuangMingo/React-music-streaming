@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useMusicContext } from "../context/MusicContext";
 import { useAuthContext } from "../context/AuthContext";
 import axios from "axios";
-import { AddSongToPlaylist } from "./AddSongToPlaylist/AddSongToPlaylist.jsx";
 import { showNotificationToast } from "../toast";
+
 const formatTime = (seconds = 0) => {
     const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
     const mins = Math.floor(safeSeconds / 60)
@@ -30,11 +30,6 @@ export function Player() {
         favouriteSongIds,
         setIsFavouriteSongIds,
         toggleFavouriteSong,
-        playlistMenuRef,
-        handleSelectTargetPlaylist,
-        selectedPlaylistBySong,
-        userPlaylists,
-        isAddingSong,
     } = useMusicContext();
     const [isFullscreen, setIsFullscreen] = useState(false);
     useEffect(() => {
@@ -48,28 +43,8 @@ export function Player() {
             document.removeEventListener("fullscreenchange", handleFullscreenChange);
         };
     }, []);
-    const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //--------------Xử lí khi click bên ngoài----------
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
-                setOpenSongMenuId(null);
-            }
-        }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
     //Mở menu khi click vào 3 chấm của bài hát
-    function handleToggleSongMenu(event, songId) {
-        event.stopPropagation();
-
-        setOpenSongMenuId((prevSongId) =>
-            prevSongId === songId ? null : songId
-        );
-    }
     const { currentUser } = useAuthContext();
     const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const audioRef = useRef();
@@ -105,6 +80,7 @@ export function Player() {
         const volumeNode = event.target.closest(".player__volume-progress");
         const popupNode = event.target.closest(".player__popup");
 
+
         if (
             heartBtn ||
             randomBtn ||
@@ -125,6 +101,26 @@ export function Player() {
         // }
 
     }
+    const [lyricsText, setLyricsText] = useState("");
+    useEffect(() => {
+        async function loadLyrics() {
+            if (!currentSong?.lyrics) {
+                setLyricsText("Chưa có lời bài hát");
+                return;
+            }
+
+            try {
+                const response = await fetch(currentSong.lyrics);
+                const text = await response.text();
+                setLyricsText(text);
+            } catch (error) {
+                console.error("Load lyrics failed:", error);
+                setLyricsText("Không tải được lời bài hát");
+            }
+        }
+
+        loadLyrics();
+    }, [currentSong?.lyrics]);
     function handleClosePlayerPopup(event) {
         event.stopPropagation();
         setOpenPlayerPopup(false);
@@ -142,7 +138,7 @@ export function Player() {
             console.error("Fullscreen failed:", error);
         }
     }
-    //Khôi phục trạng thái phát nhạc khi reload trang nếu có dữ liệu hợp lệ trong localStorage
+    //Khôi phục bài hát/thời gian khi đổi bài hoặc reload.
     useEffect(() => {
         if (audioRef.current && currentSong?.audio) {
             const savedTime = currentTime;
@@ -154,12 +150,22 @@ export function Player() {
             playSessionRef.current += 1;
             listenedTimeRef.current = 0;
             lastTimeRef.current = null;
-            audioRef.current
-                .play()
-                .then(() => setIsPlaying(true))
-                .catch(() => setIsPlaying(false));
         }
-    }, [currentSong, setCurrentTime]);
+    }, [currentSong]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !currentSong?.audio) return;
+
+        if (isPlaying) {
+            audio
+                .play()
+                .catch(() => setIsPlaying(false));
+            return;
+        }
+
+        audio.pause();
+    }, [currentSong?.audio, isPlaying, setIsPlaying]);
     //Cập nhật âm lượng của thẻ audio khi currentVolume thay đổi
     useEffect(() => {
         const audio = audioRef.current;
@@ -392,19 +398,10 @@ export function Player() {
                                     >
                                         <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong?.id) ? "-fill" : ""} primary`} />
                                     </div>
-                                    <div className="player__song-btn option-btn btn-three-dots" onClick={(event) => handleToggleSongMenu(event, currentSong.id)} ref={openSongMenuId === currentSong?.id ? playlistMenuRef : null}
+                                    <div className="player__song-btn option-btn btn-three-dots" onClick={(event) => event.stopPropagation()}
                                         title="Khác">
                                         <i className="btn--icon bi bi-three-dots" />
                                     </div>
-                                    <AddSongToPlaylist
-                                        songId={currentSong?.id}
-                                        isOpen={openSongMenuId === currentSong?.id}
-                                        playlists={userPlaylists}
-                                        selectedPlaylistId={selectedPlaylistBySong[currentSong?.id] ?? ""}
-                                        onCloseMenu={() => setOpenSongMenuId(null)}
-                                        onSelectPlaylist={handleSelectTargetPlaylist}
-                                        isAddingSong={isAddingSong}
-                                    />
                                 </div>
                             </div>
                         </div>
@@ -513,7 +510,7 @@ export function Player() {
                     <div className="player__popup-header">
                         <div className="player__popup-logo">
                             <img
-                                src="./assets/img/logos/main-logo.png"
+                                src="./../../public/assets/img/logos/main-logo.png"
                                 alt="Logo"
                                 className="player__logo-img"
                             />
@@ -522,7 +519,7 @@ export function Player() {
                             <ul className="popup__action-menu">
                                 <li className="popup__action-btn hide-on-tablet-mobile" onClick={handleToggleFullscreen}>
                                     {
-                                        document.fullscreenElement
+                                        isFullscreen
                                             ? <i className="bi bi-arrows-angle-contract popup__action-btn-icon" />
                                             : <i className="bi bi-arrows-angle-expand popup__action-btn-icon" />
                                     }
@@ -530,7 +527,7 @@ export function Player() {
 
                                 </li>
                                 {
-                                     !isFullscreen && (
+                                    !isFullscreen && (
                                         <li className="popup__action-btn btn--pop-down" onClick={(e) => handleClosePlayerPopup(e)}>
                                             <i className="bi bi-chevron-down popup__action-btn-icon" />
                                         </li>
@@ -541,30 +538,44 @@ export function Player() {
                         </div>
                     </div>
                     <div className="player__popup-cd-display">
-                        <div
-                            className="player__popup-cd-img"
-                            style={{
-                                background:
-                                    `url(${currentSong?.image || "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg"}) no-repeat center center / cover`
-                            }}
-                        />
-                    </div>
-                    <div className="player__popup-cd-info">
-                        <h4>Now playing</h4>
-                        <h2 className="is-twoline">{currentSong?.title || "Unknown Song"}</h2>
-                        <div className="player__song-author info__author">
-                            {
-                                currentSong?.artist_names?.map((artist, index) => {
-                                    return (
-                                        <span key={index}>
-                                            <a href="#" className="is-ghost">{artist}</a>
-                                            {index < currentSong?.artist_names?.length - 1 && ", "}
-                                        </span>
-                                    )
-                                })
-                            }
+                        <div className="player__popup-left">
+                            <div
+                                className="player__popup-cd-img"
+                                style={{
+                                    background:
+                                        `url(${currentSong?.image || "fallback"}) no-repeat center center / cover`
+                                }}
+                            />
+
+                            <div className="player__popup-cd-info">
+                                <h4>Now playing</h4>
+
+                                <h2 className="is-twoline">
+                                    {currentSong?.title || "Unknown Song"}
+                                </h2>
+
+                                <div className="player__song-author info__author">
+                                    {
+                                        currentSong?.artist_names?.map((artist, index) => {
+                                            return (
+                                                <span key={index}>
+                                                    <a href="#" className="is-ghost">{artist}</a>
+                                                    {index < currentSong?.artist_names?.length - 1 && ", "}
+                                                </span>
+                                            )
+                                        })
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="player__popup-lyrics">
+                            {lyricsText.split("\n").map((line, index) => (
+                                <p key={index}>{line}</p>
+                            ))}
                         </div>
                     </div>
+
                     <div className="player__popup-footer">
                         <div className="player__container-song hide-on-mobile">
                             <div className={`player__song-info media${isPlaying ? " playing" : ""}`}>
@@ -615,7 +626,18 @@ export function Player() {
 
                                             </div>
                                         </div>
-                                        <div className="player__song-author info__author">{currentSong?.artist_names?.join(', ') || 'Unknown Artist'}</div>
+                                        <div className="player__song-author info__author">
+                                            {
+                                                currentSong?.artist_names?.map((artist, index) => {
+                                                    return (
+                                                        <span key={index}>
+                                                            <a href="#" className="is-ghost">{artist}</a>
+                                                            {index < currentSong?.artist_names?.length - 1 && ", "}
+                                                        </span>
+                                                    )
+                                                })
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="media__right hide-on-tablet-mobile">

@@ -30,6 +30,7 @@ import { TabExplorer } from './components/TabExplorer/TabExplorer.jsx'
 import { RecentSong } from './components/TabFollowing/RecentSong.jsx'
 import { TabPersonal } from './components/TabPersonal/TabPersonal.jsx'
 import { TabRadio } from './components/TabRadio/TabRadio.jsx'
+import { SearchResults } from './components/Search/SearchResults.jsx'
 import { UploadSection } from './components/TabPersonal/UploadSection.jsx'
 import { Radio } from './components/TabExplorer/Radio.jsx'
 
@@ -93,7 +94,6 @@ function App() {
   //Các trang độc lập
   const standalonePaths = ['/login', '/register', '/dashboard', '/admin'];
   const isStandalonePage = standalonePaths.includes(location.pathname);
-
   // -----------Set background for header when scroll-----------
   useEffect(() => {
     const appContainers = Array.from(document.querySelectorAll('.app__container'));
@@ -163,8 +163,9 @@ function App() {
               <Route path="upload" element={<AdminRoute><UploadSection /></AdminRoute>} />
             </Route>
             <Route path="/dream" element={<DreamChart />} />
-            {/* <Route path="/radio" element={<Radio />} /> */}
             <Route path="/recent" element={<RecentSong />} />
+            <Route path="/tim-kiem" element={<Navigate to="/tim-kiem/tat-ca" replace />} />
+            <Route path="/tim-kiem/:tab" element={<SearchResults />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 

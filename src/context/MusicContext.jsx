@@ -72,6 +72,7 @@ export function MusicProvider({ children }) {
   // --------------Active song-------------
   function handleClickSong(song) {
     setCurrentSong(song);
+    setIsPlaying(true);
     if (currentSong !== song) {
       // Reset currentTime when changing songs
       setCurrentTime(0);
@@ -79,7 +80,6 @@ export function MusicProvider({ children }) {
   }
   // Sau khi xóa bài hát khỏi playlist thành công, cập nhật lại danh sách bài hát trong playlist đã chọn
   function handleSongRemoved(removedSong) {
-    const nextSongs = (selectedPlaylist?.songs ?? []).filter((song) => song.id !== removedSong.id);
 
     setSelectedPlaylist((prevPlaylist) => {
       if (!prevPlaylist) {
@@ -93,7 +93,50 @@ export function MusicProvider({ children }) {
         ),
       };
     });
+
     handleCloseRemoveSongDialog();
+  }
+  //xử lý sau khi thêm bài hát.
+  function handleSongAddedToPlaylist(playlistId, addedSong) {
+    setUserPlaylists((prevPlaylists) =>
+      prevPlaylists.map((playlist) => {
+        if (playlist.id !== Number(playlistId)) {
+          return playlist;
+        }
+
+        const songs = playlist.songs || [];
+        const isExisting = songs.some((song) => song.id === addedSong.id);
+
+        if (isExisting) {
+          return playlist;
+        }
+
+        return {
+          ...playlist,
+          songs: [addedSong, ...songs],
+          playlist_image: addedSong.image || playlist.playlist_image,
+        };
+      })
+    );
+
+    setSelectedPlaylist((prevPlaylist) => {
+      if (!prevPlaylist || prevPlaylist.id !== Number(playlistId)) {
+        return prevPlaylist;
+      }
+
+      const songs = prevPlaylist.songs || [];
+      const isExisting = songs.some((song) => song.id === addedSong.id);
+
+      if (isExisting) {
+        return prevPlaylist;
+      }
+
+      return {
+        ...prevPlaylist,
+        songs: [addedSong, ...songs],
+        playlist_image: addedSong.image || prevPlaylist.playlist_image,
+      };
+    });
   }
   //State để lưu id của bài hát đang mở menu
 
@@ -140,6 +183,7 @@ export function MusicProvider({ children }) {
 
   //lưu playlist mà người dùng đã chọn cho từng bài hát.
   function handleSelectTargetPlaylist(songId, playlistId) {
+    console.log(playlistId);
     setSelectedPlaylistBySong((prev) => ({
       ...prev,
       [songId]: playlistId,
@@ -185,21 +229,12 @@ export function MusicProvider({ children }) {
 
   useEffect(() => {
     try {
-      // Khi component được mount, kiểm tra localStorage để khôi phục trạng thái
-      const savedIsPlayingStr = localStorage.getItem("isPlaying");
-      if (savedIsPlayingStr && savedIsPlayingStr !== "undefined") {
-        const savedIsPlaying = JSON.parse(savedIsPlayingStr);
-        if (savedIsPlaying !== null) {
-          setIsPlaying(savedIsPlaying);
-        }
-      }
-
       //Lưu dữ liệu âm lượng vào biến hiện tại
       const savedVolumeStr = localStorage.getItem("currentVolume");
       if (savedVolumeStr && savedVolumeStr !== "undefined") {
         const savedVolume = JSON.parse(savedVolumeStr);
         if (savedVolume !== null) {
-          setCurrentVolume(savedVolume);
+          setCurrentVolume(Number(savedVolume) > 0 ? savedVolume : 50);
         }
       }
       //Lưu dữ liệu thời gian hiện tại của bài hát vào currentTime
@@ -228,32 +263,32 @@ export function MusicProvider({ children }) {
     }
   }, []);
 
-// async function handleClickPlaylistPersonal(playlist) {
-//     try {
-//         const response = await axios.get(
-//             "http://localhost:3000/api/playlists/playlist-details",
-//             {
-//                 params: {
-//                     playlistId: playlist.id
-//                 }
-//             }
-//         );
+  // async function handleClickPlaylistPersonal(playlist) {
+  //     try {
+  //         const response = await axios.get(
+  //             "http://localhost:3000/api/playlists/playlist-details",
+  //             {
+  //                 params: {
+  //                     playlistId: playlist.id
+  //                 }
+  //             }
+  //         );
 
-//         const playlistData = response.data;
+  //         const playlistData = response.data;
 
-//         setSelectedPlaylist(playlistData);
+  //         setSelectedPlaylist(playlistData);
 
-//         const firstSong = playlistData?.songs?.[0];
+  //         const firstSong = playlistData?.songs?.[0];
 
-//         if (firstSong) {
-//             setCurrentSong(firstSong);
-//             setCurrentTime(0);
-//             setIsPlaying(true);
-//         }
-//     } catch (error) {
-//         console.error("Load playlist failed:", error);
-//     }
-// }
+  //         if (firstSong) {
+  //             setCurrentSong(firstSong);
+  //             setCurrentTime(0);
+  //             setIsPlaying(true);
+  //         }
+  //     } catch (error) {
+  //         console.error("Load playlist failed:", error);
+  //     }
+  // }
 
   // Auto-save currentSong to localStorage
   useEffect(() => {
@@ -263,12 +298,12 @@ export function MusicProvider({ children }) {
   }, [currentSong]);
 
   // Auto-save selectedPlaylist to localStorage
-  // useEffect(() => {
-  //   if (selectedPlaylist !== null) {
-  //     localStorage.setItem("selectedPlaylist", JSON.stringify(selectedPlaylist));
-  //     return;
-  //   }
-  // }, [selectedPlaylist]);
+  useEffect(() => {
+    if (selectedPlaylist !== null) {
+      localStorage.setItem("selectedPlaylist", JSON.stringify(selectedPlaylist));
+      return;
+    }
+  }, [selectedPlaylist]);
   // Auto-save isPlaying to localStorage
   useEffect(() => {
     localStorage.setItem("isPlaying", JSON.stringify(isPlaying));
@@ -307,6 +342,7 @@ export function MusicProvider({ children }) {
       userPlaylists,
       playlistMenuRef,
       handleSelectTargetPlaylist,
+      handleSongRemoved,
     }}>
       {children}
     </MusicContext.Provider>

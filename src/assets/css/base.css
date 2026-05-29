@@ -949,14 +949,14 @@ a.row__info-creator:hover {
 .no-content-image {
     width: 90px;
     height: 90px;
-    background: url('https://zjs.zadn.vn/zmp3-desktop/releases/v1.3.18/static/media/music-icon.cfa4aa91.svg') no-repeat center center / contain;
+    color: var(--text-secondary);
     margin-bottom: 20px;
 }
 
 .no-content-text {
     font-size: 1.6rem;
     line-height: 2rem;
-    color: #b3b3b3;
+    color: var(--text-secondary);
 }
 
 
