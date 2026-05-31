@@ -1187,6 +1187,62 @@ label .container__header-icon {
     justify-content: flex-end;
 }
 
+.playlist-detail__playmusic {
+    height: auto;
+    align-items: flex-start;
+}
+
+.container__slide.playlist-detail__slide {
+    height: auto;
+    min-height: 300px;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 18px;
+}
+
+.playlist-detail__play-all {
+    min-width: 176px;
+    height: 44px;
+    font-size: 1.5rem;
+}
+
+.playlist-detail__summary {
+    width: 230px;
+}
+
+.playlist-detail__name {
+    margin: 0 0 16px;
+    color: var(--text-color);
+    font-size: 2.8rem;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.playlist-detail__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.playlist-detail__heart-btn {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-color);
+    background: var(--primary-bg);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.playlist-detail__heart-btn i {
+    font-size: 2rem;
+}
+
 .container__slide-show {
     width: 230px;
     height: 244px;
@@ -1757,7 +1813,6 @@ label .container__header-icon {
 
 .artist__container {
     align-items: stretch;
-    overflow: hidden !important;
 }
 
 .artist__viewport {
@@ -1777,148 +1832,40 @@ label .container__header-icon {
     flex: 0 0 100%;
     display: flex;
     flex-wrap: nowrap;
-    align-items: flex-start;
-    gap: 0;
 }
 
-.artist__page>.artist__col {
+.artist__page>.col {
     flex: 0 0 20%;
     max-width: 20%;
-    min-width: 0;
-    padding: 0 14px;
 }
 
 @media (max-width: 1023px) {
-    .artist__page>.artist__col {
+    .artist__page>.col {
         flex: 0 0 25%;
         max-width: 25%;
     }
 }
 
 @media (max-width: 739px) {
-    .artist__page>.artist__col {
+    .artist__page>.col {
         flex: 0 0 50%;
         max-width: 50%;
-        padding: 0 8px;
     }
 }
 
-.artist__card {
-    align-items: center;
-}
-
-.artist__card-inner {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-}
-
-.artist__avatar {
-    width: min(100%, 240px);
-    max-width: 240px;
-    aspect-ratio: 1;
-    margin: 0 auto;
-    box-shadow: none;
-}
-
-.artist__avatar .overlay {
-    border-radius: 50%;
-}
-
-.artist__avatar-img {
-    background-size: cover !important;
-}
-
-.artist__info {
-    flex: unset;
-    margin-top: 20px;
-}
-
-.artist__info .media__left {
-    width: 100%;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-}
-
-.artist__name {
-    margin: 0 0 8px;
-    color: var(--text-color);
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 2.4rem;
-}
-
-.artist__followers {
-    color: var(--text-secondary);
-    font-size: 1.6rem;
-    line-height: 2rem;
-}
-
-.artist__button-wrap {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin: 24px 0 0;
-}
-
 .artist__follow-btn {
-    min-width: 212px;
-    height: 40px !important;
-    gap: 6px;
-    padding: 0 24px !important;
-    border-radius: 999px;
-    font-size: 1.4rem !important;
-    font-weight: 700;
+    min-width: 126px;
     transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
 .artist__follow-btn--ghost {
-    border: 1px solid var(--purple-primary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14);
     background: transparent;
     color: var(--text-color);
 }
 
 .artist__follow-btn:hover {
     transform: translateY(-1px);
-}
-
-.artist__follow-btn i {
-    font-size: 1.9rem;
-    line-height: 1;
-    transform: none;
-}
-
-.artist__follow-btn span {
-    font-size: 1.4rem;
-    line-height: 1;
-}
-
-@media (max-width: 739px) {
-    .artist__avatar {
-        max-width: 180px;
-    }
-
-    .artist__name {
-        font-size: 1.7rem;
-        line-height: 2.1rem;
-    }
-
-    .artist__followers {
-        font-size: 1.4rem;
-    }
-
-    .artist__follow-btn {
-        min-width: 150px;
-        height: 34px !important;
-        padding: 0 14px !important;
-        font-size: 1.2rem !important;
-    }
-
-    .artist__follow-btn span {
-        font-size: 1.2rem;
-    }
 }
 
 
@@ -2943,7 +2890,7 @@ label .container__header-icon {
     margin-top: 0;
     font-size: 1.3rem;
     line-height: 1.8rem;
-    color: var(--white-color);
+    color: var(--text-color);
 }
 
 .search-page__artist-info .row__info-creator {
@@ -2968,7 +2915,6 @@ label .container__header-icon {
 .search-page__card-info .row__info-name {
     font-size: 1.3rem;
     line-height: 1.8rem;
-    color: var(--white-color);
 }
 
 .search-page__card-info .row__info-creator {
@@ -3002,10 +2948,10 @@ label .container__header-icon {
     color: var(--text-secondary);
 }
 
-.search-page__songs .playlist__song-btn.btn--heart:hover,
+/* .search-page__songs .playlist__song-btn.btn--heart:hover,
 .search-page__songs .playlist__song-btn.btn--heart:hover .btn--icon {
     color: var(--purple-primary);
-}
+} */
 
 .search-page__songs .playlist__rank-number {
     width: 42px;

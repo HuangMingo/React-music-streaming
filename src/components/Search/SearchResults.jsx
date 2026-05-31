@@ -29,12 +29,16 @@ export function SearchResults() {
   const isMountedRef = useRef(true);
   const {
     currentSong,
+    setCurrentSong,
+    setCurrentTime,
     isPlaying,
     setIsPlaying,
     setSelectedPlaylist,
     favouriteSongIds,
+    favouritePlaylistIds,
     setFavouriteSongIds,
     toggleFavouriteSong,
+    toggleFavouritePlaylist,
     handleClickSong,
     playlistMenuRef,
     handleSelectTargetPlaylist,
@@ -148,6 +152,80 @@ export function SearchResults() {
 
   function goToTab(nextTab) {
     navigate(`/tim-kiem/${nextTab}?q=${encodeURIComponent(q)}`);
+  }
+
+  function getPlaylistName(playlist) {
+    return playlist?.slug || playlist?.name || playlist?.playlist_name || '';
+  }
+
+  function createPlaylistSlug(playlist) {
+    const rawSlug = playlist?.slug || getPlaylistName(playlist);
+    return String(rawSlug)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function navigateToPlaylist(playlist) {
+    const slug = createPlaylistSlug(playlist);
+    if (!slug) return;
+
+    navigate(`/playlist/${slug}`, {
+      state: {
+        playlistId: playlist?.id,
+        playlist,
+      },
+    });
+  }
+
+  async function loadPlaylistDetails(playlist) {
+    if (playlist?.songs?.length) {
+      return playlist;
+    }
+
+    if (!playlist?.id) {
+      return playlist;
+    }
+
+    const response = await axios.get('http://localhost:3000/api/playlists/playlist-details', {
+      params: {
+        playlistId: playlist.id,
+      },
+    });
+
+    return response.data;
+  }
+
+  async function handlePlayPlaylist(event, playlist) {
+    event.stopPropagation();
+
+    try {
+      const playlistData = await loadPlaylistDetails(playlist);
+      const songs = playlistData?.songs ?? [];
+      const firstSong = songs[0];
+
+      if (!firstSong) {
+        navigateToPlaylist(playlist);
+        return;
+      }
+
+      setSelectedPlaylist(playlistData);
+      setCurrentSong(firstSong);
+      setCurrentTime(0);
+      setIsPlaying(true);
+      navigate(`/playlist/${createPlaylistSlug(playlistData) || createPlaylistSlug(playlist)}`, {
+        state: {
+          playlistId: playlistData?.id ?? playlist?.id,
+          playlist: playlistData,
+        },
+      });
+    } catch (error) {
+      console.error('Play playlist failed:', error);
+    }
   }
 
   function handleSongClick(song) {
@@ -279,6 +357,7 @@ export function SearchResults() {
                               <div className="playlist__song-option song--tab media__right hide-on-mobile">
                                 <div
                                   className="playlist__song-btn btn--heart option-btn"
+                                  //sự kiện nhấn yêu thích/bỏ yêu thích bài hát
                                   onClick={(event) => toggleFavouriteSong(event, song.id)}
                                   title={favouriteSongIds.has(song.id) ? 'Bỏ thích bài hát' : 'Thêm vào bài hát yêu thích'}
                                 >
@@ -297,6 +376,7 @@ export function SearchResults() {
                                     playlists={userPlaylists}
                                     selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ''}
                                     onSelectPlaylist={handleSelectTargetPlaylist}
+                                    onCloseMenu={() => setOpenSongMenuId(null)}
                                   />
                                 </div>
                               </div>
@@ -369,9 +449,11 @@ export function SearchResults() {
                     <div className="search-page__empty">Không tìm thấy playlist phù hợp</div>
                   ) : (
                     <div className="search-page__card-track">
-                      {topPlaylists.map((pl, idx) => (
+                      {topPlaylists.map((pl, idx) => {
+                        const isMine = Number(pl.creator_id) === Number(currentUser?.id);
+                        return (
                         <div className="search-page__card-col" key={pl.id ?? `pl-${idx}`}>
-                          <div className="row__item item--playlist search-page__card" onClick={() => navigate(`/tim-kiem/playlist?q=${encodeURIComponent(pl.name || pl.playlist_name || '')}`)}>
+                          <div className="row__item item--playlist search-page__card" onClick={() => navigateToPlaylist(pl)}>
                             <div className="row__item-container flex--top-left">
                               <div className="row__item-display br-5 search-page__card-display">
                                 <div className="row__item-img img--square" style={{ background: `url(${getImage(pl)}) no-repeat center center / cover`, overflow: 'hidden' }} />
@@ -379,16 +461,21 @@ export function SearchResults() {
                                   <div
                                     className="action-btn btn--heart"
                                     onClick={(e) => {
-                                      e.stopPropagation();
+                                      if (isMine) {
+                                        e.stopPropagation();
+                                        return;
+                                      }
+                                      toggleFavouritePlaylist(e, pl.id);
                                     }}
+                                    title={!isMine ? (favouritePlaylistIds.has(pl.id) ? 'Bỏ thích playlist' : 'Thêm vào playlist yêu thích') : undefined}
                                   >
-                                    {pl.ismine != null && pl.ismine === true ? (
+                                    {isMine ? (
                                       <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(pl.id)} />
                                     ) : (
-                                      <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                                      <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(pl.id) ? '-fill' : ''} primary`} />
                                     )}
                                   </div>
-                                  <div className="btn--play-playlist">
+                                  <div className="btn--play-playlist" onClick={(event) => handlePlayPlaylist(event, pl)}>
                                     <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
                                     <span className="song-note note-1">♪</span>
                                     <span className="song-note note-2">♫</span>
@@ -396,8 +483,8 @@ export function SearchResults() {
                                     <span className="song-note note-4">♫</span>
                                   </div>
                                   <div className="playlist-actions">
-                                    {pl.creator_id === currentUser?.id && (
-                                      <button className="playlist-more-btn">
+                                    {isMine && (
+                                      <button className="playlist-more-btn" onClick={(event) => event.stopPropagation()}>
                                         ...
                                       </button>
                                     )}
@@ -412,7 +499,8 @@ export function SearchResults() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </section>

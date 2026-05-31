@@ -4,19 +4,22 @@ import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
 import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx";
 import axios from "axios";
-export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
+export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false }) {
     const { currentSong,
         setCurrentSong,
         setCurrentTime,
         isPlaying,
+        setIsPlaying,
         toggleFavouriteSong,
         favouriteSongIds,
+        favouritePlaylistIds,
+        toggleFavouritePlaylist,
         setFavouriteSongIds,
         handleClickSong,
         playlistMenuRef,
         handleSelectTargetPlaylist,
         selectedPlaylist,
-        selectedPlaylistBySong, 
+        selectedPlaylistBySong,
         setSelectedPlaylist,
     } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
@@ -35,6 +38,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
 
     const visibleSongs = useMemo(() => (playlist?.songs ?? []), [playlist]);
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
+    const playlistName = playlist?.playlist_name || playlist?.name || "";
 
     const formatSongDuration = (song) => {
         const durationInSeconds = Number(song?.duration_seconds ?? song?.duration ?? 0);
@@ -43,6 +47,29 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
         const secs = Math.floor(safeDuration % 60).toString().padStart(2, "0");
         return `${mins}:${secs}`;
     };
+
+    function handlePlayAll() {
+        const firstSong = visibleSongs[0];
+        if (!firstSong) {
+            return;
+        }
+
+        setSelectedPlaylist(playlist);
+        setCurrentSong(firstSong);
+        setCurrentTime(0);
+        setIsPlaying(true);
+    }
+
+    function renderPlayAllButton(extraClassName = "") {
+        return (
+            <button
+                className={`button is-small button-primary container__header-btn btn--play-all ${extraClassName}`.trim()}
+                onClick={handlePlayAll}>
+                <i className="bi bi-play-fill container__header-icon"></i>
+                <span>Phát tất cả</span>
+            </button>
+        );
+    }
 
     //--------------Slide show logic-------------
     useEffect(() => {
@@ -160,25 +187,23 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
     return (
         <>
             <div className="container__control row">
-                <div className="col l-12 m-12 c-12 mb-10">
+                {!hideHeaderTitle && <div className="col l-12 m-12 c-12 mb-10">
                     <div className="container__header">
-                        <NavLink className="container__header-title" to="song">
-                            <h3>Bài Hát&nbsp;</h3>
-                            <i className="bi bi-chevron-right container__header-icon" />
-                        </NavLink>
-                        <h3 className="container__header-subtitle">Bài Hát</h3>
+                        <>
+                            <NavLink className="container__header-title" to="song">
+                                <h3>Bài Hát&nbsp;</h3>
+                                <i className="bi bi-chevron-right container__header-icon" />
+                            </NavLink>
+                            <h3 className="container__header-subtitle">Bài Hát</h3>
+                        </>
                         <div className="container__header-actions">
 
-                            <button
-                                className="button is-small button-primary container__header-btn btn--play-all">
-                                <i className="bi bi-play-fill container__header-icon"></i>
-                                <span>Phát tất cả</span>
-                            </button>
+                            {renderPlayAllButton()}
                         </div>
                     </div>
-                </div>
+                </div>}
                 <div className="col l-12 m-12 c-12">
-                    <div className="container__playmusic">
+                    <div className={`container__playmusic ${hideHeaderTitle ? "playlist-detail__playmusic" : ""}`}>
                         {!playlist || !playlist.songs || playlist.songs.length === 0 ? (
                             <div className="box--no-content">
                                 <div className="no-content-image" />
@@ -188,7 +213,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                             </div>
                         ) : (
                             <>
-                                <div className="container__slide hide-on-mobile">
+                                <div className={`container__slide hide-on-mobile ${hideHeaderTitle ? "playlist-detail__slide" : ""}`}>
                                     <div className="container__slide-show">
                                         {visibleSongs.map((song, songIndex) => {
                                             const className = currentSlideClasses(songIndex);
@@ -199,6 +224,21 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                             );
                                         })}
                                     </div>
+                                    {hideHeaderTitle ? (
+                                        <div className="playlist-detail__summary">
+                                            <h2 className="playlist-detail__name">{playlistName}</h2>
+                                            <div className="playlist-detail__actions">
+                                                {renderPlayAllButton("playlist-detail__play-all")}
+                                                <div
+                                                    className="action-btn btn--heart"
+                                                    onClick={(event) => toggleFavouritePlaylist(event, playlist.id)}
+                                                    title={favouritePlaylistIds.has(playlist.id) ? "Bỏ thích playlist" : "Thêm vào playlist yêu thích"}
+                                                >
+                                                    <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(playlist.id) ? "-fill" : ""} primary`}></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : null}
                                 </div>
                                 <div className="container__playlist">
                                     <div className="playlist__list">
@@ -206,7 +246,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                             return (
                                                 <div className={`playlist__list-song media ${currentSong?.id === song.id ? 'active' : ''} ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`} key={song.id} onClick={() => {
                                                     handleClickSong(song);
-                                                    setSelectedPlaylist(playlist);  
+                                                    setSelectedPlaylist(playlist);
                                                 }
                                                 }>
                                                     <div className="playlist__song-info media__left">
@@ -270,8 +310,9 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist }) {
                                                                 playlists={userPlaylists}
                                                                 selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={!playlist.isdefault}
+                                                                canRemoveFromCurrentPlaylist={!playlist.isdefault && Number(playlist?.creator_id) === Number(currentUser?.id)}
                                                                 isAddingSong={isAddingSong}
+                                                                onCloseMenu={() => setOpenSongMenuId(null)}
                                                             />
                                                         </div>
                                                     </div>

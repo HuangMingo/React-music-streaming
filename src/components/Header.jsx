@@ -96,7 +96,7 @@ export function Header({ onClose }) {
                 console.error('Suggest error', err);
                 setSuggestions({ songs: [], artists: [], playlists: [] });
             }
-        }, 300);
+        }, 100);
         return () => clearTimeout(debounceRef.current);
     }, [searchTerm, currentUser?.id]);
 

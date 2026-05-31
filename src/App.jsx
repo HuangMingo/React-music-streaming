@@ -33,6 +33,7 @@ import { TabRadio } from './components/TabRadio/TabRadio.jsx'
 import { SearchResults } from './components/Search/SearchResults.jsx'
 import { UploadSection } from './components/TabPersonal/UploadSection.jsx'
 import { Radio } from './components/TabExplorer/Radio.jsx'
+import { PlaylistDetail } from './components/PlaylistDetail/PlaylistDetail.jsx'
 
 function GuestOnlyRoute({ children }) {
   const { isAuthenticated, isAdmin } = useAuthContext();
@@ -166,6 +167,7 @@ function App() {
             <Route path="/recent" element={<RecentSong />} />
             <Route path="/tim-kiem" element={<Navigate to="/tim-kiem/tat-ca" replace />} />
             <Route path="/tim-kiem/:tab" element={<SearchResults />} />
+            <Route path="/playlist/:slug" element={<PlaylistDetail />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 

@@ -2,9 +2,11 @@ import axios from "axios";
 import { useState } from "react";
 import { showNotificationToast } from "../../toast";
 import "./DeleteSongFromPlaylistDialog.css";
+import { useAuthContext } from "../../context/AuthContext";
 
 export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDeleted }) {
     const [isDeleting, setIsDeleting] = useState(false);
+    const { currentUser } = useAuthContext();
 
     async function handleDeleteSong() {
 
@@ -18,12 +20,18 @@ export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDele
             return;
         }
 
+        if (!currentUser?.id) {
+            showNotificationToast("Vui lòng đăng nhập để xóa bài hát khỏi playlist");
+            return;
+        }
+
         try {
             setIsDeleting(true);
             await axios.delete("http://localhost:3000/api/playlists/delete-song-from-playlist", {
                 params: {
                     playlistId,
                     songId: song.id,
+                    userId: currentUser.id,
                 },
             });
 
@@ -36,7 +44,7 @@ export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDele
             onClose();
         } catch (error) {
             console.error("Delete song from playlist failed:", error);
-            alert("Xóa bài hát khỏi playlist thất bại. Vui lòng thử lại.");
+            showNotificationToast(error?.response?.data?.message || "Xóa bài hát khỏi playlist thất bại. Vui lòng thử lại.");
             setIsDeleting(false);
         }
     }

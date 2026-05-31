@@ -2,6 +2,7 @@ import { useState, useEffect} from "react";
 import { useMusicContext } from "../../context/MusicContext";
 import { DeleteSongFromPlaylistDialog } from "./DeleteSongFromPlaylistDialog";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
+import { useAuthContext } from "../../context/AuthContext";
 function formatDuration(durationSeconds) {
     const duration = Number(durationSeconds) || 0;
     const minutes = Math.floor(duration / 60)
@@ -15,6 +16,7 @@ function formatDuration(durationSeconds) {
 }
 
 export function SongSection() {
+    const { currentUser } = useAuthContext();
     const {
         selectedPlaylist,
         setSelectedPlaylist,
@@ -59,6 +61,9 @@ export function SongSection() {
         };
     }, []);
     const songs = selectedPlaylist?.songs ?? [];
+    const canRemoveFromCurrentPlaylist =
+        selectedPlaylist?.isdefault !== true &&
+        Number(selectedPlaylist?.creator_id) === Number(currentUser?.id);
 
    
 
@@ -173,7 +178,7 @@ export function SongSection() {
                                                                 selectedPlaylist={selectedPlaylist}
                                                                 onCloseMenu={() => setOpenSongMenuId(null)}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={!selectedPlaylist?.isdefault}
+                                                                canRemoveFromCurrentPlaylist={canRemoveFromCurrentPlaylist}
                                                                 isAddingSong={isAddingSong}
                                                                 ondeleteSong={handleOpenRemoveSongDialog}
                                                             />

@@ -328,7 +328,7 @@ export function Player() {
     return (
         <>
             < div className={`player grid ${isPlaying ? " playing" : ""} ${openPlayerPopup ? "open-popup" : ""}`} >
-                <div className="player__container" onClick={(e) => handleOpenPlayerPopup(e)}>
+                <div className="player__container" >
                     <div className="player__container-song">
                         <div className={`player__song-info media${isPlaying ? " playing" : ""}`}>
                             <div className="media__left">

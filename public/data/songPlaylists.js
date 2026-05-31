@@ -15,7 +15,12 @@ export const initMusicData = async (userId) => {
     //Lấy dữ liệu playlist do người dùng tạo (dùng cho trang cá nhân)
     try{
         const response = await axios.get(`http://localhost:3000/api/playlists/user-created-playlists?userId=${userId}`);
-        const data = response.data;
+        const data = Array.isArray(response.data)
+            ? response.data.map((playlist) => ({
+                ...playlist,
+                creator_id: playlist.creator_id ?? userId
+            }))
+            : [];
         personalPlaylists = [...personalPlaylists, ...data];
     } catch (error) {
         console.error("Lỗi khi lấy dữ liệu playlist do người dùng tạo:", error);

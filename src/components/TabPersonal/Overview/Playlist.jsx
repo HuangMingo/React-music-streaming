@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext";
 import { useAuthContext } from "../../../context/AuthContext";
 import { DeletePlaylistDialog } from "./../../DeletePlaylistDialog/DeletePlaylistDialog.jsx";
+import { CreatePlaylist } from "../../Sidebar/CreatePlaylist/CreatePlaylist.jsx";
+import { EditPlaylistMenu } from "../EditPlaylistMenu.jsx";
 import axios from "axios";
 export function Playlist({ playlists = [], onPlaylistsChanged }) {
     const {
@@ -13,9 +15,11 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         setIsPlaying,
         isPlaying,
         currentSong,
+        favouritePlaylistIds,
+        toggleFavouritePlaylist,
     } = useMusicContext();
     // console.log(selectedPlaylist);
-    async function handleClickPlaylistPersonal(playlist, index) {
+    async function loadPlaylistPersonal(playlist) {
         scrollPersonalContainerToTop();
 
         try {
@@ -28,20 +32,38 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                 }
             );
 
-            const playlistData = response.data;
+            const playlistData = {
+                ...response.data,
+                creator_id: response.data?.creator_id ?? playlist.creator_id
+            };
 
             setSelectedPlaylist(playlistData);
-
-            const firstSong = playlistData?.songs?.[0];
-            const hasSongs = Boolean(firstSong);
-
-            if (hasSongs) {
-                setCurrentSong(firstSong);
-                setCurrentTime(0);
-                setIsPlaying(true);
-            }
+            return playlistData;
         } catch (error) {
             console.error("Load playlist failed:", error);
+            return null;
+        }
+    }
+
+    async function handleClickPlaylistPersonal(playlist) {
+        await loadPlaylistPersonal(playlist);
+    }
+
+    async function handlePlayPlaylistPersonal(event, playlist) {
+        event.stopPropagation();
+
+        const playlistData = await loadPlaylistPersonal(playlist);
+        if (!playlistData) {
+            return;
+        }
+
+        const firstSong = playlistData?.songs?.[0];
+        const hasSongs = Boolean(firstSong);
+
+        if (hasSongs) {
+            setCurrentSong(firstSong);
+            setCurrentTime(0);
+            setIsPlaying(true);
         }
     }
 
@@ -53,6 +75,10 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
     const [itemsPerPage, setItemsPerPage] = useState(4);
     //useState mo form tao playlist moi
     const [isOpenForm, setOpenForm] = useState(false);
+    const [playlistToEdit, setPlaylistToEdit] = useState(null);
+    const [openPlaylistMenuId, setOpenPlaylistMenuId] = useState(null);
+    const [playlistMenuTrigger, setPlaylistMenuTrigger] = useState(null);
+    const playlistMenuRef = useRef(null);
     //useState hien thi diaglog xoa playlist
     const [isDeleting, setIsDeleting] = useState(false);
     //set playlistId can xoa khi click vao icon xoa
@@ -61,6 +87,58 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         setPlaylistIdToDelete(playlistId);
         setIsDeleting(true);
 
+    }
+    function isPlaylistMine(playlist) {
+        return Number(playlist?.creator_id) === Number(currentUser?.id);
+    }
+    function handleClickEditPlaylist(playlist) {
+        if (isPlaylistMine(playlist) && playlist.isdefault !== true) {
+            setOpenPlaylistMenuId(null);
+            setPlaylistMenuTrigger(null);
+            setPlaylistToEdit(playlist);
+            setOpenForm(true);
+        }
+    }
+    function handleTogglePlaylistMenu(event, playlist) {
+        event.stopPropagation();
+        if (isPlaylistMine(playlist) && playlist.isdefault !== true) {
+            const triggerElement = event.currentTarget;
+            setOpenPlaylistMenuId((currentId) => {
+                if (currentId === playlist.id) {
+                    setPlaylistMenuTrigger(null);
+                    return null;
+                }
+
+                setPlaylistMenuTrigger(triggerElement);
+                return playlist.id;
+            });
+        }
+    }
+    function closePlaylistMenu() {
+        setOpenPlaylistMenuId(null);
+        setPlaylistMenuTrigger(null);
+    }
+    async function handlePlaylistUpdated(updatedPlaylist) {
+        if (onPlaylistsChanged) {
+            await onPlaylistsChanged();
+        }
+        if (updatedPlaylist) {
+            setSelectedPlaylist((prevPlaylist) => {
+                if (!prevPlaylist || prevPlaylist.id !== updatedPlaylist.id) {
+                    return prevPlaylist;
+                }
+
+                return {
+                    ...prevPlaylist,
+                    playlist_name: updatedPlaylist.playlist_name,
+                    ispublic: updatedPlaylist.ispublic
+                };
+            });
+        }
+    }
+    function closeEditForm() {
+        setOpenForm(false);
+        setPlaylistToEdit(null);
     }
     //Đóng dialog xóa playlist
     function closeDeleteDialog() {
@@ -88,6 +166,23 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
 
         return () => window.removeEventListener("resize", updateItemsPerPage);
     }, []);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            const isClickInsideMenu = playlistMenuRef.current?.contains(event.target);
+            const isClickInsideTrigger = playlistMenuTrigger?.contains(event.target);
+
+            if (!isClickInsideMenu && !isClickInsideTrigger) {
+                setOpenPlaylistMenuId(null);
+                setPlaylistMenuTrigger(null);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [playlistMenuTrigger]);
 
     const totalPages = Math.max(1, Math.ceil(playlists.length / itemsPerPage));
     //pagedPlaylists là mảng 2 chiều, mỗi phần tử là một trang chứa các playlist tương ứng với itemsPerPage
@@ -175,12 +270,13 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                 const absoluteIndex = pageIndex * itemsPerPage + playlistIndex;
                                                 const isPlaylistActive = selectedPlaylist?.id === playlist.id;
                                                 const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
+                                                const isMine = isPlaylistMine(playlist);
                                                 return (
 
                                                     <div
                                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 && 'mb-30'}`}
                                                         key={`${absoluteIndex}`}
-                                                        
+                                                        onClick={() => handleClickPlaylistPersonal(playlist)}
                                                     >
                                                         <div className={`row__item item--playlist ${isPlaylistActive ? "active" : ""} ${isPlaylistPlaying ? "playing" : ""}`}>
                                                             <div className="row__item-container flex--top-left">
@@ -192,26 +288,29 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                     <div className="row__item-actions">
                                                                         {
                                                                             playlist.isdefault === true ? '' : (
-                                                                                <div className="action-btn btn--heart" onClick={(e) => {
-                                                                                    //Ngăn sự kiện click lan sang playlist item khi click vào icon xóa
-                                                                                    e.stopPropagation();
-                                                                                }}>
+                                                                                <div
+                                                                                    className="action-btn btn--heart"
+                                                                                    onClick={(e) => {
+                                                                                        if (isMine) {
+                                                                                            e.stopPropagation();
+                                                                                            return;
+                                                                                        }
+                                                                                        toggleFavouritePlaylist(e, playlist.id);
+                                                                                    }}
+                                                                                    title={!isMine ? (favouritePlaylistIds.has(playlist.id) ? "Bỏ thích playlist" : "Thêm vào playlist yêu thích") : undefined}
+                                                                                >
                                                                                     {
-                                                                                        playlist.ismine != null && playlist.ismine === true ? (
+                                                                                        isMine ? (
                                                                                             <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(playlist.id)}></i>
                                                                                         ) : (
-                                                                                            <i className="btn--icon icon--heart bi bi-heart-fill primary"></i>
+                                                                                            <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(playlist.id) ? "-fill" : ""} primary`}></i>
                                                                                         )
                                                                                     }
                                                                                 </div>
                                                                             )
                                                                         }
-                                                                        <div className={`btn--play-playlist `}>
-                                                                            <div className="control-btn btn-toggle-play" onClick={(e) => {
-                                                                                handleClickPlaylistPersonal(playlist, absoluteIndex);
-                                                                                e.stopPropagation();
-
-                                                                            }}>
+                                                                        <div className={`btn--play-playlist `} onClick={(e) => handlePlayPlaylistPersonal(e, playlist)}>
+                                                                            <div className="control-btn btn-toggle-play">
                                                                                 <i className="bi bi-play-fill" />
                                                                             </div>
                                                                             <span className="song-note note-1">♪</span>
@@ -227,7 +326,10 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
 
                                                                         {
                                                                             playlist.isdefault != null && playlist.isdefault === true ? '' : (
-                                                                                <div className="action-btn">
+                                                                                <div
+                                                                                    className="action-btn"
+                                                                                    onClick={(e) => handleTogglePlaylistMenu(e, playlist)}
+                                                                                >
                                                                                     <i className="btn--icon bi bi-three-dots"></i>
                                                                                 </div>
                                                                             )
@@ -253,6 +355,23 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                     </div>
                 </div>
             </div >
+            <EditPlaylistMenu
+                openPlaylistMenuId={openPlaylistMenuId}
+                playlistMenuTrigger={playlistMenuTrigger}
+                playlistMenuRef={playlistMenuRef}
+                playlists={playlists}
+                onEditPlaylist={handleClickEditPlaylist}
+                onCloseMenu={closePlaylistMenu}
+            />
+            {
+                isOpenForm && playlistToEdit && (
+                    <CreatePlaylist
+                        onClose={closeEditForm}
+                        onSuccess={handlePlaylistUpdated}
+                        editingPlaylist={playlistToEdit}
+                    />
+                )
+            }
             {
                 isDeleting && (
                     <DeletePlaylistDialog

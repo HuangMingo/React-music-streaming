@@ -18,6 +18,7 @@ const getFavouritePlaylist = async (userId) => {
     SELECT 
         p.id,
         p.name AS playlist_name, 
+        p.creator_id,
         u.username,
         p.image AS playlist_image,
         -- Bước 2: Chỉ gom nhóm JSON nếu bài hát tồn tại (tránh mảng null)
@@ -45,9 +46,45 @@ const getFavouritePlaylist = async (userId) => {
     LEFT JOIN song_playlist sp ON p.id = sp.playlist_id
     LEFT JOIN song s ON sp.song_id = s.id
     LEFT JOIN song_artists sa ON s.id = sa.song_id
-    GROUP BY p.id, p.name, u.username, p.image;
+    GROUP BY p.id, p.name, p.creator_id, u.username, p.image;
     `, [userId]);
     return result.rows;
+}
+
+const isFavouritePlaylist = async (userId, playlistId) => {
+    const result = await pool.query(`
+        SELECT id
+        FROM favourite_playlists
+        WHERE user_id = $1 AND playlist_id = $2
+        LIMIT 1
+    `, [userId, playlistId]);
+
+    return result.rows.length > 0;
+}
+
+const toggleFavouritePlaylist = async (userId, playlistId) => {
+    const isFavourite = await isFavouritePlaylist(userId, playlistId);
+
+    if (isFavourite) {
+        await pool.query(`
+            DELETE FROM favourite_playlists
+            WHERE user_id = $1 AND playlist_id = $2
+        `, [userId, playlistId]);
+
+        return false;
+    }
+
+    await pool.query(`
+        INSERT INTO favourite_playlists (user_id, playlist_id)
+        SELECT $1, $2
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM favourite_playlists
+            WHERE user_id = $1 AND playlist_id = $2
+        )
+    `, [userId, playlistId]);
+
+    return true;
 }
 //Lấy playlist do người dùng tạo (dùng cho trang cá nhân)
 const getUserCreatedPlaylist = async (userId) => {
@@ -64,10 +101,11 @@ const getUserCreatedPlaylist = async (userId) => {
     SELECT 
         p.id,
         p.name AS playlist_name, 
+        p.creator_id,
         u.username,
         p.image AS playlist_image,
-		TRUE AS isMine,
         p.isdefault AS isdefault,
+        p.ispublic AS ispublic,
         -- Bước 2: Chỉ gom nhóm JSON nếu bài hát tồn tại (tránh mảng null)
         COALESCE(
             json_agg(
@@ -94,7 +132,7 @@ const getUserCreatedPlaylist = async (userId) => {
     LEFT JOIN song s ON sp.song_id = s.id
     LEFT JOIN song_artists sa ON s.id = sa.song_id
 	WHERE p.creator_id = $1
-    GROUP BY p.id, p.name, u.username, p.image, p.isdefault;
+    GROUP BY p.id, p.name, p.creator_id, u.username, p.image, p.isdefault, p.ispublic;
         `, [userId]);
     return result.rows;
 }
@@ -109,25 +147,54 @@ const createPlaylist = async ({ name, creatorId, ispublic, isDefault }) => {
     );
     return result.rows[0];
 };
+const updatePlaylist = async ({ playlistId, userId, name, ispublic }) => {
+    const result = await pool.query(
+        `
+        UPDATE playlist
+        SET name = $1, ispublic = $2
+        WHERE id = $3 AND creator_id = $4 AND isdefault = false
+        RETURNING id, name AS playlist_name, creator_id, ispublic, isdefault
+        `,
+        [name, ispublic, playlistId, userId]
+    );
+    return result.rows[0] ?? null;
+};
 //Xóa playlist
 const deletePlaylist = async (playlistId, userId) => {
     await pool.query(`
         DELETE FROM song_playlist
-        WHERE playlist_id = $1;`, [playlistId]);
+        WHERE playlist_id = $1
+          AND EXISTS (
+              SELECT 1
+              FROM playlist
+              WHERE id = $1 AND creator_id = $2
+          );`, [playlistId, userId]);
 
     const result = await pool.query(`
         DELETE FROM playlist
         WHERE id = $1 AND creator_id = $2
+        RETURNING *
         `, [playlistId, userId]);
-    return result;
+    return result.rows[0] ?? null;
 }
 //Xóa bài hát khỏi playlist
-const deleteSongFromPlaylist = async (playlistId, songId) => {
-    const deleteResult = await pool.query(`
-        DELETE FROM song_playlist
-        WHERE playlist_id = $1 AND song_id = $2
-        RETURNING *
-    `, [playlistId, songId]);
+const deleteSongFromPlaylist = async (playlistId, songId, userId = null) => {
+    const deleteResult = userId
+        ? await pool.query(`
+        DELETE FROM song_playlist sp
+        USING playlist p
+        WHERE sp.playlist_id = p.id
+          AND sp.playlist_id = $1
+          AND sp.song_id = $2
+          AND p.creator_id = $3
+          AND p.isdefault = false
+        RETURNING sp.*
+    `, [playlistId, songId, userId])
+        : await pool.query(`
+            DELETE FROM song_playlist
+            WHERE playlist_id = $1 AND song_id = $2
+            RETURNING *
+        `, [playlistId, songId]);
 
     if (deleteResult.rowCount === 0) {
         return null;
@@ -196,9 +263,9 @@ const getPlaylistById = async (playlistId) => {
         SELECT 
             p.id,
             p.name AS playlist_name,
+            p.creator_id,
             u.username,
             p.image AS playlist_image,
-            TRUE AS isMine,
             p.isdefault AS isdefault,
             p.ispublic AS ispublic,
             COALESCE(
@@ -225,7 +292,7 @@ const getPlaylistById = async (playlistId) => {
         LEFT JOIN song s ON sp.song_id = s.id
         LEFT JOIN song_artists sa ON s.id = sa.song_id
         WHERE p.id = $1
-        GROUP BY p.id, p.name, u.username, p.image, p.isdefault;
+        GROUP BY p.id, p.name, p.creator_id, u.username, p.image, p.isdefault, p.ispublic;
     `, [playlistId]);
 
     return result.rows[0] ?? null;
@@ -234,8 +301,11 @@ const getPlaylistById = async (playlistId) => {
 export const playlistService = {
     getAllPlaylist,
     getFavouritePlaylist,
+    isFavouritePlaylist,
+    toggleFavouritePlaylist,
     getUserCreatedPlaylist,
     createPlaylist,
+    updatePlaylist,
     deletePlaylist,
     addSongToPlaylist,
     deleteSongFromPlaylist,

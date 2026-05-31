@@ -17,6 +17,7 @@ export function MusicProvider({ children }) {
 
   //Sử dụng Set tạo state để lưu trữ tập hợp ID của các bài hát yêu thích
   const [favouriteSongIds, setFavouriteSongIds] = useState(new Set());
+  const [favouritePlaylistIds, setFavouritePlaylistIds] = useState(new Set());
   //Toggle trạng thái yêu thích của bài hát cho người dùng.
   async function toggleFavouriteSong(event, songId) {
     //Ngăn chặn sự kiện từ cha
@@ -47,6 +48,37 @@ export function MusicProvider({ children }) {
       });
     } catch (error) {
       console.error("Toggle favourite failed:", error);
+    }
+  }
+//Toggle trạng thái yêu thích của playlist cho người dùng.
+  async function toggleFavouritePlaylist(event, playlistId) {
+    event.stopPropagation();
+    if (!currentUser?.id ) {
+        showNotificationToast("Vui long đăng nhập để thêm playlist yêu thích");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:3000/api/playlists/toggle-favourite-playlist", {
+        userId: currentUser.id,
+        playlistId,
+      });
+      const nextIsFavourite = Boolean(response?.data?.isFavouritePlaylist);
+      showNotificationToast(
+        nextIsFavourite
+          ? "Đã thêm playlist vào danh sách yêu thích"
+          : "Đã xóa playlist khỏi danh sách yêu thích"
+      );
+      setFavouritePlaylistIds((prev) => {
+        const next = new Set(prev);
+        if (nextIsFavourite) {
+          next.add(playlistId);
+        } else {
+          next.delete(playlistId);
+        }
+        return next;
+      });
+    } catch (error) {
+      console.error("Toggle favourite playlist failed:", error);
     }
   }
   const [favouriteVersion, setFavouriteVersion] = useState(0);
@@ -173,6 +205,43 @@ export function MusicProvider({ children }) {
     }
 
     loadUserPlaylists();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setFavouritePlaylistIds(new Set());
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadFavouritePlaylists() {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/playlists/favourite-playlists?userId=${currentUser.id}`
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        const playlistIds = Array.isArray(response?.data)
+          ? response.data.map((playlist) => playlist.id)
+          : [];
+        setFavouritePlaylistIds(new Set(playlistIds));
+      } catch (error) {
+        if (isMounted) {
+          setFavouritePlaylistIds(new Set());
+        }
+        console.error("Load favourite playlists failed:", error);
+      }
+    }
+
+    loadFavouritePlaylists();
 
     return () => {
       isMounted = false;
@@ -321,6 +390,9 @@ export function MusicProvider({ children }) {
       favouriteSongIds,
       setFavouriteSongIds,
       toggleFavouriteSong,
+      favouritePlaylistIds,
+      setFavouritePlaylistIds,
+      toggleFavouritePlaylist,
       currentSong,
       setCurrentSong,
       selectedPlaylist,

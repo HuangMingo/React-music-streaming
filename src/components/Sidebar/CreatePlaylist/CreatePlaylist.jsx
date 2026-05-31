@@ -4,9 +4,10 @@ import { showNotificationToast } from "../../../toast.js";
 import "./CreatePlaylist.css";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
 
-export function CreatePlaylist({ onClose, onSuccess }) {
-    const [playlistName, setPlaylistName] = useState("");
-    const [isPublic, setIsPublic] = useState(true);
+export function CreatePlaylist({ onClose, onSuccess, editingPlaylist = null }) {
+    const isEditing = Boolean(editingPlaylist);
+    const [playlistName, setPlaylistName] = useState(editingPlaylist?.playlist_name ?? "");
+    const [isPublic, setIsPublic] = useState(editingPlaylist?.ispublic ?? true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [nameError, setNameError] = useState("");
     const { currentUser } = useAuthContext();
@@ -27,21 +28,32 @@ export function CreatePlaylist({ onClose, onSuccess }) {
         try {
             setIsSubmitting(true);
             const userId = currentUser?.id;
-            await axios.post("http://localhost:3000/api/playlists/create-playlist", {
-                name: playlistName.trim(),
-                creator_id: userId,
-                ispublic: isPublic,
-                isdefault: false
-            });
+            let savedPlaylist = null;
+            if (isEditing) {
+                const response = await axios.put(`http://localhost:3000/api/playlists/update-playlist/${editingPlaylist.id}`, {
+                    name: playlistName.trim(),
+                    userId,
+                    ispublic: isPublic
+                });
+                savedPlaylist = response.data;
+            } else {
+                const response = await axios.post("http://localhost:3000/api/playlists/create-playlist", {
+                    name: playlistName.trim(),
+                    creator_id: userId,
+                    ispublic: isPublic,
+                    isdefault: false
+                });
+                savedPlaylist = response.data;
+            }
 
             if (onSuccess) {
-                await onSuccess();
+                await onSuccess(savedPlaylist);
             }
             onClose();
-            showNotificationToast("Tạo playlist thành công");
+            showNotificationToast(isEditing ? "Cập nhật playlist thành công" : "Tạo playlist thành công");
         } catch (error) {
             console.error("Create playlist failed:", error);
-            showNotificationToast("Tạo playlist thất bại. Vui lòng thử lại.");
+            showNotificationToast(isEditing ? "Cập nhật playlist thất bại. Vui lòng thử lại." : "Tạo playlist thất bại. Vui lòng thử lại.");
         } finally {
             setIsSubmitting(false);
         }
@@ -63,7 +75,7 @@ export function CreatePlaylist({ onClose, onSuccess }) {
                     <i className="bi bi-x-lg" />
                 </button>
 
-                <h2 className="create-playlist-title">Tạo playlist mới</h2>
+                <h2 className="create-playlist-title">{isEditing ? "Chỉnh sửa playlist" : "Tạo playlist mới"}</h2>
 
                 <input
                     className="create-playlist-input"
@@ -94,7 +106,7 @@ export function CreatePlaylist({ onClose, onSuccess }) {
                 </div>
 
                 <button className="create-playlist-submit" type="submit">
-                    {isSubmitting ? "Đang tạo..." : "Tạo mới"}
+                    {isSubmitting ? (isEditing ? "Đang lưu..." : "Đang tạo...") : (isEditing ? "Lưu" : "Tạo mới")}
                 </button>
             </form>
         </div>

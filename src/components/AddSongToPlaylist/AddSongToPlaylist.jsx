@@ -22,6 +22,7 @@ export function AddSongToPlaylist({
     onSelectPlaylist,
     onAddSong,
     onRemoveFromPlaylist,
+    onCloseMenu,
     canRemoveFromCurrentPlaylist = false,
     isAddingSong = false,
 }) {
@@ -31,13 +32,13 @@ export function AddSongToPlaylist({
         handleOpenRemoveSongDialog,
         handleCloseRemoveSongDialog,
         handleSongRemoved,
-        selectedPlaylist
     } = useMusicContext();
     const { currentUser } = useAuthContext();
     const [isAddSubmenuOpen, setIsAddSubmenuOpen] = useState(false);
     const [playlistSearch, setPlaylistSearch] = useState("");
     const rootRef = useRef(null); // Ref để gắn vào phần tử gốc của menu nhằm theo dõi sự kiện click bên ngoài
     const submenuTriggerRef = useRef(null); // Ref để gắn vào button "Thêm vào playlist" nhằm làm reference cho submenu
+    const submenuPanelRef = useRef(null);
     const [isOpenForm, setOpenForm] = useState(false); // State để quản lý việc hiển thị form tạo playlist mới
     function toggleOpenForm() {
         setOpenForm(!isOpenForm);
@@ -54,7 +55,7 @@ export function AddSongToPlaylist({
             flip({
                 fallbackPlacements: ["right-start", "left-start", "bottom-start", "top-start"],
             }),
-            shift({ padding: 8 }),
+            shift({ padding: 70 }),
         ],
         transform: false,
     });
@@ -104,6 +105,34 @@ export function AddSongToPlaylist({
     }, [isOpen, menuRefs]);
 
     useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        function handleUserScroll(event) {
+            const scrollTarget = event.target;
+            const isScrollInsideMenu =
+                rootRef.current?.contains(scrollTarget) ||
+                submenuPanelRef.current?.contains(scrollTarget);
+
+            if (isScrollInsideMenu) {
+                return;
+            }
+
+            setIsAddSubmenuOpen(false);
+            onCloseMenu?.();
+        }
+
+        window.addEventListener("wheel", handleUserScroll, { capture: true, passive: true });
+        window.addEventListener("scroll", handleUserScroll, { capture: true, passive: true });
+
+        return () => {
+            window.removeEventListener("wheel", handleUserScroll, { capture: true });
+            window.removeEventListener("scroll", handleUserScroll, { capture: true });
+        };
+    }, [isOpen, onCloseMenu]);
+
+    useEffect(() => {
         submenuRefs.setReference(isAddSubmenuOpen ? submenuTriggerRef.current : null);
     }, [isAddSubmenuOpen, submenuRefs]);
 
@@ -130,7 +159,7 @@ export function AddSongToPlaylist({
     async function handleAddSongToPlaylist(event, playlist) {
      
         event.stopPropagation();
-        const targetPlaylistId = playlist?.id ?? selectedPlaylist.id;
+        const targetPlaylistId = playlist?.id;
 
         if (!targetPlaylistId) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
@@ -190,7 +219,7 @@ export function AddSongToPlaylist({
 
                 <button
                     type="button"
-                    className="playlist__menu-title playlist__menu-option"
+                    className="playlist__menu-option"
                     ref={submenuTriggerRef}
                     onClick={openSubmenu}
                     aria-haspopup="menu"
@@ -207,7 +236,7 @@ export function AddSongToPlaylist({
                 {canRemoveFromCurrentPlaylist ? (
                     <button
                         type="button"
-                        className="playlist__menu-title playlist__menu-option"
+                        className="playlist__menu-option"
                         onClick={(event) => handleOpenRemoveSongDialog(event, song)}
                         disabled={isAddingSong}
                     >
@@ -220,7 +249,10 @@ export function AddSongToPlaylist({
 
                 <div
                     className={`playlist__menu-panel ${isAddSubmenuOpen ? "open" : ""}`}
-                    ref={submenuRefs.setFloating}
+                    ref={(node) => {
+                        submenuPanelRef.current = node;
+                        submenuRefs.setFloating(node);
+                    }}
                     role="menu"
                     aria-label="Thêm vào playlist"
                     style={{ ...submenuFloatingStyles, right: "auto", width: "280px", zIndex: 5001 }}
@@ -267,13 +299,11 @@ export function AddSongToPlaylist({
                             </div>
                         ) : (
                             filteredPlaylists.map((item) => {
-                                const isSelected = String(item.id) === String(selectedPlaylist.id);
-
                                 return (
                                     <button
                                         key={item.id}
                                         type="button"
-                                        className={`playlist__menu-option ${isSelected ? "is-selected" : ""}`}
+                                        className={`playlist__menu-option`}
                                         onClick={(event) => handleAddSongToPlaylist(event, item)}
                                         disabled={isAddingSong}
                                     >
