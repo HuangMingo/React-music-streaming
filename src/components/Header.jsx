@@ -5,6 +5,7 @@ import axios from 'axios';
 import { SuggestionDropdown } from './SuggestionDropdown/SuggestionDropdown.jsx';
 import { useAuthContext } from '../context/AuthContext';
 import { getArtistPath } from '../utils/artistNavigation.js';
+import { API_URL } from '../api.js';
 export function Header({ onClose }) {
     const [isOpenLogout, setOpenLogout] = useState(false);
     // Trạng thái bật/tắt của nút quay lại và tiến tới trên header.
@@ -89,7 +90,7 @@ export function Header({ onClose }) {
         debounceRef.current = setTimeout(async () => {
             try {
                 const userParam = currentUser?.id ? `&userId=${encodeURIComponent(currentUser.id)}` : '';
-                const res = await axios.get(`http://localhost:3000/api/search/suggest?q=${encodeURIComponent(q)}${userParam}`);
+                const res = await axios.get(`${API_URL}/api/search/suggest?q=${encodeURIComponent(q)}${userParam}`);
                 setSuggestions(res.data || { songs: [], artists: [], playlists: [] });
                 setShowSuggest(true);
                 setActiveIndex(-1);

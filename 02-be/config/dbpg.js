@@ -1,11 +1,11 @@
 import pg from 'pg';
+import dotenv from 'dotenv';
 const {Pool} = pg;
 export const pool = new Pool({
-  host: "localhost",
-  user:"postgres",
-  port: 5432,
-  password: "postgres",
-  database: "music_db"
+  connectionString: process.env.DATABASE_URL,
+  ssl: 
+    process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  
 });
 
 

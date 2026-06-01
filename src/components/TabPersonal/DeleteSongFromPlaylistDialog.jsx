@@ -3,6 +3,7 @@ import { useState } from "react";
 import { showNotificationToast } from "../../toast";
 import "./DeleteSongFromPlaylistDialog.css";
 import { useAuthContext } from "../../context/AuthContext";
+import { API_URL } from '../../api.js';
 
 export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDeleted }) {
     const [isDeleting, setIsDeleting] = useState(false);
@@ -27,7 +28,7 @@ export function DeleteSongFromPlaylistDialog({ playlistId, song, onClose, onDele
 
         try {
             setIsDeleting(true);
-            await axios.delete("http://localhost:3000/api/playlists/delete-song-from-playlist", {
+            await axios.delete(`${API_URL}/api/playlists/delete-song-from-playlist`, {
                 params: {
                     playlistId,
                     songId: song.id,

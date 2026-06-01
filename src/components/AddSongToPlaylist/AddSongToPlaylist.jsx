@@ -13,6 +13,7 @@ import "./AddSongToPlaylist.css";
 import { useMusicContext } from "../../context/MusicContext.jsx";
 import { useAuthContext } from "../../context/AuthContext.jsx";
 import { DeleteSongFromPlaylistDialog } from "../TabPersonal/DeleteSongFromPlaylistDialog.jsx";
+import { API_URL } from '../../api.js';
 export function AddSongToPlaylist({
     song,
     isOpen,
@@ -181,7 +182,7 @@ export function AddSongToPlaylist({
         }
 
         try {
-            await axios.post("http://localhost:3000/api/playlists/add-song-to-playlist", null, {
+            await axios.post(`${API_URL}/api/playlists/add-song-to-playlist`, null, {
                 params: { playlistId: playlistIdNumber, songId: song.id },
             });
             showNotificationToast(`Đã thêm bài hát thành công vào playlist "${playlist?.playlist_name}"`);

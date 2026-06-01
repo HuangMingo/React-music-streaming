@@ -1,9 +1,10 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { clearMusicStorage } from './MusicContext';
+import { API_URL } from '../api.js';
 
 const AUTH_SESSION_KEY = 'mp_auth_session';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = API_URL;
 
 const AuthContext = createContext(null);
 

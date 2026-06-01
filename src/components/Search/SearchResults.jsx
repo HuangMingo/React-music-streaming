@@ -7,6 +7,7 @@ import { useMusicContext } from '../../context/MusicContext.jsx';
 import { ArtistNameLink } from '../ArtistNameLink/ArtistNameLink.jsx';
 import { getArtistPath } from '../../utils/artistNavigation.js';
 import '../../assets/css/main.css';
+import { API_URL } from '../../api.js';
 
 const SEARCH_TABS = [
   { slug: 'tat-ca', label: 'Tất cả' },
@@ -63,7 +64,7 @@ export function SearchResults() {
       setLoading(true);
       try {
         const userParam = currentUser?.id ? `&userId=${encodeURIComponent(currentUser.id)}` : '';
-        const res = await axios.get(`http://localhost:3000/api/search/all?q=${encodeURIComponent(q)}${userParam}`);
+        const res = await axios.get(`${API_URL}/api/search/all?q=${encodeURIComponent(q)}${userParam}`);
         if (!mounted) return;
         const data = res.data || {};
         setResults({
@@ -94,7 +95,7 @@ export function SearchResults() {
 
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+          `${API_URL}/api/playlists/user-created-playlists?userId=${currentUser.id}`
         );
         setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
       } catch (error) {
@@ -118,7 +119,7 @@ export function SearchResults() {
         const checks = await Promise.all(
           results.songs.map(async (song) => {
             const response = await axios.get(
-              `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${currentUser.defaultPlaylistId}&songId=${song.id}`
+              `${API_URL}/api/songs/is-favourite-song?defaultPlaylistId=${currentUser.defaultPlaylistId}&songId=${song.id}`
             );
             return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
           })
@@ -193,7 +194,7 @@ export function SearchResults() {
       return playlist;
     }
 
-    const response = await axios.get('http://localhost:3000/api/playlists/playlist-details', {
+    const response = await axios.get(`${API_URL}/api/playlists/playlist-details`, {
       params: {
         playlistId: playlist.id,
       },

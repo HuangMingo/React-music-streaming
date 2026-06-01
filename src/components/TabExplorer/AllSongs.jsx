@@ -4,6 +4,7 @@ import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink";
+import { API_URL } from '../../api.js';
 // Component: AllSongs
 // Chức năng: Hiển thị các bài hát gợi ý, cho phép mở menu "Thêm vào playlist"
 // Các điểm chính:
@@ -47,7 +48,7 @@ export function AllSongs() {
     const fetchSong = function () {
         setIsLoading(true);
         axios
-            .get("http://localhost:3000/api/songs")
+            .get(`${API_URL}/api/songs`)
             .then((response) => {
                 setAllSongs(Array.isArray(response?.data) ? response.data : []);
             })
@@ -88,7 +89,7 @@ export function AllSongs() {
 
         try {
             const response = await axios.get(
-                `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+                `${API_URL}/api/playlists/user-created-playlists?userId=${currentUser.id}`
             );
 
             setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
@@ -112,7 +113,7 @@ export function AllSongs() {
                 const checks = await Promise.all(
                     allSongs.map(async (song) => {
                         const response = await axios.get(
-                            `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${song.id}`
+                            `${API_URL}/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${song.id}`
                         );
                         return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
                     })

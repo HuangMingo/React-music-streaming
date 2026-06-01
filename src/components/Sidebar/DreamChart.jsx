@@ -4,6 +4,7 @@ import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink";
+import { API_URL } from '../../api.js';
 export function DreamChart() {
     const [topSongs, setTopSongs] = useState([]);
     const [userPlaylists, setUserPlaylists] = useState([]);
@@ -33,7 +34,7 @@ export function DreamChart() {
     }
     useEffect(() => {
         axios
-            .get("http://localhost:3000/api/songs/top10-most-played-songs")
+            .get(`${API_URL}/api/songs/top10-most-played-songs`)
             .then((response) => {
                 setTopSongs(Array.isArray(response?.data) ? response.data : []);
             })
@@ -72,7 +73,7 @@ export function DreamChart() {
 
         try {
             const response = await axios.get(
-                `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+                `${API_URL}/api/playlists/user-created-playlists?userId=${currentUser.id}`
             );
 
             setUserPlaylists(Array.isArray(response?.data) ? response.data : []);
@@ -95,7 +96,7 @@ export function DreamChart() {
                 const checks = await Promise.all(
                     topSongs.map(async (song) => {
                         const response = await axios.get(
-                            `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${song.id}`
+                            `${API_URL}/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${song.id}`
                         );
                         return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
                     })

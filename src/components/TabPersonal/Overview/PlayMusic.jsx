@@ -5,6 +5,7 @@ import { useAuthContext } from "../../../context/AuthContext.jsx";
 import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx";
 import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
 import axios from "axios";
+import { API_URL } from '../../../api.js';
 export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false }) {
     const { currentSong,
         setCurrentSong,
@@ -100,7 +101,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                 const checks = await Promise.all(
                     visibleSongs.map(async (song) => {
                         const response = await axios.get(
-                            `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${currentUser.defaultPlaylistId}&songId=${song.id}`
+                            `${API_URL}/api/songs/is-favourite-song?defaultPlaylistId=${currentUser.defaultPlaylistId}&songId=${song.id}`
                         );
                         return { songId: song.id, isFavourite: Boolean(response?.data?.isFavouriteSong) };
                     })
@@ -137,7 +138,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
         async function loadUserPlaylists() {
             try {
                 const response = await axios.get(
-                    `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+                    `${API_URL}/api/playlists/user-created-playlists?userId=${currentUser.id}`
                 );
 
                 if (!isMounted) {

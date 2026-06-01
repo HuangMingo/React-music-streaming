@@ -7,6 +7,7 @@ import { CreatePlaylist } from "./../Sidebar/CreatePlaylist/CreatePlaylist.jsx";
 import { EditPlaylistMenu } from "./EditPlaylistMenu.jsx";
 import "./../../../public/assets/img/SongActiveAnimation/icon-playing.gif";
 import axios from "axios";
+import { API_URL } from '../../api.js';
 export function PlaylistSection() {
     const { playlists, onPlaylistsChanged } = useOutletContext();
     const { currentUser } = useAuthContext();
@@ -112,7 +113,7 @@ export function PlaylistSection() {
     async function loadPlaylistPersonal(playlist) {
         try {
             const response = await axios.get(
-                "http://localhost:3000/api/playlists/playlist-details",
+                `${API_URL}/api/playlists/playlist-details`,
                 {
                     params: {
                         playlistId: playlist.id

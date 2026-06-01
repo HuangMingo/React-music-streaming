@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { useAuthContext } from './AuthContext';
 import axios from 'axios';
 import { showNotificationToast } from '../toast.js';
+import { API_URL } from '../api.js';
 const MusicContext = createContext();
 const EMPTY_SONG = {
   path: '',
@@ -27,7 +28,7 @@ export function MusicProvider({ children }) {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:3000/api/songs/toggle-favourite-song", {
+      const response = await axios.post(`${API_URL}/api/songs/toggle-favourite-song`, {
         defaultPlaylistId: currentUser?.defaultPlaylistId,
         songId: songId,
       });
@@ -58,7 +59,7 @@ export function MusicProvider({ children }) {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:3000/api/playlists/toggle-favourite-playlist", {
+      const response = await axios.post(`${API_URL}/api/playlists/toggle-favourite-playlist`, {
         userId: currentUser.id,
         playlistId,
       });
@@ -188,7 +189,7 @@ export function MusicProvider({ children }) {
     async function loadUserPlaylists() {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/playlists/user-created-playlists?userId=${currentUser.id}`
+          `${API_URL}/api/playlists/user-created-playlists?userId=${currentUser.id}`
         );
 
         if (!isMounted) {
@@ -222,7 +223,7 @@ export function MusicProvider({ children }) {
     async function loadFavouritePlaylists() {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/playlists/favourite-playlists?userId=${currentUser.id}`
+          `${API_URL}/api/playlists/favourite-playlists?userId=${currentUser.id}`
         );
 
         if (!isMounted) {
@@ -335,7 +336,7 @@ export function MusicProvider({ children }) {
   // async function handleClickPlaylistPersonal(playlist) {
   //     try {
   //         const response = await axios.get(
-  //             "http://localhost:3000/api/playlists/playlist-details",
+  //             `${API_URL}/api/playlists/playlist-details`,
   //             {
   //                 params: {
   //                     playlistId: playlist.id

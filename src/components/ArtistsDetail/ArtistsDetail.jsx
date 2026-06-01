@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuthContext } from "../../context/AuthContext.jsx";
 import { createArtistSlug } from "../../utils/artistNavigation.js";
 import "./ArtistsDetail.css";
+import { API_URL } from '../../api.js';
 
 function formatFollowers(followers = 0) {
   const value = Number(followers) || 0;
@@ -64,7 +65,7 @@ export function ArtistDetail() {
       };
 
       try {
-        const artistResponse = await axios.get(`http://localhost:3000/api/artists/slug/${slug}`, {
+        const artistResponse = await axios.get(`${API_URL}/api/artists/slug/${slug}`, {
           params: {
             userId: currentUser?.id,
           },

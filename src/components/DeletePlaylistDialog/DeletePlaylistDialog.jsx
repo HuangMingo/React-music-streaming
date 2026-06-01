@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import "./DeletePlaylistDialog.css";
 import "./../Sidebar/CreatePlaylist/CreatePlaylist.css";
+import { API_URL } from '../../api.js';
 export function DeletePlaylistDialog({ playlistId,
     onClose,
     currentUser,
@@ -16,7 +17,7 @@ export function DeletePlaylistDialog({ playlistId,
 
         try {
             setIsDeleting(true);
-            await axios.delete(`http://localhost:3000/api/playlists/delete-playlist`, {
+            await axios.delete(`${API_URL}/api/playlists/delete-playlist`, {
                 params: {
                     playlistId: playlistId,
                     userId: currentUser.id

@@ -8,13 +8,15 @@ import UserRoutes from './routes/UserRoutes.js';
 import AlbumRoutes from './routes/AlbumRoutes.js';
 import SearchRoutes from './routes/SearchRoutes.js';
 import ArtistRoutes from './routes/ArtistRoutes.js';
+import dotenv from 'dotenv';
+dotenv.config();
 const app = express();
 app.get('/', (req, res) => {
 	res.send("Hello Minh");
 });
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 var server = app.listen(PORT, async () => {
-	await console.log("Nodejs dang hoat dong tai http://localhost:3000");
+	await console.log("Nodejs dang hoat dong tai http://localhost:" + PORT);
 });
 // Cấu hình chỉ cho phép localhost:5173 (frontend) truy cập API để tránh lỗi CORS khi phát triển. Khi deploy thực tế, cần điều chỉnh lại cho phù hợp.
 app.use(cors({ origin: 'http://localhost:5173' }));

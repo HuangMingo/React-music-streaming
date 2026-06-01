@@ -3,6 +3,7 @@ import axios from "axios";
 import { showNotificationToast } from "../../../toast.js";
 import "./CreatePlaylist.css";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
+import { API_URL } from '../../../api.js';
 
 export function CreatePlaylist({ onClose, onSuccess, editingPlaylist = null }) {
     const isEditing = Boolean(editingPlaylist);
@@ -30,14 +31,14 @@ export function CreatePlaylist({ onClose, onSuccess, editingPlaylist = null }) {
             const userId = currentUser?.id;
             let savedPlaylist = null;
             if (isEditing) {
-                const response = await axios.put(`http://localhost:3000/api/playlists/update-playlist/${editingPlaylist.id}`, {
+                const response = await axios.put(`${API_URL}/api/playlists/update-playlist/${editingPlaylist.id}`, {
                     name: playlistName.trim(),
                     userId,
                     ispublic: isPublic
                 });
                 savedPlaylist = response.data;
             } else {
-                const response = await axios.post("http://localhost:3000/api/playlists/create-playlist", {
+                const response = await axios.post(`${API_URL}/api/playlists/create-playlist`, {
                     name: playlistName.trim(),
                     creator_id: userId,
                     ispublic: isPublic,

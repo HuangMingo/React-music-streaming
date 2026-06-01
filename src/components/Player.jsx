@@ -4,6 +4,7 @@ import { useAuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { showNotificationToast } from "../toast";
 import { ArtistNameLink } from "./ArtistNameLink/ArtistNameLink";
+import { API_URL } from '../api.js';
 
 const formatTime = (seconds = 0) => {
     const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
@@ -193,7 +194,7 @@ export function Player() {
         async function loadFavouriteStatus() {
             try {
                 const response = await axios.get(
-                    `http://localhost:3000/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${currentSong.id}`
+                    `${API_URL}/api/songs/is-favourite-song?defaultPlaylistId=${defaultPlaylistId}&songId=${currentSong.id}`
                 );
 
                 if (!isMounted) {
@@ -290,7 +291,7 @@ export function Player() {
             if (incrementedSongIdRef.current !== sessionKey && listenedTimeRef.current >= halfDuration) {
                 incrementedSongIdRef.current = sessionKey;
                 // Gọi API để tăng play_count
-                axios.post('http://localhost:3000/api/songs/increment-play-count', {
+                axios.post(`${API_URL}/api/songs/increment-play-count`, {
                     songId: currentSong.id
                 }).catch(error => {
                     console.error('Failed to increment play count:', error);

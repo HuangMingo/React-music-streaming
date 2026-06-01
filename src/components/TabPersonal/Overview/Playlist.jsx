@@ -6,6 +6,7 @@ import { DeletePlaylistDialog } from "./../../DeletePlaylistDialog/DeletePlaylis
 import { CreatePlaylist } from "../../Sidebar/CreatePlaylist/CreatePlaylist.jsx";
 import { EditPlaylistMenu } from "../EditPlaylistMenu.jsx";
 import axios from "axios";
+import { API_URL } from '../../../api.js';
 export function Playlist({ playlists = [], onPlaylistsChanged }) {
     const {
         selectedPlaylist,
@@ -24,7 +25,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
 
         try {
             const response = await axios.get(
-                "http://localhost:3000/api/playlists/playlist-details",
+                `${API_URL}/api/playlists/playlist-details`,
                 {
                     params: {
                         playlistId: playlist.id

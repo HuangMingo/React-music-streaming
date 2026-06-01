@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext.jsx";
 import { PlayMusic } from "../TabPersonal/Overview/PlayMusic.jsx";
+import { API_URL } from '../../api.js';
 
 function createPlaylistSlug(playlist) {
     const rawSlug = playlist?.playlist_name;
@@ -39,7 +40,7 @@ export function PlaylistDetail() {
             if (playlistId) {
                 try {
                     setLoading(true);
-                    const response = await axios.get("http://localhost:3000/api/playlists/playlist-details", {
+                    const response = await axios.get(`${API_URL}/api/playlists/playlist-details`, {
                         params: {
                             playlistId,
                         },

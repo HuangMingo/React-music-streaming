@@ -1,11 +1,12 @@
 import axios from 'axios';
+import { API_URL } from '../../src/api.js';
 // Tạo một hàm khởi tạo dữ liệu
 export const initMusicData = async (userId) => {
     //Lưu các playlist cá nhân
     let personalPlaylists = [];
     try {
         //Lấy dữ liệu playlist yêu thích của người dùng (dùng cho trang khám phá)
-        const response = await axios.get(`http://localhost:3000/api/playlists/favourite-playlists?userId=${userId}`);
+        const response = await axios.get(`${API_URL}/api/playlists/favourite-playlists?userId=${userId}`);
         const data = response.data;
         personalPlaylists = data;
 
@@ -14,7 +15,7 @@ export const initMusicData = async (userId) => {
     }
     //Lấy dữ liệu playlist do người dùng tạo (dùng cho trang cá nhân)
     try{
-        const response = await axios.get(`http://localhost:3000/api/playlists/user-created-playlists?userId=${userId}`);
+        const response = await axios.get(`${API_URL}/api/playlists/user-created-playlists?userId=${userId}`);
         const data = Array.isArray(response.data)
             ? response.data.map((playlist) => ({
                 ...playlist,
