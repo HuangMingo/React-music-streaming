@@ -2927,7 +2927,7 @@ label .container__header-icon {
     border-bottom: 1px solid var(--border-primary);
 }
 
-.search-page__songs .playlist__list-song:hover {
+.search-page__songs .playlist__list-song:hover, .playlist__list-song.active {
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -2935,9 +2935,6 @@ label .container__header-icon {
     border-bottom: 0;
 }
 
-/* .search-page__songs .playlist__song-title {
-    color: var(--white-color);
-} */
 
 .search-page__songs .playlist__song-author,
 .search-page__songs .playlist__song-time {
@@ -2967,13 +2964,7 @@ label .container__header-icon {
     min-width: 0;
 }
 
-.search-page__songs .playlist__song-thumb {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    flex: 0 0 48px;
-    overflow: hidden;
-}
+
 
 .search-page__songs .playlist__song-thumb .thumb--animate,
 .search-page__songs .playlist__song-thumb .play-song--actions {

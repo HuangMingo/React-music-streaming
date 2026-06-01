@@ -1,4 +1,5 @@
 import { ALBUM_STORAGE_KEY } from "../../../public/data/albums.js";
+import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
 
 export function AlbumSection() {
     const albums = JSON.parse(localStorage.getItem(ALBUM_STORAGE_KEY) || "[]");
@@ -50,7 +51,18 @@ export function AlbumSection() {
                                                 </div>
                                                 <div className="row__item-info">
                                                     <a href="#" className="row__info-name is-twoline">{album.title}</a>
-                                                    <p className="row__info-creator">{album.singers?.join(", ") || "Dang cap nhat"}</p>
+                                                    <p className="row__info-creator">
+                                                        {album.singers?.length ? (
+                                                            album.singers.map((singer, singerIndex) => (
+                                                                <span key={`${singer}-${singerIndex}`}>
+                                                                    <ArtistNameLink artist={singer} className="row__info-creator" />
+                                                                    {singerIndex < album.singers.length - 1 && ", "}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            "Dang cap nhat"
+                                                        )}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>

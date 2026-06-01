@@ -3,6 +3,7 @@ import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
+import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink";
 // Component: AllSongs
 // Chức năng: Hiển thị các bài hát gợi ý, cho phép mở menu "Thêm vào playlist"
 // Các điểm chính:
@@ -228,7 +229,7 @@ export function AllSongs() {
                                                                 song?.artist_names?.map((artist, i) => {
                                                                     return (
                                                                         <span key={i}>
-                                                                            <a href="#" className="is-ghost">{artist}</a>
+                                                                            <ArtistNameLink artist={artist} />
                                                                             {i < song?.artist_names?.length - 1 && ', '}
                                                                         </span>
                                                                     );

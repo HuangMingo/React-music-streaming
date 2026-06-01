@@ -48,10 +48,15 @@
 
 .header__item-link {
     flex: 1;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    background: transparent;
     font-size: 1.4rem;
     line-height: 2.1rem;
     text-decoration: none;
     color: var(--text-color);
+    cursor: pointer;
 }
 
 .search-suggestion-dropdown {

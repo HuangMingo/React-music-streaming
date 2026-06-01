@@ -3,6 +3,7 @@ import { useMusicContext } from "../context/MusicContext";
 import { useAuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { showNotificationToast } from "../toast";
+import { ArtistNameLink } from "./ArtistNameLink/ArtistNameLink";
 
 const formatTime = (seconds = 0) => {
     const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
@@ -382,7 +383,7 @@ export function Player() {
                                             currentSong?.artist_names?.map((artist, index) => {
                                                 return (
                                                     <span key={index}>
-                                                        <a href="#" className="is-ghost">{artist}</a>
+                                                        <ArtistNameLink artist={artist} />
                                                         {index < currentSong?.artist_names?.length - 1 && ", "}
                                                     </span>
                                                 )
@@ -559,7 +560,7 @@ export function Player() {
                                         currentSong?.artist_names?.map((artist, index) => {
                                             return (
                                                 <span key={index}>
-                                                    <a href="#" className="is-ghost">{artist}</a>
+                                                    <ArtistNameLink artist={artist} />
                                                     {index < currentSong?.artist_names?.length - 1 && ", "}
                                                 </span>
                                             )
@@ -631,7 +632,7 @@ export function Player() {
                                                 currentSong?.artist_names?.map((artist, index) => {
                                                     return (
                                                         <span key={index}>
-                                                            <a href="#" className="is-ghost">{artist}</a>
+                                                            <ArtistNameLink artist={artist} />
                                                             {index < currentSong?.artist_names?.length - 1 && ", "}
                                                         </span>
                                                     )

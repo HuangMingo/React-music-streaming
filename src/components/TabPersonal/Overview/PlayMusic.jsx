@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
 import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx";
+import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
 import axios from "axios";
 export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false }) {
     const { currentSong,
@@ -276,7 +277,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                                     song?.artist_names?.map((artist, i) => {
                                                                         return (
                                                                             <span key={i}>
-                                                                                <a href="#" className="is-ghost">{artist}</a>
+                                                                                <ArtistNameLink artist={artist} />
                                                                                 {i < song?.artist_names?.length - 1 && ', '}
                                                                             </span>
                                                                         );

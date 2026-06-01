@@ -11,6 +11,7 @@ const getAllSong = async () => {
             JOIN song s ON ars.song_id = s.id
         GROUP BY s.id
         ORDER BY RANDOM()
+        LIMIT 6
     `);
     return result.rows;
 }

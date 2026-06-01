@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation, useNavigationType } from 'react-router-
 import axios from 'axios';
 import { SuggestionDropdown } from './SuggestionDropdown/SuggestionDropdown.jsx';
 import { useAuthContext } from '../context/AuthContext';
+import { getArtistPath } from '../utils/artistNavigation.js';
 export function Header({ onClose }) {
     const [isOpenLogout, setOpenLogout] = useState(false);
     // Trạng thái bật/tắt của nút quay lại và tiến tới trên header.
@@ -137,6 +138,10 @@ export function Header({ onClose }) {
                     const val = encodeURIComponent(sel.item.title || sel.item.name || sel.item.playlist_name || '');
                     setShowSuggest(false);
                     setActiveIndex(-1);
+                    if (sel.type === 'artist') {
+                        navigate(getArtistPath(sel.item));
+                        return;
+                    }
                     navigate(`/tim-kiem/tat-ca?q=${val}`);
                 }
                 return;

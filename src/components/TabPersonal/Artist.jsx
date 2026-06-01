@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom"
-import { ARTIST_STORAGE_KEY } from "./../../../public/data/artists.js";
+import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
 const ARTIST_FOLLOW_STORAGE_KEY = "ARTIST_FOLLOW_STORAGE_KEY";
 
 function doi(followers) {
@@ -14,7 +14,7 @@ function doi(followers) {
 }
 export function Artist() {
 
-    const artists = JSON.parse(localStorage.getItem(ARTIST_STORAGE_KEY) || "[]");
+    const artists = [];
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [followedArtistIds, setFollowedArtistIds] = useState(() => {
@@ -155,12 +155,12 @@ export function Artist() {
                                                             </div>
                                                             <div className="row__item-info media artist--info">
                                                                 <div className="media__left">
-                                                                    <a href="#" className="row__info-name is-ghost mt-15 lh-19 text-center">
+                                                                    <ArtistNameLink artist={artist} className="row__info-name is-ghost mt-15 lh-19 text-center">
                                                                         {artist.name}
                                                                         <i className="bi bi-star-fill row__info-icon">
                                                                             <div className="icon-overlay"></div>
                                                                         </i>
-                                                                    </a>
+                                                                    </ArtistNameLink>
                                                                     <h3 className="row__info-creator text-center">{doi(artist.followers)} quan tâm</h3>
                                                                 </div>
                                                             </div>

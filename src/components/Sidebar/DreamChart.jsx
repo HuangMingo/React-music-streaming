@@ -3,6 +3,7 @@ import axios from "axios";
 import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
+import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink";
 export function DreamChart() {
     const [topSongs, setTopSongs] = useState([]);
     const [userPlaylists, setUserPlaylists] = useState([]);
@@ -185,8 +186,8 @@ export function DreamChart() {
                                                                             {
                                                                                 song.artist_names.map((artist, artistIndex) => {
                                                                                     return (
-                                                                                        <span>
-                                                                                            <a href="#" className="is-ghost">{artist}</a>
+                                                                                        <span key={`${artist}-${artistIndex}`}>
+                                                                                            <ArtistNameLink artist={artist} />
                                                                                             {artistIndex < song.artist_names.length - 1 && ", "}
                                                                                         </span>
                                                                                     )

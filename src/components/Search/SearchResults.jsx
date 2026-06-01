@@ -4,6 +4,8 @@ import axios from 'axios';
 import { AddSongToPlaylist } from '../AddSongToPlaylist/AddSongToPlaylist.jsx';
 import { useAuthContext } from '../../context/AuthContext.jsx';
 import { useMusicContext } from '../../context/MusicContext.jsx';
+import { ArtistNameLink } from '../ArtistNameLink/ArtistNameLink.jsx';
+import { getArtistPath } from '../../utils/artistNavigation.js';
 import '../../assets/css/main.css';
 
 const SEARCH_TABS = [
@@ -82,7 +84,7 @@ export function SearchResults() {
       mounted = false;
     };
   }, [q, currentUser?.id]);
-
+  //lấy dữ liệu playlist của người dùng để hiển thị trong menu thêm bài hát vào playlist
   useEffect(() => {
     async function loadUserPlaylists() {
       if (!currentUser?.id) {
@@ -155,7 +157,7 @@ export function SearchResults() {
   }
 
   function getPlaylistName(playlist) {
-    return playlist?.slug || playlist?.name || playlist?.playlist_name || '';
+    return playlist?.playlist_name || playlist?.name || '';
   }
 
   function createPlaylistSlug(playlist) {
@@ -227,13 +229,13 @@ export function SearchResults() {
       console.error('Play playlist failed:', error);
     }
   }
-
+//Xử lí sự kiến nhấn bài hát
   function handleSongClick(song) {
     setSelectedPlaylist(null);
     handleClickSong(song);
     setIsPlaying(true);
   }
-
+//Mở menu bài hát
   function handleToggleSongMenu(event, songId) {
     event.stopPropagation();
     setOpenSongMenuId((prevSongId) => (prevSongId === songId ? null : songId));
@@ -340,8 +342,8 @@ export function SearchResults() {
                                     {
                                       song.artist_names.map((artist, artistIndex) => {
                                         return (
-                                          <span>
-                                            <a href="#" className="is-ghost">{artist}</a>
+                                          <span key={`${artist}-${artistIndex}`}>
+                                            <ArtistNameLink artist={artist} />
                                             {artistIndex < song.artist_names.length - 1 && ", "}
                                           </span>
                                         )
@@ -406,7 +408,7 @@ export function SearchResults() {
                     <div className="search-page__artist-track">
                       {topArtists.map((artist, i) => (
                         <div key={artist.id ?? `artist-${i}`} className="search-page__artist-col">
-                          <div className="row__item item--artist search-page__artist-card" onClick={() => navigate(`/tim-kiem/nghe-si?q=${encodeURIComponent(artist.name || '')}`)}>
+                          <div className="row__item item--artist search-page__artist-card" onClick={() => navigate(getArtistPath(artist))}>
                             <div className="row__item-container flex--top-left">
                               <div className="row__item-display is-rounded search-page__artist-display">
                                 <div className="row__item-img img--square is-rounded" style={{ background: `url(${getImage(artist)}) no-repeat center center / cover` }} />
@@ -421,7 +423,7 @@ export function SearchResults() {
                               </div>
                               <div className="row__item-info media artist--info search-page__artist-info">
                                 <div className="media__left">
-                                  <span className="row__info-name is-ghost mt-15 lh-19 text-center">{artist.name}</span>
+                                  <ArtistNameLink artist={artist} className="row__info-name is-ghost mt-15 lh-19 text-center" />
                                   <h3 className="row__info-creator text-center">Nghệ sĩ</h3>
                                 </div>
                               </div>

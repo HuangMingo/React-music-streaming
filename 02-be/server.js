@@ -7,6 +7,7 @@ import AuthRoutes from './routes/AuthRoutes.js';
 import UserRoutes from './routes/UserRoutes.js';
 import AlbumRoutes from './routes/AlbumRoutes.js';
 import SearchRoutes from './routes/SearchRoutes.js';
+import ArtistRoutes from './routes/ArtistRoutes.js';
 const app = express();
 app.get('/', (req, res) => {
 	res.send("Hello Minh");
@@ -24,4 +25,5 @@ app.use('/api/auth', AuthRoutes);
 app.use('/api/users', UserRoutes);
 app.use('/api/albums', AlbumRoutes);
 app.use('/api/search', SearchRoutes);
+app.use('/api/artists', ArtistRoutes);
 

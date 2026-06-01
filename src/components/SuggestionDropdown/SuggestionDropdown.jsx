@@ -40,8 +40,8 @@ export function SuggestionDropdown({
               aria-selected={isActive}
             >
               <i className="bi bi-search header__item-icon" />
-              <a
-                href="#"
+              <button
+                type="button"
                 className="header__item-link"
                 onClick={(event) => {
                   event.preventDefault();
@@ -49,7 +49,7 @@ export function SuggestionDropdown({
                 }}
               >
                 {label}
-              </a>
+              </button>
             </li>
           );
         })}

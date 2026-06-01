@@ -34,6 +34,7 @@ import { SearchResults } from './components/Search/SearchResults.jsx'
 import { UploadSection } from './components/TabPersonal/UploadSection.jsx'
 import { Radio } from './components/TabExplorer/Radio.jsx'
 import { PlaylistDetail } from './components/PlaylistDetail/PlaylistDetail.jsx'
+import { ArtistDetail } from './components/ArtistsDetail/ArtistsDetail.jsx'
 
 function GuestOnlyRoute({ children }) {
   const { isAuthenticated, isAdmin } = useAuthContext();
@@ -168,6 +169,8 @@ function App() {
             <Route path="/tim-kiem" element={<Navigate to="/tim-kiem/tat-ca" replace />} />
             <Route path="/tim-kiem/:tab" element={<SearchResults />} />
             <Route path="/playlist/:slug" element={<PlaylistDetail />} />
+            <Route path="/artist/:slug" element={<ArtistDetail />} />
+            <Route path="/:slug" element={<ArtistDetail />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 

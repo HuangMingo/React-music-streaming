@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { ALBUM_STORAGE_KEY } from "./../../../../public/data/albums.js";
+import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
 
 export function Album() {
     const albums = JSON.parse(localStorage.getItem(ALBUM_STORAGE_KEY) || "[]");
@@ -130,9 +131,7 @@ export function Album() {
                                                                     album.singers?.map((singer, index) =>
                                                                     (
                                                                         <>
-                                                                            <a href="#" className="row__info-creator" key={index}>
-                                                                                {singer}
-                                                                            </a>
+                                                                            <ArtistNameLink artist={singer} className="row__info-creator" key={index} />
                                                                             {index < album.singers.length - 1 && ', '}
                                                                         </>
 

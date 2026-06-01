@@ -3,6 +3,7 @@ import { useMusicContext } from "../../context/MusicContext";
 import { DeleteSongFromPlaylistDialog } from "./DeleteSongFromPlaylistDialog";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 import { useAuthContext } from "../../context/AuthContext";
+import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink";
 function formatDuration(durationSeconds) {
     const duration = Number(durationSeconds) || 0;
     const minutes = Math.floor(duration / 60)
@@ -143,9 +144,7 @@ export function SongSection() {
                                                             {song?.artist_names?.length ? (
                                                                 song.artist_names.map((artist, artistIndex) => (
                                                                     <span key={`${artist}-${artistIndex}`}>
-                                                                        <a href="#" className="is-ghost">
-                                                                            {artist}
-                                                                        </a>
+                                                                        <ArtistNameLink artist={artist} />
                                                                         {artistIndex < song.artist_names.length - 1 && ", "}
                                                                     </span>
                                                                 ))
