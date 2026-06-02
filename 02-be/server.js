@@ -17,7 +17,12 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 // Cấu hình chỉ cho phép localhost:5173 (frontend) truy cập API để tránh lỗi CORS khi phát triển. Khi deploy thực tế, cần điều chỉnh lại cho phù hợp.
-app.use(cors({ origin: 'https://frontend-rmqd.onrender.com' }));
+const allowedOrigins = [
+	'http://localhost:5173',
+	'https://frontend-rmqd.onrender.com',
+];
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use('/api/songs', SongRoutes);
 app.use('/api/playlists', PlaylistRoutes);
