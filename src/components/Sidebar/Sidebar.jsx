@@ -17,13 +17,13 @@ export function Sidebar({ onPlaylistsChanged }) {
     return (
         <div className="app__sidebar">
             <div className="sidebar__logo hide-on-mobile">
-                <a href="http://localhost:5173/" className="sidebar__logo-link">
+                <NavLink to="/" className="sidebar__logo-link">
                     <img
                         src="/assets/img/logos/main-logo.png"
                         alt="Logo"
                         className="sidebar__logo-img"
                     />
-                </a>
+                </NavLink>
             </div>
 
             <div className="sidebar__nav">

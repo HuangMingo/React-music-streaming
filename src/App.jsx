@@ -40,7 +40,7 @@ function GuestOnlyRoute({ children }) {
   const { isAuthenticated, isAdmin } = useAuthContext();
   if (isAuthenticated) {
     // Người đã đăng nhập không cần quay lại trang login/register.
-    return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />;
+    return <Navigate to={'/'} replace />;
   }
 
   return children;

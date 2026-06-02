@@ -549,8 +549,8 @@
     font-weight: 600;
     text-decoration: none;
     color: #fff;
-    background: #1d9bf0;
-    border: 1px solid #1d9bf0;
+    background: var(--purple-primary);
+    border: 1px solid var(--purple-primary);
     padding: 0 16px;
 }
 
@@ -2154,7 +2154,7 @@ label .container__header-icon {
 .btn-toggle-play i {
     padding: 5px;
     border-radius: 50%;
-    border: 1px solid var(--text-color);
+    border: 1.5px solid var(--text-color);
 }
 
 

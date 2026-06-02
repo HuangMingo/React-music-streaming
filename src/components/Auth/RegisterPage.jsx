@@ -9,7 +9,7 @@ export function RegisterPage() {
   const handleRegister = async (credentials) => {
     const result = await register(credentials);
     if (result.ok) {
-      window.location.replace('http://localhost:5173/');
+      navigate('/');
     }
     return result;
   };

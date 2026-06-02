@@ -6,6 +6,8 @@ import { showNotificationToast } from "../toast";
 import { ArtistNameLink } from "./ArtistNameLink/ArtistNameLink";
 import { API_URL } from '../api.js';
 
+const DEFAULT_COVER = "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg";
+
 const formatTime = (seconds = 0) => {
     const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
     const mins = Math.floor(safeSeconds / 60)
@@ -339,7 +341,7 @@ export function Player() {
                                         className="thumb-img"
                                         style={{
                                             background:
-                                                `url(${currentSong?.image || "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg"}) no-repeat center center / cover`
+                                                `url(${currentSong?.image || DEFAULT_COVER}) no-repeat center center / cover`
                                         }}
                                     />
                                     <svg
@@ -512,7 +514,7 @@ export function Player() {
                     <div className="player__popup-header">
                         <div className="player__popup-logo">
                             <img
-                                src="./../../public/assets/img/logos/main-logo.png"
+                                src="/assets/img/logos/main-logo.png"
                                 alt="Logo"
                                 className="player__logo-img"
                             />
@@ -545,7 +547,7 @@ export function Player() {
                                 className="player__popup-cd-img"
                                 style={{
                                     background:
-                                        `url(${currentSong?.image || "fallback"}) no-repeat center center / cover`
+                                        `url(${currentSong?.image || DEFAULT_COVER}) no-repeat center center / cover`
                                 }}
                             />
 
@@ -587,7 +589,7 @@ export function Player() {
                                             className="thumb-img"
                                             style={{
                                                 background:
-                                                    `url(${currentSong?.image || "https://res.cloudinary.com/dnsne0dgp/image/upload/v1774878121/vinyl-record-isolated_wjrnjk.jpg"}) no-repeat center center / cover`
+                                                    `url(${currentSong?.image || DEFAULT_COVER}) no-repeat center center / cover`
                                             }}
                                         />
                                         <svg

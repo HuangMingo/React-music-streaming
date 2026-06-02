@@ -1,4 +1,3 @@
-import { } from "../assets/img/modalThemes/modalTheme1/theme1.jpg"
 const listThemes = [
     {
         type: 'Chủ Đề',
@@ -87,7 +86,7 @@ const listThemes = [
                     layoutBg: "#e7dfdd",
                     linkTextHover: "#8c8471",
                     modalScrollbar: "rgba(12,3,3,0.8)",
-                    playerBg: "#d0ccc5",
+                    playerBg: "#F5E6E0",
                     purplePrimary: "#409abc",
                     primaryBg: "#fffffe",
                     sidebarPopupBg: "#f2f2f2",

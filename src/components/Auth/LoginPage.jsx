@@ -9,7 +9,7 @@ export function LoginPage() {
   const handleLogin = async (credentials) => {
     const result = await login(credentials);
     if (result.ok) {
-      window.location.replace('http://localhost:5173/');
+      navigate('/');
     }
     return result;
   };
