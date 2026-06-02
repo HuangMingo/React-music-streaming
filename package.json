@@ -8,7 +8,7 @@
   "type": "module",
   "main": "eslint.config.js",
   "scripts": {
-    "start": "nodemon server",
+    "start": "nodemon 02-be/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
     "build": "vite build",
