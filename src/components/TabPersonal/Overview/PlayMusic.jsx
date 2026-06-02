@@ -261,7 +261,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                             <span className="song-note note-3">♪</span>
                                                             <span className="song-note note-4">♫</span>
                                                             <div className="thumb--animate" >
-                                                                <div className="thumb--animate-img" style={{ "background": "url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
+                                                                <div className="thumb--animate-img" style={{ "background": "url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
 
                                                                 </div>
                                                             </div>

@@ -128,7 +128,7 @@ export function SongSection() {
                                                         <div className="thumb--animate">
                                                             <div
                                                                 className="thumb--animate-img"
-                                                                style={{ background: "url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}
+                                                                style={{ background: "url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}
                                                             />
                                                         </div>
                                                         <div className="play-song--actions">

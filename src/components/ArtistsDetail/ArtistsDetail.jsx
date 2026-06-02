@@ -11,7 +11,7 @@ import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist.jsx";
 const ARTIST_TABS = [
   { id: "overview", label: "Tổng quan" },
-  {id: "about", label: "Giới thiệu"},
+  { id: "about", label: "Giới thiệu" },
   { id: "songs", label: "Bài hát" },
   { id: "albums", label: "Album" },
   { id: "playlists", label: "Playlist" },
@@ -95,6 +95,8 @@ export function ArtistDetail() {
     selectedPlaylistBySong,
     userPlaylists,
   } = useMusicContext();
+
+
   const containerRef = useRef(null);
   const sectionRefs = useRef({});
   const [artist, setArtist] = useState(null);
@@ -223,7 +225,24 @@ export function ArtistDetail() {
   const displayedFollowersCount = artist?.id
     ? artistFollowersCount[artist.id] ?? followersCount
     : followersCount;
-  const aboutText = artist?.bio || artist?.description || artist?.about || "Chưa có thông tin giới thiệu.";
+  const linkAbout = artist?.bio;
+  const [aboutArtist, setAboutArtist] = useState("");
+  useEffect(() => {
+    if(!linkAbout) {
+      setAboutArtist("Chưa có thông tin");
+      return;
+    }
+    async function fetchAbout() {
+      try {
+        const response = await axios.get(linkAbout);
+        setAboutArtist(response.data);
+      } catch (err) {
+        console.error("Load artist about info failed:", err);
+        setAboutArtist("Không thể tải thông tin về nghệ sĩ.");
+      }
+    }
+    fetchAbout();
+  }, [linkAbout]);
 
   const overviewData = useMemo(() => ({
     songs: popularSongs,
@@ -344,7 +363,7 @@ export function ArtistDetail() {
                     <span className="song-note note-3">♪</span>
                     <span className="song-note note-4">♫</span>
                     <div className="thumb--animate">
-                      <div className="thumb--animate-img" style={{ background: "url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }} />
+                      <div className="thumb--animate-img" style={{ background: "url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }} />
                     </div>
                     <div className="play-song--actions">
                       <div className="control-btn btn-toggle-play btn--play-song">
@@ -535,39 +554,45 @@ export function ArtistDetail() {
 
             <div className="artist-detail__content">
               {showOverview && (
-              <section className="artist-detail__section" data-section="overview" ref={(element) => setSectionRef("overview", element)}>
-                <div className="artist-detail__panel">
-                  <div className="artist-detail__panel-header">
-                    <h2>Bài hát phổ biến</h2>
-                    <button type="button" onClick={() => goToTab("songs")}>Xem tất cả</button>
+                <section className="artist-detail__section" data-section="overview" ref={(element) => setSectionRef("overview", element)}>
+                  <div className="artist-detail__panel">
+                    <div className="artist-detail__panel-header">
+                      <h2>Giới thiệu</h2>
+                    </div>
+                    <p className="artist-detail__empty">{aboutArtist}</p>
                   </div>
-                  {renderSongList(overviewData.songs, 5)}
-                </div>
+                  <div className="artist-detail__panel">
+                    <div className="artist-detail__panel-header">
+                      <h2>Bài hát phổ biến</h2>
+                      <button type="button" onClick={() => goToTab("songs")}>Xem tất cả</button>
+                    </div>
+                    {renderSongList(overviewData.songs, 5)}
+                  </div>
 
-                <div className="artist-detail__panel">
-                  <div className="artist-detail__panel-header">
-                    <h2>Album nổi bật</h2>
-                    <button type="button" onClick={() => goToTab("albums")}>Xem tất cả</button>
+                  <div className="artist-detail__panel">
+                    <div className="artist-detail__panel-header">
+                      <h2>Album nổi bật</h2>
+                      <button type="button" onClick={() => goToTab("albums")}>Xem tất cả</button>
+                    </div>
+                    {renderAlbumGrid(overviewData.albums, 5)}
                   </div>
-                  {renderAlbumGrid(overviewData.albums, 5)}
-                </div>
 
-                <div className="artist-detail__panel">
-                  <div className="artist-detail__panel-header">
-                    <h2>Playlist nổi bật</h2>
-                    <button type="button" onClick={() => goToTab("playlists")}>Xem tất cả</button>
+                  <div className="artist-detail__panel">
+                    <div className="artist-detail__panel-header">
+                      <h2>Playlist nổi bật</h2>
+                      <button type="button" onClick={() => goToTab("playlists")}>Xem tất cả</button>
+                    </div>
+                    {renderPlaylistGrid(overviewData.playlists, 5)}
                   </div>
-                  {renderPlaylistGrid(overviewData.playlists, 5)}
-                </div>
 
-                <div className="artist-detail__panel">
-                  <div className="artist-detail__panel-header">
-                    <h2>Nghệ sĩ tương tự</h2>
-                    <button type="button" onClick={() => goToTab("related")}>Xem tất cả</button>
+                  <div className="artist-detail__panel">
+                    <div className="artist-detail__panel-header">
+                      <h2>Nghệ sĩ tương tự</h2>
+                      <button type="button" onClick={() => goToTab("related")}>Xem tất cả</button>
+                    </div>
+                    {renderRelatedArtists(overviewData.relatedArtists, 5)}
                   </div>
-                  {renderRelatedArtists(overviewData.relatedArtists, 5)}
-                </div>
-              </section>
+                </section>
               )}
 
               {showAbout && (
@@ -576,7 +601,7 @@ export function ArtistDetail() {
                     <div className="artist-detail__panel-header">
                       <h2>Giới thiệu</h2>
                     </div>
-                    <p className="artist-detail__empty">{aboutText}</p>
+                    <p className="artist-detail__empty">{aboutArtist}</p>
                   </div>
                 </section>
               )}

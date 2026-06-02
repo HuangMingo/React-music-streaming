@@ -5,7 +5,6 @@ import { useMusicContext } from "../../context/MusicContext";
 import { DeletePlaylistDialog } from "./../../components/DeletePlaylistDialog/DeletePlaylistDialog.jsx";
 import { CreatePlaylist } from "./../Sidebar/CreatePlaylist/CreatePlaylist.jsx";
 import { EditPlaylistMenu } from "./EditPlaylistMenu.jsx";
-import "./../../../public/assets/img/SongActiveAnimation/icon-playing.gif";
 import axios from "axios";
 import { API_URL } from '../../api.js';
 export function PlaylistSection() {
@@ -219,7 +218,7 @@ export function PlaylistSection() {
                                                             <span className="song-note note-3">♪</span>
                                                             <span className="song-note note-4">♫</span>
                                                             <div className="thumb--animate" >
-                                                                <div className="thumb--animate-img" style={{ "background": "url('./../../../public/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
+                                                                <div className="thumb--animate-img" style={{ "background": "url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }}>
 
                                                                 </div>
                                                             </div>

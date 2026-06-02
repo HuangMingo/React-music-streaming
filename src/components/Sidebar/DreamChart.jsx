@@ -169,7 +169,7 @@ export function DreamChart() {
                                                                         <div className="thumb--animate">
                                                                             <div className="thumb--animate-img" style={
                                                                                 {
-                                                                                    background: `url('./../assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain`
+                                                                                    background: `url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain`
                                                                                 }
                                                                             }>
 

@@ -2195,6 +2195,7 @@ label .container__header-icon {
     position: relative;
     align-items: center;
     justify-content: space-between;
+    margin-top:10px;
 }
 
 .progress__track {
