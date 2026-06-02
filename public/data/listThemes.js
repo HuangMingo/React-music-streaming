@@ -164,6 +164,29 @@ const listThemes = [
                 }
             },
             {
+                name: 'Trần Lập',
+                image: '../assets/img/modalThemes/modalTheme2/TranLap.jpg',
+                backgroundImage: '../assets/img/themeBgs/listTheme2/TranLap.jpg',
+                colors: {
+                    bgContentColor: "rgba(255,255,255,0.04)",
+                    borderBox: "rgba(120,170,220,0.18)",
+                    borderPrimary: "rgba(80,160,255,0.35)",
+                    layoutBg: "#061b3f",
+                    linkTextHover: "#6bbcff",
+                    modalScrollbar: "rgba(45,120,200,0.75)",
+                    playerBg: "#082451",
+                    purplePrimary: "#1f8cff",
+                    primaryBg: "#0a2b5f",
+                    sidebarPopupBg: "#071f49",
+                    textColor: "#f2f7ff",
+                    textItemHover: "#8fd0ff",
+                    textSecondary: "#9bb4d4",
+                    navigationText: "#d8e8ff",
+                    placeholderText: "#7f9abc",
+                    whiteColor: "#ffffff",
+                }
+            },
+            {
                 name: 'Jisoo',
                 image: '../assets/img/modalThemes/modalTheme2/theme6.jpg',
                 backgroundImage: '../assets/img/themeBgs/listTheme2/theme6.jpg',

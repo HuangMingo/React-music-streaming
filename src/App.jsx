@@ -79,6 +79,22 @@ function App() {
   const [playlists, setPlaylists] = useState([]);
   const authEntryPaths = ['/login', '/register'];
   const isAuthEntryPage = authEntryPaths.includes(location.pathname);
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const reservedTopLevelPaths = new Set([
+    'admin',
+    'dashboard',
+    'dream',
+    'guest',
+    'login',
+    'personal',
+    'playlist',
+    'recent',
+    'register',
+    'tim-kiem',
+  ]);
+  const isArtistDetailPage =
+    location.pathname.startsWith('/artist/') ||
+    (pathSegments.length === 1 && !reservedTopLevelPaths.has(pathSegments[0]));
   //Tải dữ liệu playlist và cập nhât khi có sự thay đổi 
   async function loadPlaylists() {
     if (!currentUser?.id) {
@@ -139,7 +155,7 @@ function App() {
   return (
     <MusicProvider>
       <>
-        <div className={`app grid${isAuthEntryPage ? ' app--full-screen' : ''}`} style={{ backgroundImage: "none" }}>
+        <div className={`app grid${isAuthEntryPage ? ' app--full-screen' : ''}${isArtistDetailPage ? ' app--artist-detail' : ''}`} style={{ backgroundImage: "none" }}>
           {/* Header */}
           {!isAuthEntryPage ? <Header onClose={() => setShowTheme(true)} /> : null}
 
@@ -180,9 +196,6 @@ function App() {
 
         {/* Tab radio */}
         {!isStandalonePage ? <TabRadio /> : null}
-
-        {/* Tab following */}
-        {!isStandalonePage ? <RecentSong /> : null}
 
         {/* Player */}
         {!isStandalonePage ? <Player /> : null}

@@ -31,8 +31,6 @@ export function Player() {
         setCurrentTime,
         isPlaying,
         setIsPlaying,
-        favouriteSongIds,
-        setIsFavouriteSongIds,
         toggleFavouriteSong,
     } = useMusicContext();
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -63,6 +61,7 @@ export function Player() {
     const [isRepeat, setIsRepeat] = useState(() => JSON.parse(localStorage.getItem("isRepeat") || "false"));
     const duration = audioRef.current?.duration || currentSong?.duration_seconds || 0;
     const [pendingRestoreTime, setPendingRestoreTime] = useState(null);
+    // Trạng thái yêu thích riêng của bài đang phát; không dùng favouriteSongIds vì Set đó thay đổi theo từng tab/danh sách.
     const [isFavouriteCurrentSong, setIsFavouriteCurrentSong] = useState(false);
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
     const songs = selectedPlaylist?.songs || [];
@@ -203,7 +202,7 @@ export function Player() {
                     return;
                 }
 
-                setIsFavouriteCurrentSong(Boolean(response?.data?.isFavourite));
+                setIsFavouriteCurrentSong(Boolean(response?.data?.isFavouriteSong));
             } catch (error) {
                 if (isMounted) {
                     setIsFavouriteCurrentSong(false);
@@ -217,7 +216,15 @@ export function Player() {
         return () => {
             isMounted = false;
         };
-    }, [currentSong?.id, currentUser?.id]);
+    }, [currentSong?.id, currentUser?.id, defaultPlaylistId]);
+
+    async function handleToggleFavouriteCurrentSong(event) {
+        const nextIsFavourite = await toggleFavouriteSong(event, currentSong.id);
+        // toggleFavouriteSong trả về trạng thái mới để icon player cập nhật ngay sau khi bấm.
+        if (nextIsFavourite !== null) {
+            setIsFavouriteCurrentSong(Boolean(nextIsFavourite));
+        }
+    }
 
 
     const playSongAt = (songIndex) => {
@@ -397,10 +404,10 @@ export function Player() {
                             </div>
                             <div className="media__right hide-on-tablet-mobile">
                                 <div className="player__song-options">
-                                    <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}
-                                        title={favouriteSongIds?.has(currentSong?.id) ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}
+                                    <div className="player__song-btn option-btn btn--heart" onClick={handleToggleFavouriteCurrentSong}
+                                        title={isFavouriteCurrentSong ? "Bỏ thích bài hát" : "Thêm vào bài hát yêu thích"}
                                     >
-                                        <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds?.has(currentSong?.id) ? "-fill" : ""} primary`} />
+                                        <i className={`btn--icon icon--heart bi bi-heart${isFavouriteCurrentSong ? "-fill" : ""} primary`} />
                                     </div>
                                     <div className="player__song-btn option-btn btn-three-dots" onClick={(event) => event.stopPropagation()}
                                         title="Khác">
@@ -646,8 +653,8 @@ export function Player() {
                                 </div>
                                 <div className="media__right hide-on-tablet-mobile">
                                     <div className="player__song-options">
-                                        <div className="player__song-btn option-btn btn--heart" onClick={(e) => toggleFavouriteSong(e, currentSong.id)}>
-                                            <i className={`btn--icon icon--heart bi bi-heart${favouriteSongIds.has(currentSong?.id) ? "-fill" : ""} primary`} />
+                                        <div className="player__song-btn option-btn btn--heart" onClick={handleToggleFavouriteCurrentSong}>
+                                            <i className={`btn--icon icon--heart bi bi-heart${isFavouriteCurrentSong ? "-fill" : ""} primary`} />
                                         </div>
                                         <div className="player__song-btn option-btn">
                                             <i className="btn--icon bi bi-three-dots" />

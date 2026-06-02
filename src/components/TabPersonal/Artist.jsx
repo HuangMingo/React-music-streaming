@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom"
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
-const ARTIST_FOLLOW_STORAGE_KEY = "ARTIST_FOLLOW_STORAGE_KEY";
+import { useMusicContext } from "../../context/MusicContext.jsx";
 
 function doi(followers) {
     if (followers >= 1000000) {
@@ -15,21 +15,14 @@ function doi(followers) {
 export function Artist() {
 
     const artists = [];
+    // Artist card dùng chung follow state trong MusicContext, không lưu localStorage riêng.
+    const {
+        artistFollowersCount,
+        toggleFollowArtist,
+        isArtistFollowed,
+    } = useMusicContext();
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [followedArtistIds, setFollowedArtistIds] = useState(() => {
-        try {
-            const savedFollowedArtistIds = JSON.parse(localStorage.getItem(ARTIST_FOLLOW_STORAGE_KEY) || "null");
-            if (Array.isArray(savedFollowedArtistIds)) {
-                return savedFollowedArtistIds;
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-        return artists.map((artist) => artist.id);
-    });
-
     useEffect(() => {
         function updateItemsPerPage() {
             const width = window.innerWidth;
@@ -52,10 +45,6 @@ export function Artist() {
 
         return () => window.removeEventListener("resize", updateItemsPerPage);
     }, []);
-
-    useEffect(() => {
-        localStorage.setItem(ARTIST_FOLLOW_STORAGE_KEY, JSON.stringify(followedArtistIds));
-    }, [followedArtistIds]);
 
     const totalPages = Math.max(1, Math.ceil(artists.length / itemsPerPage));
     const pagedArtists = useMemo(() => {
@@ -81,13 +70,8 @@ export function Artist() {
     }
 
     function handleToggleFollow(artistId) {
-        setFollowedArtistIds((currentIds) => {
-            if (currentIds.includes(artistId)) {
-                return currentIds.filter((id) => id !== artistId);
-            }
-
-            return [...currentIds, artistId];
-        });
+        // Component chỉ gọi context; context chịu trách nhiệm gọi API và cập nhật state.
+        toggleFollowArtist(artistId);
     }
 
     const isFirstPage = currentPage === 0;
@@ -136,7 +120,9 @@ export function Artist() {
                                     <div className="artist__page" key={`artist-page-${pageIndex}`}>
                                         {pageArtists.map((artist, artistIndex) => {
                                             const absoluteIndex = pageIndex * itemsPerPage + artistIndex;
-                                            const isFollowing = followedArtistIds.includes(artist.id);
+                                            // Follow status/count lấy từ context để đồng bộ với ArtistDetail.
+                                            const isFollowing = isArtistFollowed(artist.id);
+                                            const followersCount = artistFollowersCount[artist.id] ?? artist.followers;
 
                                             return (
                                                 <div className="col l-2-4 m-3 c-6" key={absoluteIndex}>
@@ -161,7 +147,7 @@ export function Artist() {
                                                                             <div className="icon-overlay"></div>
                                                                         </i>
                                                                     </ArtistNameLink>
-                                                                    <h3 className="row__info-creator text-center">{doi(artist.followers)} quan tâm</h3>
+                                                                    <h3 className="row__info-creator text-center">{doi(followersCount)} quan tâm</h3>
                                                                 </div>
                                                             </div>
                                                             <div className="row__item-btn">
@@ -172,7 +158,7 @@ export function Artist() {
                                                                     aria-pressed={isFollowing}
                                                                 >
                                                                     <i className={isFollowing ? "bi bi-check2" : ""}></i>
-                                                                    <span>&nbsp;{isFollowing ? "Đã quan tâm" : "Quan tâm"}</span>
+                                                                    <span>&nbsp;{isFollowing ? "Đang theo dõi" : "Theo dõi"}</span>
                                                                 </button>
                                                             </div>
                                                         </div>

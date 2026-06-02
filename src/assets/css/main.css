@@ -14,6 +14,10 @@
     height: 100vh;
 }
 
+.app.app--artist-detail {
+    background-image: none !important;
+}
+
 /* Siderbar CSS */
 .app__sidebar {
     width: 240px;
@@ -278,6 +282,7 @@
     width: 100%;
     display: flex;
     align-items: flex-end;
+    margin-top: auto;
 }
 
 .sidebar__create-container {
@@ -1388,10 +1393,8 @@ label .container__header-icon {
     box-shadow: 0 1px 1px var(--bg-color);
     border-bottom: 1px solid var(--bg-content-color);
 }
-
-.playlist__list-song:hover,
-.playlist__list-song.active {
-    background-color: var(--bg-content-color);
+.playlist__list-song.active{
+    background: rgba(128, 128, 128, 0.1);
 }
 
 
@@ -1521,7 +1524,9 @@ label .container__header-icon {
     display: none;
     overflow: hidden;
 }
-
+.playlist__list-song:hover{
+        background: rgba(128, 128, 128, 0.1);
+}
 .playlist__list-song.active.playing .thumb--animate {
     display: flex;
 }
@@ -2927,9 +2932,7 @@ label .container__header-icon {
     border-bottom: 1px solid var(--border-primary);
 }
 
-.search-page__songs .playlist__list-song:hover, .playlist__list-song.active {
-    background: rgba(255, 255, 255, 0.02);
-}
+
 
 .search-page__songs .playlist__list-song:last-child {
     border-bottom: 0;

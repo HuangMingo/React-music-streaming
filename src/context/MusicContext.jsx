@@ -19,13 +19,153 @@ export function MusicProvider({ children }) {
   //Sử dụng Set tạo state để lưu trữ tập hợp ID của các bài hát yêu thích
   const [favouriteSongIds, setFavouriteSongIds] = useState(new Set());
   const [favouritePlaylistIds, setFavouritePlaylistIds] = useState(new Set());
+  // Lưu danh sách artistId đã follow trong context để mọi màn dùng chung một nguồn state.
+  const [followedArtists, setFollowedArtists] = useState(new Set());
+  // Cache số follower theo artistId để UI cập nhật ngay sau follow/unfollow.
+  const [artistFollowersCount, setArtistFollowersCount] = useState({});
+
+  // Helper dùng trong component để kiểm tra nhanh trạng thái follow.
+  function isArtistFollowed(artistId) {
+    return followedArtists.has(Number(artistId));
+  }
+
+  // Đồng bộ trạng thái follow vào Set mà không reload trang.
+  function syncArtistFollowStatus(artistId, isFollowing) {
+    const normalizedArtistId = Number(artistId);
+    if (!normalizedArtistId) return;
+
+    setFollowedArtists((prev) => {
+      const next = new Set(prev);
+      if (isFollowing) {
+        next.add(normalizedArtistId);
+      } else {
+        next.delete(normalizedArtistId);
+      }
+      return next;
+    });
+  }
+
+  // Đồng bộ follower count theo artistId để ArtistDetail/card dùng lại được.
+  function syncArtistFollowersCount(artistId, followersCount) {
+    const normalizedArtistId = Number(artistId);
+    if (!normalizedArtistId) return;
+
+    setArtistFollowersCount((prev) => ({
+      ...prev,
+      [normalizedArtistId]: Number(followersCount) || 0,
+    }));
+  }
+
+  // Lấy trạng thái follow từ backend khi một màn vừa load artist.
+  async function loadArtistFollowStatus(artistId) {
+    const normalizedArtistId = Number(artistId);
+    if (!currentUser?.id || !normalizedArtistId) return false;
+
+    try {
+      const response = await axios.get(`${API_URL}/api/artists/follow-status`, {
+        params: {
+          userId: currentUser.id,
+          artistId: normalizedArtistId,
+        },
+      });
+      const isFollowing = Boolean(response?.data?.isFollowing);
+      syncArtistFollowStatus(normalizedArtistId, isFollowing);
+      return isFollowing;
+    } catch (error) {
+      console.error("Load artist follow status failed:", error);
+      return false;
+    }
+  }
+
+  // Lấy số follower từ backend và đưa vào cache trong context.
+  async function loadArtistFollowersCount(artistId) {
+    const normalizedArtistId = Number(artistId);
+    if (!normalizedArtistId) return 0;
+
+    try {
+      const response = await axios.get(`${API_URL}/api/artists/followers-count`, {
+        params: {
+          artistId: normalizedArtistId,
+        },
+      });
+      const followersCount = Number(response?.data?.followersCount) || 0;
+      syncArtistFollowersCount(normalizedArtistId, followersCount);
+      return followersCount;
+    } catch (error) {
+      console.error("Load artist followers count failed:", error);
+      return 0;
+    }
+  }
+
+  // Gọi API follow rồi cập nhật context sau khi backend thành công.
+  async function followArtist(artistId) {
+    const normalizedArtistId = Number(artistId);
+    if (!currentUser?.id || !normalizedArtistId) {
+      showNotificationToast("Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ theo dÃµi nghá»‡ sÄ©.");
+      return null;
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/api/artists/follow`, {
+        userId: currentUser.id,
+        artistId: normalizedArtistId,
+      });
+      const followersCount = Number(response?.data?.followersCount) || 0;
+      syncArtistFollowStatus(normalizedArtistId, true);
+      syncArtistFollowersCount(normalizedArtistId, followersCount);
+      return { isFollowing: true, followersCount };
+    } catch (error) {
+      console.error("Follow artist failed:", error);
+      return null;
+    }
+  }
+
+  // Gọi API unfollow rồi cập nhật context sau khi backend thành công.
+  async function unfollowArtist(artistId) {
+    const normalizedArtistId = Number(artistId);
+    if (!currentUser?.id || !normalizedArtistId) {
+      showNotificationToast("Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ theo dÃµi nghá»‡ sÄ©.");
+      return null;
+    }
+
+    try {
+      const response = await axios.delete(`${API_URL}/api/artists/follow`, {
+        data: {
+          userId: currentUser.id,
+          artistId: normalizedArtistId,
+        },
+      });
+      const followersCount = Number(response?.data?.followersCount) || 0;
+      syncArtistFollowStatus(normalizedArtistId, false);
+      syncArtistFollowersCount(normalizedArtistId, followersCount);
+      return { isFollowing: false, followersCount };
+    } catch (error) {
+      console.error("Unfollow artist failed:", error);
+      return null;
+    }
+  }
+
+  // Toggle dựa trên state context hiện tại để component không tự quản lý follow riêng.
+  async function toggleFollowArtist(artistId) {
+    return isArtistFollowed(artistId)
+      ? unfollowArtist(artistId)
+      : followArtist(artistId);
+  }
+
+  // Khi logout/chưa đăng nhập thì xóa state follow khỏi context.
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setFollowedArtists(new Set());
+      setArtistFollowersCount({});
+    }
+  }, [currentUser?.id]);
   //Toggle trạng thái yêu thích của bài hát cho người dùng.
   async function toggleFavouriteSong(event, songId) {
     //Ngăn chặn sự kiện từ cha
     event.stopPropagation();
     if (!currentUser?.id || !songId) {
       showNotificationToast("Vui lòng đăng nhập để thêm bài hát yêu thích");
-      return;
+      return null;
     }
     try {
       const response = await axios.post(`${API_URL}/api/songs/toggle-favourite-song`, {
@@ -47,8 +187,10 @@ export function MusicProvider({ children }) {
         }
         return next;
       });
+      return nextIsFavourite;
     } catch (error) {
       console.error("Toggle favourite failed:", error);
+      return null;
     }
   }
 //Toggle trạng thái yêu thích của playlist cho người dùng.
@@ -394,6 +536,18 @@ export function MusicProvider({ children }) {
       favouritePlaylistIds,
       setFavouritePlaylistIds,
       toggleFavouritePlaylist,
+      followedArtists,
+      setFollowedArtists,
+      artistFollowersCount,
+      setArtistFollowersCount,
+      followArtist,
+      unfollowArtist,
+      toggleFollowArtist,
+      isArtistFollowed,
+      loadArtistFollowStatus,
+      loadArtistFollowersCount,
+      syncArtistFollowStatus,
+      syncArtistFollowersCount,
       currentSong,
       setCurrentSong,
       selectedPlaylist,

@@ -348,7 +348,6 @@ a {
     text-align: center;
     line-height: 1.3rem;
     display: inline-block;
-    color: var(--text-color);
 }
 
 .btn--icon.song__icon.primary,

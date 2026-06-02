@@ -33,7 +33,14 @@ async function searchSongs(like, limit) {
 async function searchArtists(like, limit) {
     const result = await pool.query(
         `
-        SELECT *
+        SELECT
+            artist.*,
+            -- Trả count từ artist_follow để SearchResults dùng cùng dữ liệu với ArtistDetail.
+            (
+                SELECT COUNT(*)::int
+                FROM artist_follow af
+                WHERE af.artist_id = artist.id
+            ) AS "followersCount"
         FROM artist
         WHERE unaccent(name) ILIKE unaccent($1)
         ORDER BY name ASC
