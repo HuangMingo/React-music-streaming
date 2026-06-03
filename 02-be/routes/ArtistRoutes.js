@@ -13,5 +13,5 @@ router.get('/followers-count', ArtistController.getArtistFollowersCount);
 // Giữ route cũ để các màn đang gọi toggle-follow không bị lỗi.
 router.post('/:artistId/toggle-follow', ArtistController.toggleFollowArtist);
 router.get('/:slug', ArtistController.getArtistBySlug);
-
+router.get('/followed-artists', ArtistController.getFollowedArtistsByUserId);
 export default router;

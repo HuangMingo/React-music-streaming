@@ -19,7 +19,7 @@ const formatTime = (seconds = 0) => {
     return `${mins}:${secs}`;
 };
 
-export function Player() {
+export function Player({ style }) {
     const {
         currentSong,
         setCurrentSong,
@@ -338,7 +338,7 @@ export function Player() {
 
     return (
         <>
-            < div className={`player grid ${isPlaying ? " playing" : ""} ${openPlayerPopup ? "open-popup" : ""}`} >
+            < div className={`player grid ${isPlaying ? " playing" : ""} ${openPlayerPopup ? "open-popup" : ""}`} style={style} >
                 <div className="player__container" >
                     <div className="player__container-song">
                         <div className={`player__song-info media${isPlaying ? " playing" : ""}`}>
@@ -390,14 +390,22 @@ export function Player() {
                                     </div>
                                     <div className="player__song-author info__author">
                                         {
-                                            currentSong?.artist_names?.map((artist, index) => {
-                                                return (
-                                                    <span key={index}>
-                                                        <ArtistNameLink artist={artist} />
-                                                        {index < currentSong?.artist_names?.length - 1 && ", "}
-                                                    </span>
+                                            currentSong?.artist_names?.length === 0 ? (
+                                                <span key={index}>
+                                                    <ArtistNameLink artist={"Unknown Artist"} />
+                                                </span>
+                                            ):
+                                                (
+                                                    currentSong?.artist_names?.map((artist, index) => {
+                                                        return (
+                                                            <span key={index}>
+                                                                <ArtistNameLink artist={artist} />
+                                                                {index < currentSong?.artist_names?.length - 1 && ", "}
+                                                            </span>
+                                                        )
+                                                    })
                                                 )
-                                            })
+
                                         }
                                     </div>
                                 </div>

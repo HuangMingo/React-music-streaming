@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ALBUM_STORAGE_KEY } from "./../../../../public/data/albums.js";
 import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
 
 export function Album() {
-    const albums = JSON.parse(localStorage.getItem(ALBUM_STORAGE_KEY) || "[]");
+    const albums = [];
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(5);
 

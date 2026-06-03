@@ -6,7 +6,7 @@ import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx
 import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
 import axios from "axios";
 import { API_URL } from '../../../api.js';
-export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false }) {
+export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false, playlistScope = "personal" }) {
     const { currentSong,
         setCurrentSong,
         setCurrentTime,
@@ -20,9 +20,9 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
         handleClickSong,
         playlistMenuRef,
         handleSelectTargetPlaylist,
-        selectedPlaylist,
         selectedPlaylistBySong,
-        setSelectedPlaylist,
+        setPersonalSelectedPlaylist,
+        setExploreSelectedPlaylist,
     } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //Mở menu khi click vào 3 chấm của bài hát
@@ -56,7 +56,11 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
             return;
         }
 
-        setSelectedPlaylist(playlist);
+        const setScopedSelectedPlaylist = playlistScope === "explore"
+            ? setExploreSelectedPlaylist
+            : setPersonalSelectedPlaylist;
+
+        setScopedSelectedPlaylist(playlist);
         setCurrentSong(firstSong);
         setCurrentTime(0);
         setIsPlaying(true);
@@ -248,7 +252,10 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                             return (
                                                 <div className={`playlist__list-song media ${currentSong?.id === song.id ? 'active' : ''} ${currentSong?.id === song.id && isPlaying ? 'playing' : ''}`} key={song.id} onClick={() => {
                                                     handleClickSong(song);
-                                                    setSelectedPlaylist(playlist);
+                                                    const setScopedSelectedPlaylist = playlistScope === "explore"
+                                                        ? setExploreSelectedPlaylist
+                                                        : setPersonalSelectedPlaylist;
+                                                    setScopedSelectedPlaylist(playlist);
                                                 }
                                                 }>
                                                     <div className="playlist__song-info media__left">

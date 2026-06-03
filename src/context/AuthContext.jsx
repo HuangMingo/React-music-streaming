@@ -99,7 +99,8 @@ export function AuthProvider({ children }) {
     () => ({
       currentUser,
       isAuthenticated: Boolean(currentUser),
-      isAdmin: currentUser?.role === 'admin',
+      isAdmin: currentUser?.role === 'admin' || currentUser?.role === 'super_admin',
+      isSuperAdmin: currentUser?.role === 'super_admin',
       register,
       login,
       logout,

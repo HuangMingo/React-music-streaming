@@ -48,10 +48,6 @@ function getImage(item) {
   return item?.image_url || item?.image || item?.playlist_image || "/assets/img/avatars/avatar.jpg";
 }
 
-function getSongArtists(song) {
-  return Array.isArray(song?.artist_names) ? song.artist_names : [];
-}
-
 function getAlbumTitle(album) {
   return album?.title || album?.name || album?.album_name || "Album";
 }
@@ -79,7 +75,8 @@ export function ArtistDetail() {
     setCurrentSong,
     setCurrentTime,
     setIsPlaying,
-    setSelectedPlaylist,
+    exploreSelectedPlaylist,
+    setExploreSelectedPlaylist,
     favouriteSongIds,
     setFavouriteSongIds,
     toggleFavouriteSong,
@@ -108,7 +105,7 @@ export function ArtistDetail() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [followersCount, setFollowersCount] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen] = useState(false);
   const [openSongMenuId, setOpenSongMenuId] = useState(null);
 
   useEffect(() => {
@@ -228,7 +225,7 @@ export function ArtistDetail() {
   const linkAbout = artist?.bio;
   const [aboutArtist, setAboutArtist] = useState("");
   useEffect(() => {
-    if(!linkAbout) {
+    if (!linkAbout) {
       setAboutArtist("Chưa có thông tin");
       return;
     }
@@ -263,7 +260,7 @@ export function ArtistDetail() {
   }
 
   function handleSongClick(song) {
-    setSelectedPlaylist(null);
+    setExploreSelectedPlaylist(null);
     setCurrentSong(song);
     setCurrentTime(0);
     setIsPlaying(true);
@@ -310,7 +307,7 @@ export function ArtistDetail() {
       return;
     }
 
-    setSelectedPlaylist(collection);
+    setExploreSelectedPlaylist(collection);
     setCurrentSong(firstSong);
     setCurrentTime(0);
     setIsPlaying(true);
@@ -425,7 +422,7 @@ export function ArtistDetail() {
     );
   }
 
-  function renderAlbumGrid(list, limit = list.length) {
+  function renderArtistAlbumGrid(list, limit = list.length) {
     const visibleAlbums = list.slice(0, limit);
 
     if (visibleAlbums.length === 0) {
@@ -433,24 +430,61 @@ export function ArtistDetail() {
     }
 
     return (
-      <div className="artist-detail__card-grid">
-        {visibleAlbums.map((album, index) => (
-          <button className="artist-detail__card" type="button" key={album.id ?? `${getAlbumTitle(album)}-${index}`} onClick={() => navigateToAlbum(album)}>
-            <span className="artist-detail__card-image">
-              <img src={getImage(album)} alt={getAlbumTitle(album)} />
-              <span className="artist-detail__play-fab" onClick={(event) => playCollection(event, album, getAlbumTitle(album))}>
-                <i className="bi bi-play-fill" />
-              </span>
-            </span>
-            <strong>{getAlbumTitle(album)}</strong>
-            <span>{album.release_date ? new Date(album.release_date).getFullYear() : "Album"} · {album.song_count ?? album.songs?.length ?? 0} bài hát</span>
-          </button>
-        ))}
+      <div className="row album--container artist-detail__collection-row">
+        {visibleAlbums.map((album, index) => {
+          const albumTitle = getAlbumTitle(album);
+          const isCollectionActive = exploreSelectedPlaylist?.id === album.id;
+          const isCollectionPlaying = isCollectionActive && isPlaying && album?.songs?.some((song) => song.id === currentSong?.id);
+
+          return (
+            <div
+              className="col l-2-4 m-3 c-4 mb-30"
+              key={album.id ?? `${albumTitle}-${index}`}
+              onClick={() => navigateToAlbum(album)}
+            >
+              <div className={`row__item item--playlist item--album artist-detail__collection-card ${isCollectionActive ? "active" : ""} ${isCollectionPlaying ? "playing" : ""}`}>
+                <div className="row__item-container flex--top-left">
+                  <div className="row__item-display br-5">
+                    <div
+                      className="row__item-img img--square"
+                      style={{ background: `url(${getImage(album)}) no-repeat center center / cover`, overflow: "hidden" }}
+                    />
+                    <div className="row__item-actions">
+                      <div className="action-btn btn--heart" onClick={(event) => event.stopPropagation()}>
+                        <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                      </div>
+                      <div className="btn--play-playlist" onClick={(event) => playCollection(event, album, albumTitle)}>
+                        <div className="control-btn btn-toggle-play">
+                          <i className="bi bi-play-fill" />
+                        </div>
+                        <span className="song-note note-1">♪</span>
+                        <span className="song-note note-2">♫</span>
+                        <span className="song-note note-3">♪</span>
+                        <span className="song-note note-4">♫</span>
+                        <div className="thumb--animate">
+                          <div className="thumb--animate-img" style={{ background: "url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }} />
+                        </div>
+                      </div>
+                      <div className="action-btn" onClick={(event) => event.stopPropagation()}>
+                        <i className="btn--icon bi bi-three-dots" />
+                      </div>
+                    </div>
+                    <div className="overlay" />
+                  </div>
+                  <div className="row__item-info">
+                    <a href="#" className="row__info-name is-twoline" onClick={(event) => event.preventDefault()}>{albumTitle}</a>
+                    <h3 className="row__info-creator">{album.release_date ? new Date(album.release_date).getFullYear() : "Album"} · {album.song_count ?? album.songs?.length ?? 0} bài hát</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   }
 
-  function renderPlaylistGrid(list, limit = list.length) {
+  function renderArtistPlaylistGrid(list, limit = list.length) {
     const visiblePlaylists = list.slice(0, limit);
 
     if (visiblePlaylists.length === 0) {
@@ -458,19 +492,56 @@ export function ArtistDetail() {
     }
 
     return (
-      <div className="artist-detail__card-grid">
-        {visiblePlaylists.map((playlist, index) => (
-          <button className="artist-detail__card" type="button" key={playlist.id ?? `${getPlaylistTitle(playlist)}-${index}`} onClick={() => navigateToPlaylist(playlist)}>
-            <span className="artist-detail__card-image">
-              <img src={getImage(playlist)} alt={getPlaylistTitle(playlist)} />
-              <span className="artist-detail__play-fab" onClick={(event) => playCollection(event, playlist, getPlaylistTitle(playlist))}>
-                <i className="bi bi-play-fill" />
-              </span>
-            </span>
-            <strong>{getPlaylistTitle(playlist)}</strong>
-            <span>{playlist.song_count ?? playlist.songs?.length ?? 0} bài hát</span>
-          </button>
-        ))}
+      <div className="row playlist--container artist-detail__collection-row">
+        {visiblePlaylists.map((playlist, index) => {
+          const playlistTitle = getPlaylistTitle(playlist);
+          const isPlaylistActive = exploreSelectedPlaylist?.id === playlist.id;
+          const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some((song) => song.id === currentSong?.id);
+
+          return (
+            <div
+              className="col l-2-4 m-3 c-4 mb-30"
+              key={playlist.id ?? `${playlistTitle}-${index}`}
+              onClick={() => navigateToPlaylist(playlist)}
+            >
+              <div className={`row__item item--playlist artist-detail__collection-card ${isPlaylistActive ? "active" : ""} ${isPlaylistPlaying ? "playing" : ""}`}>
+                <div className="row__item-container flex--top-left">
+                  <div className="row__item-display br-5">
+                    <div
+                      className="row__item-img img--square"
+                      style={{ background: `url(${getImage(playlist)}) no-repeat center center / cover`, overflow: "hidden" }}
+                    />
+                    <div className="row__item-actions">
+                      <div className="action-btn btn--heart" onClick={(event) => event.stopPropagation()}>
+                        <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                      </div>
+                      <div className="btn--play-playlist" onClick={(event) => playCollection(event, playlist, playlistTitle)}>
+                        <div className="control-btn btn-toggle-play">
+                          <i className="bi bi-play-fill" />
+                        </div>
+                        <span className="song-note note-1">♪</span>
+                        <span className="song-note note-2">♫</span>
+                        <span className="song-note note-3">♪</span>
+                        <span className="song-note note-4">♫</span>
+                        <div className="thumb--animate">
+                          <div className="thumb--animate-img" style={{ background: "url('/assets/img/SongActiveAnimation/icon-playing.gif') no-repeat 50% / contain" }} />
+                        </div>
+                      </div>
+                      <div className="action-btn" onClick={(event) => event.stopPropagation()}>
+                        <i className="btn--icon bi bi-three-dots" />
+                      </div>
+                    </div>
+                    <div className="overlay" />
+                  </div>
+                  <div className="row__item-info">
+                    <a href="#" className="row__info-name is-twoline" onClick={(event) => event.preventDefault()}>{playlistTitle}</a>
+                    <h3 className="row__info-creator">{playlist.song_count ?? playlist.songs?.length ?? 0} bài hát</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -574,7 +645,7 @@ export function ArtistDetail() {
                       <h2>Album nổi bật</h2>
                       <button type="button" onClick={() => goToTab("albums")}>Xem tất cả</button>
                     </div>
-                    {renderAlbumGrid(overviewData.albums, 5)}
+                    {renderArtistAlbumGrid(overviewData.albums, 5)}
                   </div>
 
                   <div className="artist-detail__panel">
@@ -582,7 +653,7 @@ export function ArtistDetail() {
                       <h2>Playlist nổi bật</h2>
                       <button type="button" onClick={() => goToTab("playlists")}>Xem tất cả</button>
                     </div>
-                    {renderPlaylistGrid(overviewData.playlists, 5)}
+                    {renderArtistPlaylistGrid(overviewData.playlists, 5)}
                   </div>
 
                   <div className="artist-detail__panel">
@@ -623,7 +694,7 @@ export function ArtistDetail() {
                     <div className="artist-detail__panel-header">
                       <h2>Album</h2>
                     </div>
-                    {renderAlbumGrid(albums)}
+                    {renderArtistAlbumGrid(albums)}
                   </div>
                 </section>
               )}
@@ -634,7 +705,7 @@ export function ArtistDetail() {
                     <div className="artist-detail__panel-header">
                       <h2>Playlist</h2>
                     </div>
-                    {renderPlaylistGrid(playlists)}
+                    {renderArtistPlaylistGrid(playlists)}
                   </div>
                 </section>
               )}

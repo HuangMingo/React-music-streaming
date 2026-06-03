@@ -36,7 +36,7 @@ export function SearchResults() {
     setCurrentTime,
     isPlaying,
     setIsPlaying,
-    setSelectedPlaylist,
+    setExploreSelectedPlaylist,
     favouriteSongIds,
     favouritePlaylistIds,
     setFavouriteSongIds,
@@ -216,7 +216,7 @@ export function SearchResults() {
         return;
       }
 
-      setSelectedPlaylist(playlistData);
+      setExploreSelectedPlaylist(playlistData);
       setCurrentSong(firstSong);
       setCurrentTime(0);
       setIsPlaying(true);
@@ -232,7 +232,7 @@ export function SearchResults() {
   }
 //Xử lí sự kiến nhấn bài hát
   function handleSongClick(song) {
-    setSelectedPlaylist(null);
+    setExploreSelectedPlaylist(null);
     handleClickSong(song);
     setIsPlaying(true);
   }

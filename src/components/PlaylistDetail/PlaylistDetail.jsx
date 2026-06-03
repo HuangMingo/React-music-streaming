@@ -21,7 +21,7 @@ function createPlaylistSlug(playlist) {
 export function PlaylistDetail() {
     const { slug } = useParams();
     const location = useLocation();
-    const { selectedPlaylist } = useMusicContext();
+    const { exploreSelectedPlaylist } = useMusicContext();
     const [playlist, setPlaylist] = useState(location.state?.playlist ?? null);
     const [loading, setLoading] = useState(false);
 
@@ -59,8 +59,8 @@ export function PlaylistDetail() {
                 return;
             }
             console.log(playlist.playlist_name.normalize("NFD"));
-            if (selectedPlaylist && createPlaylistSlug(selectedPlaylist) === slug) {
-                setPlaylist(selectedPlaylist);
+            if (exploreSelectedPlaylist && createPlaylistSlug(exploreSelectedPlaylist) === slug) {
+                setPlaylist(exploreSelectedPlaylist);
             }
         }
 
@@ -69,7 +69,7 @@ export function PlaylistDetail() {
         return () => {
             mounted = false;
         };
-    }, [location.state, selectedPlaylist, slug]);
+    }, [location.state, exploreSelectedPlaylist, slug]);
 
     return (
         <div className="app__container active">
@@ -78,7 +78,7 @@ export function PlaylistDetail() {
                     {loading ? (
                         <div className="loader">Đang tải...</div>
                     ) : (
-                        <PlayMusic playlist={playlist} hideHeaderTitle = {true} />
+                        <PlayMusic playlist={playlist} hideHeaderTitle = {true} playlistScope="explore" />
                     )}
                 </div>
             </div>

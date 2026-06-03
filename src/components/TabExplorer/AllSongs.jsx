@@ -27,7 +27,8 @@ export function AllSongs() {
         toggleFavouriteSong,
         playlistMenuRef,
         handleSelectTargetPlaylist,
-        selectedPlaylistBySong, } = useMusicContext();
+        selectedPlaylistBySong,
+        setExploreSelectedPlaylist, } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //Mở menu khi click vào 3 chấm của bài hát
     function handleToggleSongMenu(event, songId) {
@@ -200,7 +201,7 @@ export function AllSongs() {
                                             <div
                                                 className={`playlist__list-song media media mb-15 ${currentSong.id === song.id ? 'active' : ''} ${currentSong.id === song.id && isPlaying ? 'playing' : ''}`}
                                                 key={`${colIndex}-${rowIndex}`}
-                                                onClick={() => {handleClickSong(song); setSelectedPlaylist(null);} }
+                                                onClick={() => {handleClickSong(song); setExploreSelectedPlaylist(null);} }
                                                 style={{ cursor: "pointer" }}
                                             >
                                                 <div className="playlist__song-info media__left">

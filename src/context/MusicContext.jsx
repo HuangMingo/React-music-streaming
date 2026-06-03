@@ -12,6 +12,20 @@ const EMPTY_SONG = {
   duration: 0,
 };
 
+function restorePlaylistFromStorage(key) {
+  try {
+    const savedPlaylistStr = localStorage.getItem(key);
+    if (savedPlaylistStr && savedPlaylistStr !== "undefined") {
+      return JSON.parse(savedPlaylistStr);
+    }
+  } catch (error) {
+    console.error(`Error restoring ${key}:`, error);
+    localStorage.removeItem(key);
+  }
+
+  return null;
+}
+
 export function MusicProvider({ children }) {
   //Số bài hát yêu thích trong playlist  bản yêu thích của người dùng (0: mặc định, 1: yêu thích, 2: không yêu thích)
   const { currentUser, setCurrentUser } = useAuthContext();
@@ -19,6 +33,31 @@ export function MusicProvider({ children }) {
   //Sử dụng Set tạo state để lưu trữ tập hợp ID của các bài hát yêu thích
   const [favouriteSongIds, setFavouriteSongIds] = useState(new Set());
   const [favouritePlaylistIds, setFavouritePlaylistIds] = useState(new Set());
+  const [activePlaylistScope, setActivePlaylistScope] = useState(() => (
+    localStorage.getItem("activePlaylistScope") || "personal"
+  ));
+  const [personalSelectedPlaylistState, setPersonalSelectedPlaylistState] = useState(() => (
+    restorePlaylistFromStorage("personalSelectedPlaylist") ||
+    restorePlaylistFromStorage("selectedPlaylist")
+  ));
+  const [exploreSelectedPlaylistState, setExploreSelectedPlaylistState] = useState(() => (
+    restorePlaylistFromStorage("exploreSelectedPlaylist")
+  ));
+  const personalSelectedPlaylist = personalSelectedPlaylistState;
+  const exploreSelectedPlaylist = exploreSelectedPlaylistState;
+  const selectedPlaylist = activePlaylistScope === "explore"
+    ? exploreSelectedPlaylist
+    : personalSelectedPlaylist;
+
+  function setPersonalSelectedPlaylist(value) {
+    setActivePlaylistScope("personal");
+    setPersonalSelectedPlaylistState(value);
+  }
+
+  function setExploreSelectedPlaylist(value) {
+    setActivePlaylistScope("explore");
+    setExploreSelectedPlaylistState(value);
+  }
   // Lưu danh sách artistId đã follow trong context để mọi màn dùng chung một nguồn state.
   const [followedArtists, setFollowedArtists] = useState(new Set());
   // Cache số follower theo artistId để UI cập nhật ngay sau follow/unfollow.
@@ -256,7 +295,7 @@ export function MusicProvider({ children }) {
   // Sau khi xóa bài hát khỏi playlist thành công, cập nhật lại danh sách bài hát trong playlist đã chọn
   function handleSongRemoved(removedSong) {
 
-    setSelectedPlaylist((prevPlaylist) => {
+    setPersonalSelectedPlaylist((prevPlaylist) => {
       if (!prevPlaylist) {
         return prevPlaylist;
       }
@@ -294,7 +333,7 @@ export function MusicProvider({ children }) {
       })
     );
 
-    setSelectedPlaylist((prevPlaylist) => {
+    setPersonalSelectedPlaylist((prevPlaylist) => {
       if (!prevPlaylist || prevPlaylist.id !== Number(playlistId)) {
         return prevPlaylist;
       }
@@ -425,20 +464,6 @@ export function MusicProvider({ children }) {
   }
 
   //Dữ liệu các bài hát của playlist đang được chọn
-  const [selectedPlaylist, setSelectedPlaylist] = useState(() => {
-    try {
-      const savedPlaylistStr = localStorage.getItem("selectedPlaylist");
-      if (savedPlaylistStr && savedPlaylistStr !== "undefined") {
-        return JSON.parse(savedPlaylistStr);
-      }
-    } catch (error) {
-      console.error("Error restoring selectedPlaylist:", error);
-      localStorage.removeItem("selectedPlaylist");
-    }
-
-    return null;
-  });
-
   useEffect(() => {
     try {
       //Lưu dữ liệu âm lượng vào biến hiện tại
@@ -471,6 +496,8 @@ export function MusicProvider({ children }) {
       // Clear corrupted data from localStorage
       localStorage.removeItem("currentSong");
       localStorage.removeItem("selectedPlaylist");
+      localStorage.removeItem("personalSelectedPlaylist");
+      localStorage.removeItem("exploreSelectedPlaylist");
       localStorage.removeItem("isPlaying");
     }
   }, []);
@@ -509,13 +536,27 @@ export function MusicProvider({ children }) {
     }
   }, [currentSong]);
 
-  // Auto-save selectedPlaylist to localStorage
+  // Auto-save personalSelectedPlaylist to localStorage
   useEffect(() => {
-    if (selectedPlaylist !== null) {
-      localStorage.setItem("selectedPlaylist", JSON.stringify(selectedPlaylist));
+    if (personalSelectedPlaylist !== null) {
+      localStorage.setItem("personalSelectedPlaylist", JSON.stringify(personalSelectedPlaylist));
       return;
     }
-  }, [selectedPlaylist]);
+    localStorage.removeItem("personalSelectedPlaylist");
+  }, [personalSelectedPlaylist]);
+
+  // Auto-save exploreSelectedPlaylist to localStorage
+  useEffect(() => {
+    if (exploreSelectedPlaylist !== null) {
+      localStorage.setItem("exploreSelectedPlaylist", JSON.stringify(exploreSelectedPlaylist));
+      return;
+    }
+    localStorage.removeItem("exploreSelectedPlaylist");
+  }, [exploreSelectedPlaylist]);
+
+  useEffect(() => {
+    localStorage.setItem("activePlaylistScope", activePlaylistScope);
+  }, [activePlaylistScope]);
   // Auto-save isPlaying to localStorage
   useEffect(() => {
     localStorage.setItem("isPlaying", JSON.stringify(isPlaying));
@@ -551,7 +592,10 @@ export function MusicProvider({ children }) {
       currentSong,
       setCurrentSong,
       selectedPlaylist,
-      setSelectedPlaylist,
+      personalSelectedPlaylist,
+      setPersonalSelectedPlaylist,
+      exploreSelectedPlaylist,
+      setExploreSelectedPlaylist,
       currentVolume,
       setCurrentVolume,
       currentTime,
@@ -588,4 +632,7 @@ export function useMusicContext() {
 export function clearMusicStorage() {
   localStorage.removeItem("playlistIndex");
   localStorage.removeItem("selectedPlaylist");
+  localStorage.removeItem("personalSelectedPlaylist");
+  localStorage.removeItem("exploreSelectedPlaylist");
+  localStorage.removeItem("activePlaylistScope");
 }

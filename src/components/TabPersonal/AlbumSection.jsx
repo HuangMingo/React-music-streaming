@@ -1,8 +1,7 @@
-import { ALBUM_STORAGE_KEY } from "../../../public/data/albums.js";
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
 
 export function AlbumSection() {
-    const albums = JSON.parse(localStorage.getItem(ALBUM_STORAGE_KEY) || "[]");
+    const albums = [];
 
     return (
         <>
@@ -22,7 +21,7 @@ export function AlbumSection() {
                                     <div className="no-content-image">
                                        <i className="bi bi-music-note-beamed" style= {{color: "black"}}></i>
                                     </div>
-                                    <span className="no-content-text">Chua co album nao.</span>
+                                    <span className="no-content-text">Bạn chưa có album nào à. Sao không thử tìm một chiếc đi</span>
                                 </div>
                             ) : (
                                 albums.map((album, index) => (

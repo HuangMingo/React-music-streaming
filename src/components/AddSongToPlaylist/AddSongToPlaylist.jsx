@@ -18,6 +18,7 @@ export function AddSongToPlaylist({
     song,
     isOpen,
     playlists = [],
+    selectedPlaylist,
     selectedTargetPlaylist = {},
     currentPlaylistId = "",
     onSelectPlaylist,
@@ -323,7 +324,7 @@ export function AddSongToPlaylist({
             )}
             {songToRemove ? (
                 <DeleteSongFromPlaylistDialog
-                    playlistId={selectedPlaylist.id}
+                    playlistId={selectedPlaylist?.id}
                     song={songToRemove}
                     onClose={handleCloseRemoveSongDialog}
                     onDeleted={handleSongRemoved}

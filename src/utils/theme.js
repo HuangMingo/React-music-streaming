@@ -1,0 +1,17 @@
+export function applyTheme(theme) {
+    document.documentElement.style.setProperty('--bg-content-color', theme.colors.bgContentColor)
+    document.documentElement.style.setProperty('--border-box', theme.colors.borderBox)
+    document.documentElement.style.setProperty('--border-primary', theme.colors.borderPrimary)
+    document.documentElement.style.setProperty('--layout-bg', theme.colors.layoutBg)
+    document.documentElement.style.setProperty('--link-text-hover', theme.colors.linkTextHover)
+    document.documentElement.style.setProperty('--modal-scrollbar', theme.colors.modalScrollbar)
+    document.documentElement.style.setProperty('--player-bg', theme.colors.playerBg)
+    document.documentElement.style.setProperty('--purple-primary', theme.colors.purplePrimary)
+    document.documentElement.style.setProperty('--primary-bg', theme.colors.primaryBg)
+    document.documentElement.style.setProperty('--sidebar-popup-bg', theme.colors.sidebarPopupBg)
+    document.documentElement.style.setProperty('--text-color', theme.colors.textColor)
+    document.documentElement.style.setProperty('--text-item-hover', theme.colors.textItemHover)
+    document.documentElement.style.setProperty('--text-secondary', theme.colors.textSecondary)
+    document.documentElement.style.setProperty('--navigation-text', theme.colors.navigationText)
+    document.documentElement.style.setProperty('--placeholder-text', theme.colors.placeholderText)
+}

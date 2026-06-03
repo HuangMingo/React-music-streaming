@@ -13,8 +13,8 @@ export function PlaylistSection() {
     const outletContext = useOutletContext();
     // console.log("PlaylistSection outletContext:", outletContext);
     const {
-        selectedPlaylist,
-        setSelectedPlaylist,
+        personalSelectedPlaylist,
+        setPersonalSelectedPlaylist,
         currentSong,
         setCurrentSong,
         setCurrentTime,
@@ -74,7 +74,7 @@ export function PlaylistSection() {
             await onPlaylistsChanged();
         }
         if (updatedPlaylist) {
-            setSelectedPlaylist((prevPlaylist) => {
+            setPersonalSelectedPlaylist((prevPlaylist) => {
                 if (!prevPlaylist || prevPlaylist.id !== updatedPlaylist.id) {
                     return prevPlaylist;
                 }
@@ -125,7 +125,7 @@ export function PlaylistSection() {
                 creator_id: response.data?.creator_id ?? playlist.creator_id
             };
 
-            setSelectedPlaylist(playlistData);
+            setPersonalSelectedPlaylist(playlistData);
             navigate("/personal");
             return playlistData;
         } catch (error) {
@@ -171,7 +171,7 @@ export function PlaylistSection() {
                     <div className="col l-12 m-12 c-12">
                         <div className="row playlist--container">
                             {playlists.map((playlist, playlistIndex) => {
-                                const isPlaylistActive = selectedPlaylist?.id === playlist.id;
+                                const isPlaylistActive = personalSelectedPlaylist?.id === playlist.id;
                                 const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
                                 const isMine = isPlaylistMine(playlist);
                                 return (

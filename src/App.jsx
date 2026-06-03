@@ -5,7 +5,8 @@ import './assets/css/grid.css'
 import './assets/css/main.css'
 import './assets/css/responsive.css'
 import './components/Header.jsx'
-import { applyTheme, ThemeModal } from './components/ThemeModal.jsx'
+import { ThemeModal } from './components/ThemeModal.jsx'
+import { applyTheme } from './utils/theme.js'
 import { MusicProvider } from './context/MusicContext.jsx'
 import { useAuthContext } from './context/AuthContext.jsx'
 import { AlbumSection } from './components/TabPersonal/AlbumSection.jsx'
@@ -76,9 +77,12 @@ function App() {
   const location = useLocation();
   const { isAuthenticated, currentUser } = useAuthContext();
   const [showTheme, setShowTheme] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState(() => JSON.parse(localStorage.getItem("theme")));
   const [playlists, setPlaylists] = useState([]);
   const authEntryPaths = ['/login', '/register'];
   const isAuthEntryPage = authEntryPaths.includes(location.pathname);
+  const isAdminPage = location.pathname === '/admin';
+  const isFullScreenPage = isAuthEntryPage || isAdminPage;
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const reservedTopLevelPaths = new Set([
     'admin',
@@ -147,17 +151,32 @@ function App() {
 
   //Lay du lieu cu
   useEffect(() => {
-    const savedTheme = JSON.parse(localStorage.getItem("theme"));
-    if (savedTheme) {
-      applyTheme(savedTheme);
+    if (currentTheme) {
+      applyTheme(currentTheme);
     }
-  }, []);
+  }, [currentTheme]);
+
+  function handleApplyTheme(theme) {
+    setCurrentTheme(theme);
+    localStorage.setItem("theme", JSON.stringify(theme));
+  }
+
+  const appBackgroundImage = currentTheme?.backgroundImage
+    ? `url(${currentTheme.backgroundImage})`
+    : "none";
+  const playerStyle = currentTheme?.playerImage
+    ? { background: `url(${currentTheme.playerImage})` }
+    : undefined;
+
   return (
     <MusicProvider>
       <>
-        <div className={`app grid${isAuthEntryPage ? ' app--full-screen' : ''}${isArtistDetailPage ? ' app--artist-detail' : ''}`} style={{ backgroundImage: "none" }}>
+        <div
+          className={`app grid${isFullScreenPage ? ' app--full-screen' : ''}${currentTheme ? ' has__theme-img' : ''}${isArtistDetailPage ? ' app--artist-detail' : ''}`}
+          style={{ backgroundImage: appBackgroundImage }}
+        >
           {/* Header */}
-          {!isAuthEntryPage ? <Header onClose={() => setShowTheme(true)} /> : null}
+          {!isFullScreenPage ? <Header onClose={() => setShowTheme(true)} /> : null}
 
           {/* Sidebar */}
           {/* Khi có sự thay đổi về playlist thì load lại danh sách playlist */}
@@ -198,11 +217,15 @@ function App() {
         {!isStandalonePage ? <TabRadio /> : null}
 
         {/* Player */}
-        {!isStandalonePage ? <Player /> : null}
+        {!isStandalonePage ? <Player style={playerStyle} /> : null}
         {/* Theme */}
         {
           showTheme && (
-            <ThemeModal onClose={() => setShowTheme(false)} />
+            <ThemeModal
+              onClose={() => setShowTheme(false)}
+              onApplyTheme={handleApplyTheme}
+              currentTheme={currentTheme}
+            />
           )
         }
 

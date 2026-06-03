@@ -7,7 +7,7 @@ const getAllSong = async () => {
             s.*,
             json_agg(art.name) AS artist_names
         FROM artist_song ars
-            JOIN artist art ON art.id = ars.artist_id
+            RIGHT JOIN artist art ON art.id = ars.artist_id
             JOIN song s ON ars.song_id = s.id
         GROUP BY s.id
         ORDER BY RANDOM()

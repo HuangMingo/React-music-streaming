@@ -13,7 +13,7 @@ export function OverviewSection() {
     const [playlist, setPlaylist] = useState({ songs: [] });
     const [currentPlaylist, setCurrentPlaylist] = useState(0);
     const {playlists, onPlaylistsChanged} = useOutletContext();
-    const {selectedPlaylist} = useMusicContext();
+    const {personalSelectedPlaylist} = useMusicContext();
     useEffect(() => {
         setPlaylist(playlists[currentPlaylist]);
         if (playlists.length > 0) {
@@ -24,7 +24,7 @@ export function OverviewSection() {
         <>
             <div className="grid container__tab tab-home active">
                 {/* Play music */}
-                <PlayMusic playlist={selectedPlaylist} />
+                <PlayMusic playlist={personalSelectedPlaylist} />
 
                 {/* Playlist */}
                 <Playlist playlists={playlists} onPlaylistsChanged={onPlaylistsChanged} />

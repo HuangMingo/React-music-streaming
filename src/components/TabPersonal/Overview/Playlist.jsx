@@ -9,8 +9,8 @@ import axios from "axios";
 import { API_URL } from '../../../api.js';
 export function Playlist({ playlists = [], onPlaylistsChanged }) {
     const {
-        selectedPlaylist,
-        setSelectedPlaylist,
+        personalSelectedPlaylist,
+        setPersonalSelectedPlaylist,
         setCurrentTime,
         setCurrentSong,
         setIsPlaying,
@@ -19,7 +19,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         favouritePlaylistIds,
         toggleFavouritePlaylist,
     } = useMusicContext();
-    // console.log(selectedPlaylist);
+    // console.log(personalSelectedPlaylist);
     async function loadPlaylistPersonal(playlist) {
         scrollPersonalContainerToTop();
 
@@ -38,7 +38,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                 creator_id: response.data?.creator_id ?? playlist.creator_id
             };
 
-            setSelectedPlaylist(playlistData);
+            setPersonalSelectedPlaylist(playlistData);
             return playlistData;
         } catch (error) {
             console.error("Load playlist failed:", error);
@@ -124,7 +124,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
             await onPlaylistsChanged();
         }
         if (updatedPlaylist) {
-            setSelectedPlaylist((prevPlaylist) => {
+            setPersonalSelectedPlaylist((prevPlaylist) => {
                 if (!prevPlaylist || prevPlaylist.id !== updatedPlaylist.id) {
                     return prevPlaylist;
                 }
@@ -269,7 +269,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                         <div className="playlist__page" key={`playlist-page-${pageIndex}`}>
                                             {pagePlaylists.map((playlist, playlistIndex) => {
                                                 const absoluteIndex = pageIndex * itemsPerPage + playlistIndex;
-                                                const isPlaylistActive = selectedPlaylist?.id === playlist.id;
+                                                const isPlaylistActive = personalSelectedPlaylist?.id === playlist.id;
                                                 const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
                                                 const isMine = isPlaylistMine(playlist);
                                                 return (
@@ -341,7 +341,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                 </div>
                                                                 <div className="row__item-info">
                                                                     <a href="#" className="row__info-name is-twoline">{playlist.playlist_name}</a>
-                                                                    <h3 className="row__info-creator">{playlist.username}</h3>
+                                                                    <h3 className="row__info-creator" onClick= {(e) => {e.stopPropagation()}}>{playlist.username}</h3>
                                                                 </div>
                                                             </div>
                                                         </div>

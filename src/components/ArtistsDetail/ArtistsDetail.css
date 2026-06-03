@@ -305,7 +305,7 @@
 
 .artist-detail__empty {
     margin: 0;
-    color: #777180;
+    color: var(--text-secondary);
     font-size: 1.4rem;
 }
 
@@ -435,6 +435,41 @@
 
 .artist-detail__card strong {
     margin-top: 12px;
+}
+
+.artist-detail__collection-row {
+    row-gap: 22px;
+}
+
+.artist-detail__collection-card {
+    cursor: pointer;
+}
+
+.artist-detail__collection-card .row__item-display {
+    width: 100%;
+}
+
+.artist-detail__collection-card .row__info-name {
+    margin-top: 12px;
+    margin-bottom: 4px;
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 2rem;
+}
+
+.artist-detail__collection-card .row__info-creator {
+    display: block;
+    overflow: hidden;
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artist-detail__collection-card .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .artist-detail__related {

@@ -19,8 +19,8 @@ function formatDuration(durationSeconds) {
 export function SongSection() {
     const { currentUser } = useAuthContext();
     const {
-        selectedPlaylist,
-        setSelectedPlaylist,
+        personalSelectedPlaylist,
+        setPersonalSelectedPlaylist,
         currentSong,
         setCurrentSong,
         setCurrentTime,
@@ -61,10 +61,10 @@ export function SongSection() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
-    const songs = selectedPlaylist?.songs ?? [];
+    const songs = personalSelectedPlaylist?.songs ?? [];
     const canRemoveFromCurrentPlaylist =
-        selectedPlaylist?.isdefault !== true &&
-        Number(selectedPlaylist?.creator_id) === Number(currentUser?.id);
+        personalSelectedPlaylist?.isdefault !== true &&
+        Number(personalSelectedPlaylist?.creator_id) === Number(currentUser?.id);
 
    
 
@@ -111,7 +111,10 @@ export function SongSection() {
                                             <div
                                                 className={`playlist__list-song media ${isActiveSong ? "active" : ""} ${isActiveSong && isPlaying ? "playing" : ""}`}
                                                 key={song.id ?? `${song.name ?? song.title ?? "song"}-${index}`}
-                                                onClick={() => handleClickSong(song)}
+                                                onClick={() => {
+                                                    handleClickSong(song);
+                                                    setPersonalSelectedPlaylist(personalSelectedPlaylist);
+                                                }}
                                             >
                                                 <div className="playlist__song-info media__left">
                                                     <i className="bi bi-music-note-beamed playlist__song-icon mr-10" />
@@ -174,7 +177,7 @@ export function SongSection() {
                                                                 song={song}
                                                                 isOpen={openSongMenuId === song.id}
                                                                 playlists={userPlaylists}
-                                                                selectedPlaylist={selectedPlaylist}
+                                                                selectedPlaylist={personalSelectedPlaylist}
                                                                 onCloseMenu={() => setOpenSongMenuId(null)}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
                                                                 canRemoveFromCurrentPlaylist={canRemoveFromCurrentPlaylist}

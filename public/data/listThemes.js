@@ -1,4 +1,4 @@
-const listThemes = [
+export const listThemes = [
     {
         type: 'Chủ Đề',
         themes: [
@@ -478,4 +478,3 @@ const listThemes = [
 
 export const THEME_LIST_STORAGE_KEY = "themeList";
 
-localStorage.setItem(THEME_LIST_STORAGE_KEY, JSON.stringify(listThemes))

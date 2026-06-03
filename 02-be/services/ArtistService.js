@@ -147,9 +147,13 @@ const getArtistDetailBySlug = async (slug, userId = null) => {
             JOIN "user" u ON u.id = p.creator_id
             JOIN song_playlist sp ON sp.playlist_id = p.id
             JOIN song s ON s.id = sp.song_id
-            JOIN artist_song ars ON ars.song_id = s.id AND ars.artist_id = $1
+            JOIN artist_song ars ON ars.song_id = s.id
             LEFT JOIN song_artists sa ON sa.song_id = s.id
-            WHERE p.ispublic = TRUE
+            WHERE p.ispublic = TRUE and exists(
+                SELECT 1
+                FROM artist_song ars2 join song_playlist sp2 on sp2.song_id = ars2.song_id
+                WHERE ars2.artist_id = $1 AND sp2.playlist_id = p.id
+            )
             GROUP BY p.id, p.name, p.creator_id, u.username, p.image, p.isdefault, p.ispublic
             ORDER BY song_count DESC, p.id DESC
             LIMIT 12
@@ -255,7 +259,18 @@ const toggleFollowArtist = async (userId, artistId) => {
         ? unfollowArtist(userId, artistId)
         : followArtist(userId, artistId);
 };
+//Lấy danh sách nghệ sĩ đã follow
+const getFollowedArtistsByUserId = async (userId) => {
+    const result = await pool.query(`
+        SELECT a.*
+        FROM artist a
+        JOIN artist_follow af ON af.artist_id = a.id
+        WHERE af.user_id = $1
+        ORDER BY a.follower_count DESC NULLS LAST, a.name ASC
+    `, [userId]);
 
+    return result.rows;
+};
 export const artistService = {
     getArtistBySlug,
     getArtistDetailBySlug,
@@ -264,4 +279,5 @@ export const artistService = {
     isFollowingArtist,
     getArtistFollowersCount,
     toggleFollowArtist,
+    getFollowedArtistsByUserId,
 };

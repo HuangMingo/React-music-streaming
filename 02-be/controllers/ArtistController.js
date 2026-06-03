@@ -128,7 +128,21 @@ const toggleFollowArtist = async (req, res) => {
         return res.status(500).json({ message: 'Cannot update artist follow.' });
     }
 };
+const getFollowedArtistsByUserId = async (req, res) => {
+    try {
+        const userId = Number(req.query.userId);
 
+        if (!userId) {
+            return res.status(400).json({ message: 'Missing userId' });
+        }
+
+        const artists = await artistService.getFollowedArtistsByUserId(userId);
+        return res.json(artists);
+    } catch (error) {
+        console.error('Không thể lấy danh sách nghệ sĩ đã theo dõi', error);
+        return res.status(500).json({ message: 'Cannot get followed artists.' });
+    }
+};
 export const ArtistController = {
     getArtistBySlug,
     getArtistDetailBySlug,
@@ -137,4 +151,5 @@ export const ArtistController = {
     getArtistFollowStatus,
     getArtistFollowersCount,
     toggleFollowArtist,
+    getFollowedArtistsByUserId
 };

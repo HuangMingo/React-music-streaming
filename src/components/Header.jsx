@@ -400,16 +400,18 @@ export function Header({ onClose }) {
                                     onClick={() => setOpenLogout(!isOpenLogout)}
                                 />
                                 <div className={`option__log-out ${isOpenLogout ? 'open' : ''}`}>
-                                    <Link className="log-out__action" to="/dashboard" onClick={closeUserMenu}>
-                                        <i className="bi bi-person-circle log-out__icon" />
-                                        <span>Trang đã đăng nhập</span>
-                                    </Link>
+
                                     {isAdmin ? (
                                         <Link className="log-out__action" to="/admin" onClick={closeUserMenu}>
                                             <i className="bi bi-shield-lock log-out__icon" />
                                             <span>Quản trị Admin</span>
                                         </Link>
-                                    ) : null}
+                                    ) : (
+                                        <Link className="log-out__action" to="/dashboard" onClick={closeUserMenu}>
+                                            <i className="bi bi-person-circle log-out__icon" />
+                                            <span>Trang đã đăng nhập</span>
+                                        </Link>
+                                    )}
                                     <button className="log-out__action log-out__button" type="button" onClick={handleLogout}>
                                         <i className="bi bi-box-arrow-right log-out__icon" />
                                         <span>Đăng xuất</span>

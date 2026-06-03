@@ -12,7 +12,7 @@ const songSelectWithArtists = `
             json_agg(art.name) AS artist_names
         FROM artist_song ars
             JOIN artist art ON art.id = ars.artist_id
-            JOIN song s ON ars.song_id = s.id
+            RIGHT JOIN song s ON ars.song_id = s.id
 `;
 
 async function searchSongs(like, limit) {
