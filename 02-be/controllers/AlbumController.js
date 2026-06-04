@@ -1,6 +1,39 @@
 import { albumService } from '../services/AlbumService.js';
 
 export const AlbumController = {
+    async getFavouriteAlbums(req, res) {
+        try {
+            const userId = Number(req.query.userId);
+
+            if (!userId) {
+                return res.status(400).json({ message: 'Thiáº¿u userId' });
+            }
+
+            const albums = await albumService.getFavouriteAlbum(userId);
+            res.json(albums);
+        } catch (error) {
+            console.error('Get favourite albums failed:', error);
+            res.status(500).json({ message: 'KhÃ´ng thá»ƒ láº¥y album yÃªu thÃ­ch.' });
+        }
+    },
+
+    async toggleFavouriteAlbum(req, res) {
+        try {
+            const userId = Number(req.body.userId);
+            const albumId = Number(req.body.albumId);
+
+            if (!userId || !albumId) {
+                return res.status(400).json({ message: 'Thiáº¿u userId hoáº·c albumId' });
+            }
+
+            const isFavouriteAlbum = await albumService.toggleFavouriteAlbum(userId, albumId);
+            res.json({ isFavouriteAlbum });
+        } catch (error) {
+            console.error('Toggle favourite album failed:', error);
+            res.status(500).json({ message: 'KhÃ´ng thá»ƒ cáº­p nháº­t album yÃªu thÃ­ch.' });
+        }
+    },
+
     async getAllAlbums(req, res) {
         try {
             const albums = await albumService.getAllAlbum();

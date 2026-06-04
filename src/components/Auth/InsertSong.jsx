@@ -1,0 +1,222 @@
+import { useEffect, useState } from 'react';
+
+function formatFileSize(file) {
+  if (!file) {
+    return '';
+  }
+
+  if (file.size < 1024 * 1024) {
+    return `${(file.size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function getCloudinaryFileName(url) {
+  if (!url) {
+    return '';
+  }
+
+  try {
+    const { pathname } = new URL(url);
+    return decodeURIComponent(pathname.split('/').pop() || url);
+  } catch (error) {
+    return url;
+  }
+}
+
+function CloudinaryFileLink({ label, url }) {
+  if (!url) {
+    return null;
+  }
+
+}
+
+export function InsertSong({
+  albums,
+  artists,
+  songFiles,
+  songForm,
+  songSubmitting,
+  editingSongId,
+  uploading,
+  onClose,
+  onFileChange,
+  onFormChange,
+  onSubmit,
+}) {
+  const [imagePreview, setImagePreview] = useState('');
+  const [artistDropdownOpen, setArtistDropdownOpen] = useState(false);
+  const songActionLabel = editingSongId ? 'Sửa bài hát' : 'Thêm bài hát';
+  const audioFileLabel = songFiles.audio?.name || (songForm.audio ? 'Đã có file audio' : 'Chưa chọn file audio');
+  const audioFileMeta = songFiles.audio ? formatFileSize(songFiles.audio) : (songForm.audio ? getCloudinaryFileName(songForm.audio) : 'Định dạng: MP3');
+  const lyricsFileLabel = songFiles.lyrics?.name || (songForm.lyrics ? 'Đã có file lyrics' : 'Chưa chọn file lyrics');
+  const lyricsFileMeta = songFiles.lyrics ? formatFileSize(songFiles.lyrics) : (songForm.lyrics ? getCloudinaryFileName(songForm.lyrics) : 'Định dạng: TXT, LRC hoặc SRT');
+
+  const selectedArtistIds = songForm.artist_ids || [];
+  const selectedArtists = artists.filter((artist) => selectedArtistIds.map(Number).includes(Number(artist.id)));
+
+  function updateArtistIds(nextArtistIds) {
+    onFormChange({ ...songForm, artist_ids: nextArtistIds });
+  }
+
+  function toggleArtist(artistId) {
+    const normalizedArtistId = Number(artistId);
+    const currentIds = selectedArtistIds.map(Number);
+
+    if (currentIds.includes(normalizedArtistId)) {
+      updateArtistIds(currentIds.filter((id) => id !== normalizedArtistId));
+      return;
+    }
+
+    updateArtistIds([...currentIds, normalizedArtistId]);
+  }
+
+  useEffect(() => {
+    if (!songFiles.image) {
+      setImagePreview(songForm.image || '');
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(songFiles.image);
+    setImagePreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [songFiles.image, songForm.image]);
+
+  return (
+    <form className="admin-song-editor" onSubmit={onSubmit}>
+      <div className="admin-song-editor__topline">
+        <button className="admin-breadcrumb" type="button" onClick={onClose}>Quản lý bài hát</button>
+        <span>
+          <i class="bi bi-chevron-right"></i>
+        </span>
+        <strong>{songActionLabel}</strong>
+      </div>
+
+      <div className="admin-song-editor__header">
+        <div className="admin-song-editor__title">
+          <button type="button" className="admin-back-btn" onClick={onClose}>←</button>
+          <div>
+            <h2>{songActionLabel}</h2>
+          </div>
+        </div>
+
+      </div>
+
+      <div className="admin-song-editor__grid">
+        <section className="admin-song-card">
+          <label>Tiêu đề bài hát <span>*</span></label>
+          <input maxLength={255} placeholder="Nhập tiêu đề bài hát" value={songForm.title} onChange={(event) => onFormChange({ ...songForm, title: event.target.value })} />
+
+          <label>Album</label>
+          <select value={songForm.album_id} onChange={(event) => onFormChange({ ...songForm, album_id: event.target.value })}>
+            <option value="">Chọn album</option>
+            {albums.map((album) => <option key={album.id} value={album.id}>{album.title || album.name}</option>)}
+          </select>
+          <p className="admin-song-hint">Chọn album chứa bài hát nếu có.</p>
+
+          <label>Số thứ tự trong album</label>
+          <input type="number" min="1" placeholder="Ví dụ: 1, 2, 3..." value={songForm.track_number} onChange={(event) => onFormChange({ ...songForm, track_number: event.target.value })} />
+          <p className="admin-song-hint">Ví dụ: 1, 2, 3...</p>
+
+          <label>Nghệ sĩ</label>
+          <div className={`admin-multi-select${artistDropdownOpen ? ' is-open' : ''}`}>
+            <div className="admin-multi-select__control">
+              <div className="admin-multi-select__values">
+                {selectedArtists.length ? selectedArtists.map((artist) => (
+                  <span className="admin-multi-select__tag" key={artist.id}>
+                    {artist.name}
+                    <button type="button" onClick={() => toggleArtist(artist.id)}><i class="fa-solid fa-x"></i></button>
+                  </span>
+                )) : <span className="admin-multi-select__placeholder">Chọn nghệ sĩ</span>}
+              </div>
+              <button
+                className="admin-multi-select__clear"
+                disabled={!selectedArtists.length}
+                type="button"
+                onClick={() => updateArtistIds([])}
+              >
+                <i class="bi bi-x-lg"></i>
+              </button>
+              <span className="admin-multi-select__divider"></span>
+              <button
+                className="admin-multi-select__arrow"
+                type="button"
+                onClick={() => setArtistDropdownOpen((current) => !current)}
+              >
+                <i class="bi bi-caret-down-fill"></i>
+              </button>
+            </div>
+            {artistDropdownOpen ? (
+              <div className="admin-multi-select__menu">
+                {artists.map((artist) => (
+                  <label className="admin-multi-select__option" key={artist.id}>
+                    <input
+                      checked={selectedArtistIds.map(Number).includes(Number(artist.id))}
+                      type="checkbox"
+                      onChange={() => toggleArtist(artist.id)}
+                    />
+                    <span>{artist.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <label>File audio (MP3) <span>*</span></label>
+          <input id="admin-audio-upload" hidden name="audio" type="file" accept="audio/mpeg,.mp3" onChange={(event) => onFileChange('audio', event.target.files?.[0])} />
+          <div className="admin-file-box">
+            <div className="admin-file-box__icon">♪</div>
+            <div><strong>{audioFileLabel}</strong><p>{audioFileMeta}</p></div>
+            <label className="admin-file-btn" htmlFor="admin-audio-upload">Chọn file</label>
+            {songFiles.audio || songForm.audio ? <button type="button" className="admin-remove-btn" onClick={() => onFileChange('audio', null)}>Xóa</button> : null}
+          </div>
+          <CloudinaryFileLink label="Đường dẫn Cloudinary audio" url={songForm.audio} />
+          {uploading?.audio ? <p className="admin-song-hint">{uploading.audio}</p> : null}
+          <p className="admin-song-hint">Định dạng: MP3</p>
+        </section>
+
+        <section className="admin-song-card">
+
+
+          <label>Ảnh bìa <span>*</span></label>
+          <input id="admin-image-upload" hidden name="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => onFileChange('image', event.target.files?.[0])} />
+          <div className="admin-cover-upload">
+            {imagePreview ? <div className="admin-cover-preview">
+              <img src={imagePreview} alt="Preview ảnh bìa" />
+              <button type="button" onClick={() => onFileChange('image', null)}>
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div> : null}
+            <label className="admin-cover-drop" htmlFor="admin-image-upload">
+              <strong>Upload ảnh bìa</strong>
+            </label>
+          </div>
+          <CloudinaryFileLink label="Đường dẫn Cloudinary ảnh bìa" url={songForm.image} />
+          {uploading?.image ? <p className="admin-song-hint">{uploading.image}</p> : null}
+          <p className="admin-song-hint">Định dạng: JPG, PNG, WEBP</p>
+
+          <label>Lyrics</label>
+          <input id="admin-lyrics-upload" hidden name="lyrics" type="file" accept=".txt,.lrc,.srt,text/plain" onChange={(event) => onFileChange('lyrics', event.target.files?.[0])} />
+          <div className="admin-file-box">
+            <div className="admin-file-box__icon">TXT</div>
+            <div><strong>{lyricsFileLabel}</strong><p>{lyricsFileMeta}</p></div>
+            <label className="admin-file-btn" htmlFor="admin-lyrics-upload">Chọn file</label>
+            {songFiles.lyrics || songForm.lyrics ? <button type="button" className="admin-remove-btn" onClick={() => onFileChange('lyrics', null)}>Xóa</button> : null}
+          </div>
+          <CloudinaryFileLink label="Đường dẫn Cloudinary lyrics" url={songForm.lyrics} />
+          {uploading?.lyrics ? <p className="admin-song-hint">{uploading.lyrics}</p> : null}
+
+          <label>Thời lượng bài hát</label>
+          <div className="admin-readonly-field">Tự động</div>
+          <p className="admin-song-hint">Thời lượng sẽ được tự động lấy từ file audio sau khi lưu.</p>
+          <div className="admin-song-editor__actions">
+            <button type="button" className="admin-cancel-btn" onClick={onClose}>Hủy</button>
+            <button type="submit" className="admin-save-btn" disabled={songSubmitting || Object.values(uploading || {}).some((status) => status === 'Đang upload...')}>{songSubmitting ? 'Đang lưu...' : 'Lưu bài hát'}</button>
+          </div>
+        </section>
+      </div>
+
+    </form>
+  );
+}

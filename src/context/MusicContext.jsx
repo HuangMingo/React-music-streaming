@@ -33,6 +33,7 @@ export function MusicProvider({ children }) {
   //Sử dụng Set tạo state để lưu trữ tập hợp ID của các bài hát yêu thích
   const [favouriteSongIds, setFavouriteSongIds] = useState(new Set());
   const [favouritePlaylistIds, setFavouritePlaylistIds] = useState(new Set());
+  const [favouriteAlbumIds, setFavouriteAlbumIds] = useState(new Set());
   const [activePlaylistScope, setActivePlaylistScope] = useState(() => (
     localStorage.getItem("activePlaylistScope") || "personal"
   ));
@@ -263,7 +264,42 @@ export function MusicProvider({ children }) {
       console.error("Toggle favourite playlist failed:", error);
     }
   }
+  async function toggleFavouriteAlbum(event, albumId) {
+    event.stopPropagation();
+    if (!currentUser?.id || !albumId) {
+      showNotificationToast("Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ thÃªm album yÃªu thÃ­ch");
+      return null;
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/api/albums/toggle-favourite-album`, {
+        userId: currentUser.id,
+        albumId,
+      });
+      const nextIsFavourite = Boolean(response?.data?.isFavouriteAlbum);
+      showNotificationToast(
+        nextIsFavourite
+          ? "ÄÃ£ thÃªm album vÃ o danh sÃ¡ch yÃªu thÃ­ch"
+          : "ÄÃ£ xÃ³a album khá»i danh sÃ¡ch yÃªu thÃ­ch"
+      );
+      setFavouriteAlbumIds((prev) => {
+        const next = new Set(prev);
+        if (nextIsFavourite) {
+          next.add(albumId);
+        } else {
+          next.delete(albumId);
+        }
+        return next;
+      });
+      setFavouriteAlbumVersion((version) => version + 1);
+      return nextIsFavourite;
+    } catch (error) {
+      console.error("Toggle favourite album failed:", error);
+      return null;
+    }
+  }
   const [favouriteVersion, setFavouriteVersion] = useState(0);
+  const [favouriteAlbumVersion, setFavouriteAlbumVersion] = useState(0);
   const refreshPlaylists = () => setPlaylistVersion(v => v + 1);
   // Thời gian hiện tại của bài hát
   const [currentTime, setCurrentTime] = useState(0);
@@ -430,6 +466,43 @@ export function MusicProvider({ children }) {
     };
   }, [currentUser?.id]);
   //Ref trỏ về menu của mỗi bài hát để kiểm tra click bên ngoài đóng menu
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setFavouriteAlbumIds(new Set());
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadFavouriteAlbums() {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/albums/favourite-albums?userId=${currentUser.id}`
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        const albumIds = Array.isArray(response?.data)
+          ? response.data.map((album) => album.id)
+          : [];
+        setFavouriteAlbumIds(new Set(albumIds));
+      } catch (error) {
+        if (isMounted) {
+          setFavouriteAlbumIds(new Set());
+        }
+        console.error("Load favourite albums failed:", error);
+      }
+    }
+
+    loadFavouriteAlbums();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id, favouriteAlbumVersion]);
+
   const playlistMenuRef = useRef(null);
 
   //lưu playlist mà người dùng đã chọn cho từng bài hát.
@@ -577,6 +650,10 @@ export function MusicProvider({ children }) {
       favouritePlaylistIds,
       setFavouritePlaylistIds,
       toggleFavouritePlaylist,
+      favouriteAlbumIds,
+      setFavouriteAlbumIds,
+      toggleFavouriteAlbum,
+      favouriteAlbumVersion,
       followedArtists,
       setFollowedArtists,
       artistFollowersCount,

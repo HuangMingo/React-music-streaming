@@ -81,7 +81,7 @@ function App() {
   const [playlists, setPlaylists] = useState([]);
   const authEntryPaths = ['/login', '/register'];
   const isAuthEntryPage = authEntryPaths.includes(location.pathname);
-  const isAdminPage = location.pathname === '/admin';
+  const isAdminPage = location.pathname.startsWith('/admin');
   const isFullScreenPage = isAuthEntryPage || isAdminPage;
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const reservedTopLevelPaths = new Set([
@@ -114,8 +114,8 @@ function App() {
     loadPlaylists();
   }, [currentUser?.id]);
   //Các trang độc lập
-  const standalonePaths = ['/login', '/register', '/dashboard', '/admin'];
-  const isStandalonePage = standalonePaths.includes(location.pathname);
+  const standalonePaths = ['/login', '/register', '/dashboard'];
+  const isStandalonePage = standalonePaths.includes(location.pathname) || isAdminPage;
   // -----------Set background for header when scroll-----------
   useEffect(() => {
     const appContainers = Array.from(document.querySelectorAll('.app__container'));
@@ -187,7 +187,10 @@ function App() {
             <Route path="/login" element={<GuestOnlyRoute><LoginPage /></GuestOnlyRoute>} />
             <Route path="/register" element={<GuestOnlyRoute><RegisterPage /></GuestOnlyRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><UserDashboardPage /></ProtectedRoute>} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+            <Route path="/admin" element={<Navigate to="/admin/songs" replace />} />
+            <Route path="/admin/:tab" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+            <Route path="/admin/:tab/:mode" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+            <Route path="/admin/:tab/:mode/:songId" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
             {/* Tab Cá nhân hiển thị giao diện chào mừng cho khách và giao diện thật cho người đã đăng nhập */}
             <Route path="/personal" element={isAuthenticated ? <TabPersonal playlists={playlists} onPlaylistsChanged={loadPlaylists} /> : <GuestPage />} >
               <Route path="" element={<OverviewSection />} />

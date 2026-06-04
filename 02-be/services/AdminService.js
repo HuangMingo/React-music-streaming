@@ -94,16 +94,15 @@ export async function createSong(data) {
   const lyrics = data.lyrics ?? data.lyric ?? null;
   const durationSeconds = data.duration_seconds ? Number(data.duration_seconds) : null;
   const trackNumber = data.track_number ? Number(data.track_number) : null;
-  const releaseDate = data.release_date || null;
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
     const result = await client.query(
-      `INSERT INTO song (title, image, audio, lyrics, duration_seconds, album_id, track_number, release_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO song (title, image, audio, lyrics, duration_seconds, album_id, track_number)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [title, data.image || null, data.audio || null, lyrics || null, durationSeconds, albumId, trackNumber, releaseDate]
+      [title, data.image || null, data.audio || null, lyrics || null, durationSeconds, albumId, trackNumber]
     );
     const song = result.rows[0];
 
@@ -139,7 +138,7 @@ export async function updateSong(songId, data) {
     await client.query('BEGIN');
     const result = await client.query(
       `UPDATE song
-       SET title = $1, image = $2, audio = $3, lyrics = $4, duration_seconds = $5, album_id = $6
+       SET title = $1, image = $2, audio = $3, lyrics = $4, duration_seconds = $5, album_id = $6, release_date = CURRENT_DATE
        WHERE id = $7
        RETURNING *`,
       [title, data.image || null, data.audio || null, lyrics || null, durationSeconds, albumId, id]

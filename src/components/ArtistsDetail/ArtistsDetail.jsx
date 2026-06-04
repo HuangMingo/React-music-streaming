@@ -78,8 +78,10 @@ export function ArtistDetail() {
     exploreSelectedPlaylist,
     setExploreSelectedPlaylist,
     favouriteSongIds,
+    favouriteAlbumIds,
     setFavouriteSongIds,
     toggleFavouriteSong,
+    toggleFavouriteAlbum,
     toggleFollowArtist,
     isArtistFollowed,
     artistFollowersCount,
@@ -450,8 +452,12 @@ export function ArtistDetail() {
                       style={{ background: `url(${getImage(album)}) no-repeat center center / cover`, overflow: "hidden" }}
                     />
                     <div className="row__item-actions">
-                      <div className="action-btn btn--heart" onClick={(event) => event.stopPropagation()}>
-                        <i className="btn--icon icon--heart bi bi-heart-fill primary" />
+                      <div
+                        className="action-btn btn--heart"
+                        onClick={(event) => toggleFavouriteAlbum(event, album.id)}
+                        title={favouriteAlbumIds.has(album.id) ? "Bỏ thích album" : "Thêm vào album yêu thích"}
+                      >
+                        <i className={`btn--icon icon--heart bi bi-heart${favouriteAlbumIds.has(album.id) ? "-fill" : ""} primary`} />
                       </div>
                       <div className="btn--play-playlist" onClick={(event) => playCollection(event, album, albumTitle)}>
                         <div className="control-btn btn-toggle-play">

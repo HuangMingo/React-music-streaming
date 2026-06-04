@@ -39,9 +39,11 @@ export function SearchResults() {
     setExploreSelectedPlaylist,
     favouriteSongIds,
     favouritePlaylistIds,
+    favouriteAlbumIds,
     setFavouriteSongIds,
     toggleFavouriteSong,
     toggleFavouritePlaylist,
+    toggleFavouriteAlbum,
     handleClickSong,
     playlistMenuRef,
     handleSelectTargetPlaylist,
@@ -161,8 +163,24 @@ export function SearchResults() {
     return playlist?.playlist_name || playlist?.name || '';
   }
 
+  function getAlbumName(album) {
+    return album?.playlist_name || album?.title || album?.name || album?.album_name || '';
+  }
+
   function createPlaylistSlug(playlist) {
     const rawSlug = playlist?.slug || getPlaylistName(playlist);
+    return String(rawSlug)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function createAlbumSlug(album) {
+    const rawSlug = album?.slug || getAlbumName(album);
     return String(rawSlug)
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -185,6 +203,29 @@ export function SearchResults() {
     });
   }
 
+  function toPlayableAlbum(album) {
+    return {
+      ...album,
+      playlist_name: getAlbumName(album),
+      playlist_image: getImage(album),
+      songs: Array.isArray(album?.songs) ? album.songs : [],
+    };
+  }
+
+  function navigateToAlbum(album) {
+    const albumData = toPlayableAlbum(album);
+    const slug = createAlbumSlug(albumData);
+    if (!slug) return;
+
+    setExploreSelectedPlaylist(albumData);
+    navigate(`/playlist/${slug}`, {
+      state: {
+        playlistId: albumData?.id,
+        playlist: albumData,
+      },
+    });
+  }
+
   async function loadPlaylistDetails(playlist) {
     if (playlist?.songs?.length) {
       return playlist;
@@ -201,6 +242,19 @@ export function SearchResults() {
     });
 
     return response.data;
+  }
+
+  async function loadAlbumDetails(album) {
+    if (album?.songs?.length) {
+      return toPlayableAlbum(album);
+    }
+
+    if (!album?.id) {
+      return toPlayableAlbum(album);
+    }
+
+    const response = await axios.get(`${API_URL}/api/albums/${album.id}`);
+    return toPlayableAlbum(response.data);
   }
 
   async function handlePlayPlaylist(event, playlist) {
@@ -228,6 +282,34 @@ export function SearchResults() {
       });
     } catch (error) {
       console.error('Play playlist failed:', error);
+    }
+  }
+
+  async function handlePlayAlbum(event, album) {
+    event.stopPropagation();
+
+    try {
+      const albumData = await loadAlbumDetails(album);
+      const songs = albumData?.songs ?? [];
+      const firstSong = songs[0];
+
+      if (!firstSong) {
+        navigateToAlbum(albumData);
+        return;
+      }
+
+      setExploreSelectedPlaylist(albumData);
+      setCurrentSong(firstSong);
+      setCurrentTime(0);
+      setIsPlaying(true);
+      navigate(`/playlist/${createAlbumSlug(albumData) || createAlbumSlug(album)}`, {
+        state: {
+          playlistId: albumData?.id ?? album?.id,
+          playlist: albumData,
+        },
+      });
+    } catch (error) {
+      console.error('Play album failed:', error);
     }
   }
 //Xử lí sự kiến nhấn bài hát
@@ -261,12 +343,14 @@ export function SearchResults() {
   const topSongs = activeTab === 'tat-ca' ? results.songs.slice(0, 5) : results.songs;
   const topArtists = activeTab === 'tat-ca' ? results.artists.slice(0, 5) : results.artists;
   const topPlaylists = activeTab === 'tat-ca' ? results.playlists.slice(0, 5) : results.playlists;
-  const albums = results.albums.length > 0 ? results.albums : results.playlists;
-  const topAlbums = activeTab === 'tat-ca' ? albums.slice(0, 5) : albums;
+  const topAlbums = activeTab === 'tat-ca' ? results.albums.slice(0, 5) : results.albums;
+  const topCollections = [
+    ...topPlaylists.map((item) => ({ type: 'playlist', item })),
+    ...topAlbums.map((item) => ({ type: 'album', item })),
+  ];
   const showSongs = activeTab === 'tat-ca' || activeTab === 'bai-hat';
   const showArtists = activeTab === 'tat-ca' || activeTab === 'nghe-si';
   const showPlaylists = activeTab === 'tat-ca' || activeTab === 'playlist';
-  const showAlbums = activeTab === 'tat-ca' || activeTab === 'album';
 
   return (
     <div className="app__container tab--search active">
@@ -448,15 +532,17 @@ export function SearchResults() {
                     )}
                   </div>
 
-                  {topPlaylists.length === 0 ? (
+                  {topCollections.length === 0 ? (
                     <div className="search-page__empty">Không tìm thấy playlist phù hợp</div>
                   ) : (
                     <div className="search-page__card-track">
-                      {topPlaylists.map((pl, idx) => {
-                        const isMine = Number(pl.creator_id) === Number(currentUser?.id);
+                      {topCollections.map(({ type, item: pl }, idx) => {
+                        const isAlbum = type === 'album';
+                        const isMine = !isAlbum && Number(pl.creator_id) === Number(currentUser?.id);
+                        const isFavouriteAlbum = favouriteAlbumIds.has(pl.id);
                         return (
-                        <div className="search-page__card-col" key={pl.id ?? `pl-${idx}`}>
-                          <div className="row__item item--playlist search-page__card" onClick={() => navigateToPlaylist(pl)}>
+                        <div className="search-page__card-col" key={`${type}-${pl.id ?? idx}`}>
+                          <div className="row__item item--playlist search-page__card" onClick={() => (isAlbum ? navigateToAlbum(pl) : navigateToPlaylist(pl))}>
                             <div className="row__item-container flex--top-left">
                               <div className="row__item-display br-5 search-page__card-display">
                                 <div className="row__item-img img--square" style={{ background: `url(${getImage(pl)}) no-repeat center center / cover`, overflow: 'hidden' }} />
@@ -464,21 +550,31 @@ export function SearchResults() {
                                   <div
                                     className="action-btn btn--heart"
                                     onClick={(e) => {
+                                      if (isAlbum) {
+                                        toggleFavouriteAlbum(e, pl.id);
+                                        return;
+                                      }
                                       if (isMine) {
                                         e.stopPropagation();
                                         return;
                                       }
                                       toggleFavouritePlaylist(e, pl.id);
                                     }}
-                                    title={!isMine ? (favouritePlaylistIds.has(pl.id) ? 'Bỏ thích playlist' : 'Thêm vào playlist yêu thích') : undefined}
+                                    title={
+                                      isAlbum
+                                        ? (isFavouriteAlbum ? 'Bỏ thích album' : 'Thêm vào album yêu thích')
+                                        : (!isMine ? (favouritePlaylistIds.has(pl.id) ? 'Bỏ thích playlist' : 'Thêm vào playlist yêu thích') : undefined)
+                                    }
                                   >
                                     {isMine ? (
                                       <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(pl.id)} />
+                                    ) : isAlbum ? (
+                                      <i className={`btn--icon icon--heart bi bi-heart${isFavouriteAlbum ? '-fill' : ''} primary`} />
                                     ) : (
                                       <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(pl.id) ? '-fill' : ''} primary`} />
                                     )}
                                   </div>
-                                  <div className="btn--play-playlist" onClick={(event) => handlePlayPlaylist(event, pl)}>
+                                  <div className="btn--play-playlist" onClick={(event) => (isAlbum ? handlePlayAlbum(event, pl) : handlePlayPlaylist(event, pl))}>
                                     <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
                                     <span className="song-note note-1">♪</span>
                                     <span className="song-note note-2">♫</span>
@@ -496,8 +592,8 @@ export function SearchResults() {
                                 <div className="overlay" />
                               </div>
                               <div className="row__item-info search-page__card-info">
-                                <span className="row__info-name is-twoline">{pl.name || pl.playlist_name}</span>
-                                <h3 className="row__info-creator">{pl.username || pl.creator || 'Playlist'}</h3>
+                                <span className="row__info-name is-twoline">{isAlbum ? getAlbumName(pl) : (pl.name || pl.playlist_name)}</span>
+                                <h3 className="row__info-creator">{isAlbum ? (pl.artist_name || 'Album') : (pl.username || pl.creator || 'Playlist')}</h3>
                               </div>
                             </div>
                           </div>

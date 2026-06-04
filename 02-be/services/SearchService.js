@@ -4,6 +4,7 @@ const EMPTY_RESULT = {
     songs: [],
     artists: [],
     playlists: [],
+    albums: [],
 };
 
 const songSelectWithArtists = `
@@ -68,6 +69,57 @@ async function searchPlaylists(like, limit, userId) {
     return result.rows;
 }
 // ------------------TÌM KIẾM THEO TỪ KHÓA----------------
+async function searchAlbums(like, limit) {
+    const result = await pool.query(
+        `
+        WITH song_artists AS (
+            SELECT 
+                ars.song_id,
+                json_agg(art.name) AS artist_names
+            FROM artist_song ars
+            JOIN artist art ON art.id = ars.artist_id
+            GROUP BY ars.song_id
+        )
+        SELECT
+            al.id,
+            al.title,
+            al.image,
+            al.release_date,
+            al.artist_id,
+            art.name AS artist_name,
+            COUNT(s.id)::int AS song_count,
+            COALESCE(
+                json_agg(
+                    json_build_object(
+                        'id', s.id,
+                        'title', s.title,
+                        'album_id', s.album_id,
+                        'duration_seconds', s.duration_seconds,
+                        'track_number', s.track_number,
+                        'release_date', s.release_date,
+                        'lyrics', s.lyrics,
+                        'audio', s.audio,
+                        'image', s.image,
+                        'artist_names', sa.artist_names
+                    )
+                    ORDER BY s.track_number NULLS LAST, s.id
+                ) FILTER (WHERE s.id IS NOT NULL), '[]'::json
+            ) AS songs
+        FROM album al
+        LEFT JOIN artist art ON art.id = al.artist_id
+        LEFT JOIN song s ON s.album_id = al.id
+        LEFT JOIN song_artists sa ON sa.song_id = s.id
+        WHERE unaccent(al.title) ILIKE unaccent($1)
+        GROUP BY al.id, art.name
+        ORDER BY al.title ASC
+        LIMIT $2
+        `,
+        [like, limit]
+    );
+
+    return result.rows;
+}
+
 async function searchByKeyword(q, limits, userId) {
     const keyword = q?.trim();
 
@@ -77,15 +129,17 @@ async function searchByKeyword(q, limits, userId) {
 
     const like = `%${keyword}%`;
 
-    const [songs, artists, playlists] = await Promise.all([
+    const [songs, artists, playlists, albums] = await Promise.all([
         searchSongs(like, limits.songs),
         searchArtists(like, limits.artists),
-        searchPlaylists(like, limits.playlists, userId)
+        searchPlaylists(like, limits.playlists, userId),
+        searchAlbums(like, limits.playlists)
     ]);
     return {
         songs,
         artists,
         playlists,
+        albums,
     };
 }
 
