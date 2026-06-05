@@ -52,7 +52,7 @@ export function DreamChart() {
         loadUserPlaylists();
     }, [currentUser?.id]);
 
-     //--------------Xử lí khi click bên ngoài----------
+    //--------------Xử lí khi click bên ngoài----------
     useEffect(() => {
         function handleClickOutside(event) {
             if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
@@ -153,7 +153,11 @@ export function DreamChart() {
                                                                                 ${songIndex === 0 && 'is-outline--blue'}
                                                                                 ${songIndex === 1 && 'is-outline--green'}
                                                                                 ${songIndex === 2 && 'is-outline--red'}
-                                                                                ${songIndex > 2 && 'is-outline--text'}`}>
+                                                                                ${songIndex > 2 && 'is-outline--text'}`}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                        }}
+                                                                    >
                                                                         {songIndex + 1}
                                                                     </div>
 
@@ -215,8 +219,8 @@ export function DreamChart() {
                                                                     <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
                                                                 </div>
                                                                 <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
-                                                                        title="Khác"
-                                                                    >
+                                                                    title="Khác"
+                                                                >
                                                                     <i className="btn--icon bi bi-three-dots"></i>
                                                                     <AddSongToPlaylist
                                                                         song={song}

@@ -6,6 +6,9 @@ import { SuggestionDropdown } from './SuggestionDropdown/SuggestionDropdown.jsx'
 import { useAuthContext } from '../context/AuthContext';
 import { getArtistPath } from '../utils/artistNavigation.js';
 import { API_URL } from '../api.js';
+
+const EMPTY_SUGGESTIONS = { songs: [], artists: [], playlists: [], albums: [] };
+
 export function Header({ onClose }) {
     const [isOpenLogout, setOpenLogout] = useState(false);
     // Trạng thái bật/tắt của nút quay lại và tiến tới trên header.
@@ -16,10 +19,10 @@ export function Header({ onClose }) {
     const navigationType = useNavigationType();
     const { currentUser, isAuthenticated, isAdmin, logout } = useAuthContext();
     const [searchTerm, setSearchTerm] = useState('');
-    const [suggestions, setSuggestions] = useState({ songs: [], artists: [], playlists: [] });
+    const [suggestions, setSuggestions] = useState(EMPTY_SUGGESTIONS);
     const [showSuggest, setShowSuggest] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
-    const debounceRef = useRef(null);
+    const debounceRef = useRef(null); //
     const inputRef = useRef(null);
     const userMenuRef = useRef(null);
 
@@ -82,7 +85,7 @@ export function Header({ onClose }) {
         const q = searchTerm.trim();
         if (debounceRef.current) clearTimeout(debounceRef.current);
         if (!q) {
-            setSuggestions({ songs: [], artists: [], playlists: [] });
+            setSuggestions(EMPTY_SUGGESTIONS);
             setShowSuggest(false);
             setActiveIndex(-1);
             return;
@@ -91,14 +94,14 @@ export function Header({ onClose }) {
             try {
                 const userParam = currentUser?.id ? `&userId=${encodeURIComponent(currentUser.id)}` : '';
                 const res = await axios.get(`${API_URL}/api/search/suggest?q=${encodeURIComponent(q)}${userParam}`);
-                setSuggestions(res.data || { songs: [], artists: [], playlists: [] });
+                setSuggestions(res.data || EMPTY_SUGGESTIONS);
                 setShowSuggest(true);
                 setActiveIndex(-1);
             } catch (err) {
                 console.error('Suggest error', err);
-                setSuggestions({ songs: [], artists: [], playlists: [] });
+                setSuggestions(EMPTY_SUGGESTIONS);
             }
-        }, 100);
+        }, 0);
         return () => clearTimeout(debounceRef.current);
     }, [searchTerm, currentUser?.id]);
 
@@ -107,6 +110,7 @@ export function Header({ onClose }) {
         (list.songs || []).forEach((s) => out.push({ type: 'song', item: s }));
         (list.artists || []).forEach((a) => out.push({ type: 'artist', item: a }));
         (list.playlists || []).forEach((p) => out.push({ type: 'playlist', item: p }));
+        (list.albums || []).forEach((a) => out.push({ type: 'album', item: a }));
         return out;
     }
 

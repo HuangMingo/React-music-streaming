@@ -1,24 +1,26 @@
 import './SuggestionDropdown.css';
 
 export function SuggestionDropdown({
-  suggestions = { songs: [], artists: [], playlists: [] },
+  suggestions = { songs: [], artists: [], playlists: [], albums: [] },
   activeIndex = -1,
   onHoverIndex = () => {},
   onSelect = () => {},
 }) {
-  const { songs = [], artists = [], playlists = [] } = suggestions;
+  const { songs = [], artists = [], playlists = [], albums = [] } = suggestions;
 
-  if (!songs.length && !artists.length && !playlists.length) return null;
+  if (!songs.length && !artists.length && !playlists.length && !albums.length) return null;
 
   const flatSuggestions = [
     ...songs.map((item) => ({ type: 'song', item })),
     ...artists.map((item) => ({ type: 'artist', item })),
     ...playlists.map((item) => ({ type: 'playlist', item })),
+    ...albums.map((item) => ({ type: 'album', item })),
   ];
 
   const getSuggestionLabel = (type, item) => {
     if (type === 'song') return item.title || '';
     if (type === 'artist') return item.name || '';
+    if (type === 'album') return item.title || item.name || item.album_name || '';
     return item.name || item.playlist_name || '';
   };
 

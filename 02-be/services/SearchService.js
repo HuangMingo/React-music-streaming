@@ -133,7 +133,7 @@ async function searchByKeyword(q, limits, userId) {
         searchSongs(like, limits.songs),
         searchArtists(like, limits.artists),
         searchPlaylists(like, limits.playlists, userId),
-        searchAlbums(like, limits.playlists)
+        searchAlbums(like, limits.albums),
     ]);
     return {
         songs,
@@ -142,12 +142,13 @@ async function searchByKeyword(q, limits, userId) {
         albums,
     };
 }
-
+//------------------GỢI Ý TỪ KHÓA----------------
 const suggest = async (q, userId) => {
     return searchByKeyword(q, {
         songs: 5,
         artists: 3,
         playlists: 3,
+        albums: 3,
     }, userId);
 };
 
@@ -156,6 +157,7 @@ const searchAll = async (q, userId) => {
         songs: 50,
         artists: 50,
         playlists: 50,
+        albums: 50,
     }, userId);
 };
 

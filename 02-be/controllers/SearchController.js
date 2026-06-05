@@ -4,7 +4,7 @@ const suggest = async (req, res) => {
     try {
         const q = (req.query.q || '').trim();
         const userId = req.query.userId ? Number(req.query.userId) : null;
-        if (!q) return res.json({ songs: [], artists: [], playlists: [] });
+        if (!q) return res.json({ songs: [], artists: [], playlists: [], albums: [] });
         const result = await searchService.suggest(q, Number.isFinite(userId) ? userId : null);
         res.json(result);
     } catch (error) {
@@ -17,7 +17,7 @@ const searchAll = async (req, res) => {
     try {
         const q = (req.query.q || '').trim();
         const userId = req.query.userId ? Number(req.query.userId) : null;
-        if (!q) return res.json({ songs: [], artists: [], playlists: [] });
+        if (!q) return res.json({ songs: [], artists: [], playlists: [], albums: [] });
         const result = await searchService.searchAll(q, Number.isFinite(userId) ? userId : null);
         res.json(result);
     } catch (error) {

@@ -3,7 +3,7 @@ const getAllAlbum = async () => {
     const result = await pool.query('SELECT * FROM album ORDER BY id');
     return result.rows;
 };
-
+//Lấy album theo id, kèm theo thôn tin nghệ sĩ và bài hát trong album đó
 const getAlbumById = async (albumId) => {
     const result = await pool.query(`
         WITH song_artists AS (
