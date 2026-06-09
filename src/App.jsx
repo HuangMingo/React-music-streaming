@@ -86,6 +86,7 @@ function App() {
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const reservedTopLevelPaths = new Set([
     'admin',
+    'album',
     'dashboard',
     'dream',
     'guest',
@@ -206,7 +207,8 @@ function App() {
             <Route path="/recent" element={<RecentSong />} />
             <Route path="/tim-kiem" element={<Navigate to="/tim-kiem/tat-ca" replace />} />
             <Route path="/tim-kiem/:tab" element={<SearchResults />} />
-            <Route path="/playlist/:slug" element={<PlaylistDetail />} />
+            <Route path="/album/:id" element={<PlaylistDetail />} />
+            <Route path="/playlist/:id" element={<PlaylistDetail />} />
             <Route path="/artist/:slug" element={<ArtistDetail />} />
             <Route path="/:slug" element={<ArtistDetail />} />
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -59,6 +59,12 @@ export function MusicProvider({ children }) {
     setActivePlaylistScope("explore");
     setExploreSelectedPlaylistState(value);
   }
+
+  function resetSelectedPlaylist() {
+    setPersonalSelectedPlaylistState(null);
+    setExploreSelectedPlaylistState(null);
+    setActivePlaylistScope("personal");
+  }
   // Lưu danh sách artistId đã follow trong context để mọi màn dùng chung một nguồn state.
   const [followedArtists, setFollowedArtists] = useState(new Set());
   // Cache số follower theo artistId để UI cập nhật ngay sau follow/unfollow.
@@ -673,6 +679,7 @@ export function MusicProvider({ children }) {
       setPersonalSelectedPlaylist,
       exploreSelectedPlaylist,
       setExploreSelectedPlaylist,
+      resetSelectedPlaylist,
       currentVolume,
       setCurrentVolume,
       currentTime,
@@ -710,6 +717,5 @@ export function clearMusicStorage() {
   localStorage.removeItem("playlistIndex");
   localStorage.removeItem("selectedPlaylist");
   localStorage.removeItem("personalSelectedPlaylist");
-  localStorage.removeItem("exploreSelectedPlaylist");
   localStorage.removeItem("activePlaylistScope");
 }

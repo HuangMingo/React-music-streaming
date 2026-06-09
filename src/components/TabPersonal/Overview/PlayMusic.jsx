@@ -4,9 +4,10 @@ import { useMusicContext } from "../../../context/MusicContext.jsx";
 import { useAuthContext } from "../../../context/AuthContext.jsx";
 import { AddSongToPlaylist } from "../../AddSongToPlaylist/AddSongToPlaylist.jsx";
 import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
+import { LoadingState } from "../../LoadingState/LoadingState.jsx";
 import axios from "axios";
 import { API_URL } from '../../../api.js';
-export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false, playlistScope = "personal" }) {
+export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false, playlistScope = "personal", loading = false, emptyMessage = "Chưa có bài hát nào trong playlist này!" }) {
     const { currentSong,
         setCurrentSong,
         setCurrentTime,
@@ -210,11 +211,13 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                 </div>}
                 <div className="col l-12 m-12 c-12">
                     <div className={`container__playmusic ${hideHeaderTitle ? "playlist-detail__playmusic" : ""}`}>
-                        {!playlist || !playlist.songs || playlist.songs.length === 0 ? (
+                        {loading ? (
+                            <LoadingState />
+                        ) : !playlist || !playlist.songs || playlist.songs.length === 0 ? (
                             <div className="box--no-content">
                                 <div className="no-content-image" />
                                 <span className="no-content-text">
-                                    Chưa có bài hát nào trong playlist này!
+                                    {emptyMessage}
                                 </span>
                             </div>
                         ) : (

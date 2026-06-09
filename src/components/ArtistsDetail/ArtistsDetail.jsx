@@ -9,6 +9,7 @@ import "./ArtistsDetail.css";
 import { API_URL } from '../../api.js';
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist.jsx";
+import { LoadingState } from "../LoadingState/LoadingState.jsx";
 const ARTIST_TABS = [
   { id: "overview", label: "Tổng quan" },
   { id: "about", label: "Giới thiệu" },
@@ -31,17 +32,6 @@ function formatDuration(song) {
   const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
   const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, "0");
   return `${minutes}:${seconds}`;
-}
-
-function createSlug(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 function getImage(item) {
@@ -275,10 +265,9 @@ export function ArtistDetail() {
 
   function navigateToPlaylist(playlist) {
     const playlistData = toPlayableCollection(playlist, "Playlist");
-    const playlistSlug = createSlug(playlistData.playlist_name);
-    if (!playlistSlug) return;
+    if (!playlistData?.id) return;
 
-    navigate(`/playlist/${playlistSlug}`, {
+    navigate(`/playlist/${playlistData.id}`, {
       state: {
         playlistId: playlistData.id,
         playlist: playlistData,
@@ -288,10 +277,9 @@ export function ArtistDetail() {
 
   function navigateToAlbum(album) {
     const albumData = toPlayableCollection(album, getAlbumTitle(album));
-    const albumSlug = createSlug(albumData.playlist_name);
-    if (!albumSlug) return;
+    if (!albumData?.id) return;
 
-    navigate(`/playlist/${albumSlug}`, {
+    navigate(`/album/${albumData.id}`, {
       state: {
         playlistId: albumData.id,
         playlist: albumData,
@@ -576,7 +564,7 @@ export function ArtistDetail() {
     <div className="app__container artist-detail active" ref={containerRef}>
       <div className="app__container-content">
         {loading ? (
-          <div className="loader">Đang tải...</div>
+          <LoadingState />
         ) : error ? (
           <div className="artist-detail__state">
             <h2>{error}</h2>

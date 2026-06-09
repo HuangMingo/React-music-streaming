@@ -162,7 +162,9 @@ export async function updateSong(songId, data) {
     client.release();
   }
 }
-
+//pg coi câu lệnh có tham số
+//  là một prepared statement và không cho phép nhiều 
+// câu SQL trong một statement.
 export async function deleteSong(songId) {
   const id = normalizeId(songId);
   if (!id) {
@@ -296,7 +298,7 @@ export async function createArtist(data) {
     `INSERT INTO artist (name, image, bio, follower_count)
      VALUES ($1, $2, $3, $4)
      RETURNING *`,
-    [name, image, data.bio || data.introduction || null, followerCount]
+    [name, image || '/assets/img/artists/artist-avatar.png', data.bio || data.introduction || null, followerCount]
   );
 
   return result.rows[0];

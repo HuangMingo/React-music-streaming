@@ -1204,6 +1204,7 @@ label .container__header-icon {
     align-items: flex-end;
     justify-content: flex-start;
     gap: 18px;
+    /* position: fixed; */
 }
 
 .playlist-detail__play-all {

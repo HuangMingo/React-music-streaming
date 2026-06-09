@@ -5,6 +5,7 @@ import { AddSongToPlaylist } from '../AddSongToPlaylist/AddSongToPlaylist.jsx';
 import { useAuthContext } from '../../context/AuthContext.jsx';
 import { useMusicContext } from '../../context/MusicContext.jsx';
 import { ArtistNameLink } from '../ArtistNameLink/ArtistNameLink.jsx';
+import { LoadingState } from '../LoadingState/LoadingState.jsx';
 import { getArtistPath } from '../../utils/artistNavigation.js';
 import '../../assets/css/main.css';
 import { API_URL } from '../../api.js';
@@ -159,43 +160,14 @@ export function SearchResults() {
     navigate(`/tim-kiem/${nextTab}?q=${encodeURIComponent(q)}`);
   }
 
-  function getPlaylistName(playlist) {
-    return playlist?.playlist_name || playlist?.name || '';
-  }
-
   function getAlbumName(album) {
     return album?.playlist_name || album?.title || album?.name || album?.album_name || '';
   }
 
-  function createPlaylistSlug(playlist) {
-    const rawSlug = playlist?.slug || getPlaylistName(playlist);
-    return String(rawSlug)
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-
-  function createAlbumSlug(album) {
-    const rawSlug = album?.slug || getAlbumName(album);
-    return String(rawSlug)
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-
   function navigateToPlaylist(playlist) {
-    const slug = createPlaylistSlug(playlist);
-    if (!slug) return;
+    if (!playlist?.id) return;
 
-    navigate(`/playlist/${slug}`, {
+    navigate(`/playlist/${playlist.id}`, {
       state: {
         playlistId: playlist?.id,
         playlist,
@@ -214,11 +186,9 @@ export function SearchResults() {
 
   function navigateToAlbum(album) {
     const albumData = toPlayableAlbum(album);
-    const slug = createAlbumSlug(albumData);
-    if (!slug) return;
+    if (!albumData?.id) return;
 
-    setExploreSelectedPlaylist(albumData);
-    navigate(`/playlist/${slug}`, {
+    navigate(`/album/${albumData.id}`, {
       state: {
         playlistId: albumData?.id,
         playlist: albumData,
@@ -274,7 +244,7 @@ export function SearchResults() {
       setCurrentSong(firstSong);
       setCurrentTime(0);
       setIsPlaying(true);
-      navigate(`/playlist/${createPlaylistSlug(playlistData) || createPlaylistSlug(playlist)}`, {
+      navigate(`/playlist/${playlistData?.id ?? playlist?.id}`, {
         state: {
           playlistId: playlistData?.id ?? playlist?.id,
           playlist: playlistData,
@@ -302,7 +272,7 @@ export function SearchResults() {
       setCurrentSong(firstSong);
       setCurrentTime(0);
       setIsPlaying(true);
-      navigate(`/playlist/${createAlbumSlug(albumData) || createAlbumSlug(album)}`, {
+      navigate(`/album/${albumData.id}`, {
         state: {
           playlistId: albumData?.id ?? album?.id,
           playlist: albumData,
@@ -355,7 +325,7 @@ export function SearchResults() {
   return (
     <div className="app__container tab--search active">
       <div className="app__container-content">
-        {loading && <div className="loader">Đang tìm...</div>}
+        {loading && <LoadingState message="Đang tìm dữ liệu..." />}
 
         {!loading && (
           <div className="search-page">

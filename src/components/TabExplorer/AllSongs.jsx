@@ -4,6 +4,7 @@ import { useMusicContext } from "../../context/MusicContext";
 import { useAuthContext } from "../../context/AuthContext";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink";
+import { LoadingState } from "../LoadingState/LoadingState.jsx";
 import { API_URL } from '../../api.js';
 // Component: AllSongs
 // Chức năng: Hiển thị các bài hát gợi ý, cho phép mở menu "Thêm vào playlist"
@@ -42,7 +43,7 @@ export function AllSongs() {
     const defaultPlaylistId = currentUser?.defaultPlaylistId;
     const [allSongs, setAllSongs] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     // Danh sách playlist do người dùng tạo (dùng để render menu thêm bài)
     const [userPlaylists, setUserPlaylists] = useState([]);
     const isMountedRef = useRef(true); // Ref để đánh dấu component vẫn mounted, tránh setState sau unmount 
@@ -185,9 +186,7 @@ export function AllSongs() {
                 </div>
                 <div className="col l-12 m-12 c-12">
                     {isLoading ? (
-                        <div style={{ textAlign: "center", padding: "20px", color: "var(--text-color)", fontSize: "16px" }}>
-                            Đang tải...
-                        </div>
+                        <LoadingState />
                     ) : allSongs.length === 0 ? (
                         <div style={{ textAlign: "center", padding: "20px", color: "var(--text-color)", fontSize: "16px" }}>
                             Chưa có bài hát nào

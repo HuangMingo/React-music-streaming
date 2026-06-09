@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation, useNavigationType } from 'react-router-
 import axios from 'axios';
 import { SuggestionDropdown } from './SuggestionDropdown/SuggestionDropdown.jsx';
 import { useAuthContext } from '../context/AuthContext';
+import { useMusicContext } from '../context/MusicContext.jsx';
 import { getArtistPath } from '../utils/artistNavigation.js';
 import { API_URL } from '../api.js';
 
@@ -25,6 +26,7 @@ export function Header({ onClose }) {
     const debounceRef = useRef(null); //
     const inputRef = useRef(null);
     const userMenuRef = useRef(null);
+    const { resetSelectedPlaylist } = useMusicContext();
 
     // Đồng bộ trạng thái nút back/forward theo history index của browser
     useEffect(() => {
@@ -101,7 +103,7 @@ export function Header({ onClose }) {
                 console.error('Suggest error', err);
                 setSuggestions(EMPTY_SUGGESTIONS);
             }
-        }, 0);
+        }, 1000);
         return () => clearTimeout(debounceRef.current);
     }, [searchTerm, currentUser?.id]);
 
@@ -167,6 +169,7 @@ export function Header({ onClose }) {
     }
 
     function handleLogout() {
+        resetSelectedPlaylist();
         logout();
         setOpenLogout(false);
         navigate('/personal');

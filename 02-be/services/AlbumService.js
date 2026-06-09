@@ -17,6 +17,7 @@ const getAlbumById = async (albumId) => {
         SELECT
             al.*,
             art.name AS artist_name,
+            CASE WHEN art.name IS NULL THEN '[]'::json ELSE json_build_array(art.name) END AS artist_names,
             COALESCE(
                 json_agg(
                     json_build_object(

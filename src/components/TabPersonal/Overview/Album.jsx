@@ -122,18 +122,17 @@ export function Album() {
         setCurrentPage((prevPage) => Math.min(prevPage, totalPages - 1));
     }, [totalPages]);
 
-    function navigateToAlbum(album) {
+    function scrollToPlayMusic(album) {
         const albumData = toPlayableAlbum(album);
         const slug = createSlug(albumData.playlist_name);
         if (!slug) return;
 
         setPersonalSelectedPlaylist(albumData);
-        navigate(`/playlist/${slug}`, {
-            state: {
-                playlistId: albumData.id,
-                playlist: albumData,
-            },
-        });
+        const personalContainer = document.querySelector(".app__container.tab--personal");
+        if (personalContainer) {
+            personalContainer.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+        }
     }
 
     function playAlbum(event, album) {
@@ -142,7 +141,7 @@ export function Album() {
         const firstSong = albumData.songs?.[0];
 
         if (!firstSong) {
-            navigateToAlbum(album);
+            scrollToPlayMusic(album);
             return;
         }
 
@@ -150,7 +149,7 @@ export function Album() {
         setCurrentSong(firstSong);
         setCurrentTime(0);
         setIsPlaying(true);
-        navigateToAlbum(albumData);
+        scrollToPlayMusic(albumData);
     }
 
     function handlePrevPage() {
@@ -213,7 +212,7 @@ export function Album() {
                                         const isFavourite = favouriteAlbumIds.has(album.id);
 
                                         return (
-                                            <div className={`col l-2-4 m-3 c-4 ${albumIndex === 1 && "mb-30"}`} key={album.id ?? `${title}-${albumIndex}`} onClick={() => navigateToAlbum(album)}>
+                                            <div className={`col l-2-4 m-3 c-4 ${albumIndex === 1 && "mb-30"}`} key={album.id ?? `${title}-${albumIndex}`} onClick={() => scrollToPlayMusic(album)}>
                                                 <div className="row__item item--album">
                                                     <div className="row__item-container flex--top-left">
                                                         <div className="row__item-display br-5">

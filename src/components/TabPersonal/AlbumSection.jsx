@@ -2,20 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ArtistNameLink } from "../ArtistNameLink/ArtistNameLink.jsx";
+import { LoadingState } from "../LoadingState/LoadingState.jsx";
 import { useAuthContext } from "../../context/AuthContext.jsx";
 import { useMusicContext } from "../../context/MusicContext.jsx";
 import { API_URL } from "../../api.js";
-
-function createSlug(value) {
-    return String(value || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "D")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-}
 
 function getAlbumTitle(album) {
     return album?.title || album?.name || album?.album_name || "Album";
@@ -90,11 +80,10 @@ export function AlbumSection() {
 
     function navigateToAlbum(album) {
         const albumData = toPlayableAlbum(album);
-        const slug = createSlug(albumData.playlist_name);
-        if (!slug) return;
+        if (!albumData?.id) return;
 
         setPersonalSelectedPlaylist(albumData);
-        navigate(`/playlist/${slug}`, {
+        navigate(`/album/${albumData.id}`, {
             state: {
                 playlistId: albumData.id,
                 playlist: albumData,
@@ -132,7 +121,7 @@ export function AlbumSection() {
                 <div className="col l-12 m-12 c-12">
                     <div className="row album--container">
                         {loading ? (
-                            <div className="loader">Đang tải...</div>
+                            <LoadingState />
                         ) : albums.length === 0 ? (
                             <div className="box--no-content">
                                 <div className="no-content-image">
