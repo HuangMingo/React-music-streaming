@@ -103,7 +103,7 @@ export function Header({ onClose }) {
                 console.error('Suggest error', err);
                 setSuggestions(EMPTY_SUGGESTIONS);
             }
-        }, 1000);
+        }, 100);
         return () => clearTimeout(debounceRef.current);
     }, [searchTerm, currentUser?.id]);
 

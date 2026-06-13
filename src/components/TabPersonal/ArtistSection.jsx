@@ -1,21 +1,10 @@
+import { Artist } from "./Artist.jsx";
+
 export function ArtistSection() {
     return (
-
-        <>
-            <div className="grid container__tab tab-artist active">
-                <div className="container__section row">
-                    <div className="col l-12 m-12 c-12 mb-10">
-                        <div className="container__header">
-                            <a href="#" className="container__header-title">
-                                <h3>Nghệ Sĩ&nbsp;</h3>
-                            </a>
-                        </div>
-                    </div>
-                    <div className="col l-12 m-12 c-12">
-                        <div className="row artist--container"></div>
-                    </div>
-                </div>
-            </div>
-        </>
-    )
+        <div className="grid container__tab tab-artist active">
+            {/* Tab /personal/artist dùng lại Artist để hiển thị đúng danh sách nghệ sĩ đã follow. */}
+            <Artist />
+        </div>
+    );
 }

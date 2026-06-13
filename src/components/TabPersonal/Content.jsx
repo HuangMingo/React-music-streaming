@@ -36,13 +36,6 @@ export function Content({selectedPlaylist, setSelectedPlaylist, playlists, onPla
                                     <span>Nghệ sĩ</span>
                                 </li>
                             </NavLink>
-                            {isAdmin ? (
-                                <NavLink to="upload" className="content__navbar-item hide-on-tablet-mobile">
-                                    <li>
-                                        <span>Tải lên</span>
-                                    </li>
-                                </NavLink>
-                            ) : null}
                         </ul>
                     </div>
                 </div>

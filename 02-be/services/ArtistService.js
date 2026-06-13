@@ -206,7 +206,11 @@ const followArtist = async (userId, artistId) => {
         VALUES ($1, $2, NOW())
         ON CONFLICT (user_id, artist_id) DO NOTHING
     `, [userId, artistId]);
-
+    await pool.query(`
+        UPDATE artist
+        SET follower_count = follower_count + 1
+        WHERE id = $1
+    `, [artistId]);
     return {
         isFollowing: true,
         followersCount: await getArtistFollowersCount(artistId),
@@ -220,7 +224,11 @@ const unfollowArtist = async (userId, artistId) => {
         DELETE FROM artist_follow
         WHERE user_id = $1 AND artist_id = $2
     `, [userId, artistId]);
-
+    await pool.query(`
+        UPDATE artist
+        SET follower_count = GREATEST(follower_count - 1, 0)
+        WHERE id = $1
+    `, [artistId]);
     return {
         isFollowing: false,
         followersCount: await getArtistFollowersCount(artistId),

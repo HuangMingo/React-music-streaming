@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { AddSongToPlaylist } from '../AddSongToPlaylist/AddSongToPlaylist.jsx';
@@ -31,6 +31,8 @@ export function SearchResults() {
   const navigate = useNavigate();
   const { currentUser } = useAuthContext();
   const isMountedRef = useRef(true);
+  const appContainerRef = useRef(null);
+  const searchPageRef = useRef(null);
   const {
     currentSong,
     setCurrentSong,
@@ -321,14 +323,110 @@ export function SearchResults() {
   const showSongs = activeTab === 'tat-ca' || activeTab === 'bai-hat';
   const showArtists = activeTab === 'tat-ca' || activeTab === 'nghe-si';
   const showPlaylists = activeTab === 'tat-ca' || activeTab === 'playlist';
+  const scrollStorageKey = `search-scroll:${activeTab}:${q}`;
+
+  function getScrollSnapshot() {
+    return {
+      app: appContainerRef.current?.scrollTop ?? 0,
+      page: searchPageRef.current?.scrollTop ?? 0,
+    };
+  }
+
+  function saveScrollSnapshot() {
+    const savedValue = sessionStorage.getItem(scrollStorageKey);
+    const scrollElements = [appContainerRef.current, searchPageRef.current].filter(Boolean);
+    const hasScrollableContent = scrollElements.some(
+      (scrollElement) => scrollElement.scrollHeight > scrollElement.clientHeight
+    );
+
+    if (savedValue && !hasScrollableContent) {
+      return;
+    }
+
+    sessionStorage.setItem(scrollStorageKey, JSON.stringify(getScrollSnapshot()));
+  }
+
+  function restoreScrollSnapshot() {
+    const savedValue = sessionStorage.getItem(scrollStorageKey);
+    if (!savedValue) return;
+
+    try {
+      const savedScroll = JSON.parse(savedValue);
+      const appScrollTop = Number(savedScroll?.app ?? 0);
+      const pageScrollTop = Number(savedScroll?.page ?? 0);
+
+      if (appContainerRef.current && Number.isFinite(appScrollTop)) {
+        appContainerRef.current.scrollTop = appScrollTop;
+      }
+      if (searchPageRef.current && Number.isFinite(pageScrollTop)) {
+        searchPageRef.current.scrollTop = pageScrollTop;
+      }
+    } catch {
+      const savedScrollTop = Number(savedValue);
+      if (searchPageRef.current && Number.isFinite(savedScrollTop)) {
+        searchPageRef.current.scrollTop = savedScrollTop;
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (loading) return;
+
+    const scrollElements = [appContainerRef.current, searchPageRef.current].filter(Boolean);
+    if (scrollElements.length === 0) return;
+
+    let frameId = null;
+    const saveScrollPosition = () => {
+      if (frameId) return;
+      frameId = window.requestAnimationFrame(() => {
+        saveScrollSnapshot();
+        frameId = null;
+      });
+    };
+
+    scrollElements.forEach((scrollElement) => {
+      scrollElement.addEventListener('scroll', saveScrollPosition, { passive: true });
+    });
+
+    return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+      saveScrollSnapshot();
+      scrollElements.forEach((scrollElement) => {
+        scrollElement.removeEventListener('scroll', saveScrollPosition);
+      });
+    };
+  }, [loading, scrollStorageKey]);
+
+  useLayoutEffect(() => {
+    if (loading) return;
+
+    const frameIds = [];
+    restoreScrollSnapshot();
+    frameIds.push(window.requestAnimationFrame(restoreScrollSnapshot));
+    frameIds.push(window.requestAnimationFrame(() => {
+      frameIds.push(window.requestAnimationFrame(restoreScrollSnapshot));
+    }));
+
+    return () => {
+      frameIds.forEach((frameId) => window.cancelAnimationFrame(frameId));
+    };
+  }, [
+    loading,
+    scrollStorageKey,
+    topSongs.length,
+    topArtists.length,
+    topCollections.length,
+  ]);
 
   return (
-    <div className="app__container tab--search active">
+    <div className="app__container tab--search active" ref={appContainerRef}>
       <div className="app__container-content">
         {loading && <LoadingState message="Đang tìm dữ liệu..." />}
 
         {!loading && (
-          <div className="search-page">
+          <div className="search-page" ref={searchPageRef}>
             <div className="search-results">
               <div className="search-page__headline">
                 <div className="search-page__eyebrow">Kết quả tìm kiếm</div>

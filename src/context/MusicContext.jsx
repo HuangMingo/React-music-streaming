@@ -285,8 +285,8 @@ export function MusicProvider({ children }) {
       const nextIsFavourite = Boolean(response?.data?.isFavouriteAlbum);
       showNotificationToast(
         nextIsFavourite
-          ? "ÄÃ£ thÃªm album vÃ o danh sÃ¡ch yÃªu thÃ­ch"
-          : "ÄÃ£ xÃ³a album khá»i danh sÃ¡ch yÃªu thÃ­ch"
+          ? "Đã thêm album vào danh sách yêu thích"
+          : "Đã xóa album khỏi danh sách yêu thích"
       );
       setFavouriteAlbumIds((prev) => {
         const next = new Set(prev);
