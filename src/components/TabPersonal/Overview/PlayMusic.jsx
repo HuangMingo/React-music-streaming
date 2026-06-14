@@ -38,9 +38,11 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
     const [slideIndex, setSlideIndex] = useState(0);
     const [userPlaylists, setUserPlaylists] = useState([]);
     const [isAddingSong, setIsAddingSong] = useState(false);
+    const [compactSlidesSpread, setCompactSlidesSpread] = useState(false);
 
     const visibleSongs = useMemo(() => (playlist?.songs ?? []), [playlist]);
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
+    const compactSlideshow = visibleSongs.length > 1 && visibleSongs.length < 4;
     const playlistName = playlist?.playlist_name || playlist?.name || "";
 
     const formatSongDuration = (song) => {
@@ -91,6 +93,20 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
 
         return () => clearInterval(interval);
     }, [slideshowActive, visibleSongs.length]);
+
+    useEffect(() => {
+        if (!compactSlideshow) {
+            setCompactSlidesSpread(false);
+            return;
+        }
+
+        setCompactSlidesSpread(false);
+        const frameId = requestAnimationFrame(() => {
+            setCompactSlidesSpread(true);
+        });
+
+        return () => cancelAnimationFrame(frameId);
+    }, [compactSlideshow, playlist?.id, visibleSongs.length]);
 
 
     useEffect(() => {
@@ -180,7 +196,8 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
     }, []);
 
     const currentSlideClasses = (index) => {
-        if (!slideshowActive || visibleSongs.length < 2) {
+        if (visibleSongs.length < 2) {
+            if (visibleSongs.length === 1) return "container__slide-item first";
             return "container__slide-item single";
         }
 
@@ -215,14 +232,13 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                             <LoadingState />
                         ) : !playlist || !playlist.songs || playlist.songs.length === 0 ? (
                             <div className="box--no-content">
-                                <div className="no-content-image" />
                                 <span className="no-content-text">
                                     {emptyMessage}
                                 </span>
                             </div>
                         ) : (
                             <>
-                                <div className={`container__slide hide-on-mobile ${hideHeaderTitle ? "playlist-detail__slide" : ""}`}>
+                                <div className={`container__slide hide-on-mobile ${hideHeaderTitle ? "playlist-detail__slide" : ""} ${compactSlideshow ? "container__slide--compact" : ""} ${compactSlidesSpread ? "is-spread" : ""}`}>
                                     <div className="container__slide-show">
                                         {visibleSongs.map((song, songIndex) => {
                                             const className = currentSlideClasses(songIndex);

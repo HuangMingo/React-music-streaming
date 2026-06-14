@@ -164,7 +164,12 @@ export function Album() {
     const isLastPage = currentPage === totalPages - 1;
 
     if (albums.length === 0) {
-        return null;
+        return (
+            <div className="box--no-content">
+                <span className="no-content-text">Yêu những gì bạn yêu</span>
+            </div>
+
+        );
     }
 
     return (

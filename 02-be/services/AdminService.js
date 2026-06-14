@@ -2,6 +2,8 @@ import { pool } from '../config/dbpg.js';
 import { ensureUserRoleColumn } from '../middlewares/AdminAuthMiddleware.js';
 
 const VALID_USER_ROLES = ['user', 'admin', 'super_admin'];
+const DEFAULT_PLAYLIST_IMAGE = 'https://res.cloudinary.com/dnsne0dgp/image/upload/v1775963817/macdinh_ivawgv.jpg';
+let playlistSystemColumnReady = false;
 
 function normalizeId(value) {
   const id = Number(value);
@@ -11,6 +13,16 @@ function normalizeId(value) {
 function normalizeArtistIds(value) {
   if (!Array.isArray(value)) {
     return [];
+  }
+
+  return [...new Set(value.map(normalizeId).filter(Boolean))];
+}
+
+function normalizeSongIds(value) {
+  if (!Array.isArray(value)) {
+    const error = new Error('Danh sách bài hát không hợp lệ.');
+    error.status = 400;
+    throw error;
   }
 
   return [...new Set(value.map(normalizeId).filter(Boolean))];
@@ -37,6 +49,29 @@ async function replaceSongArtists(client, songId, artistIds) {
   }
 }
 
+async function ensurePlaylistSystemColumn() {
+  if (playlistSystemColumnReady) {
+    return;
+  }
+
+  await pool.query(`
+    ALTER TABLE playlist
+    ADD COLUMN IF NOT EXISTS issystem BOOLEAN DEFAULT false
+  `);
+  playlistSystemColumnReady = true;
+}
+
+async function replacePlaylistSongs(client, playlistId, songIds) {
+  await client.query('DELETE FROM song_playlist WHERE playlist_id = $1', [playlistId]);
+
+  for (const songId of songIds) {
+    await client.query(
+      'INSERT INTO song_playlist (playlist_id, song_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [playlistId, songId]
+    );
+  }
+}
+
 async function syncAlbumSong(client, songId, albumId) {
   await client.query('DELETE FROM album_song WHERE song_id = $1', [songId]);
 
@@ -50,11 +85,13 @@ async function syncAlbumSong(client, songId, albumId) {
 
 export async function getOverview() {
   await ensureUserRoleColumn();
+  await ensurePlaylistSystemColumn();
 
-  const [songs, albums, artists, users] = await Promise.all([
+  const [songs, albums, artists, playlists, users] = await Promise.all([
     pool.query('SELECT COUNT(*)::int AS count FROM song'),
     pool.query('SELECT COUNT(*)::int AS count FROM album'),
     pool.query('SELECT COUNT(*)::int AS count FROM artist'),
+    pool.query('SELECT COUNT(*)::int AS count FROM playlist WHERE issystem = true'),
     pool.query('SELECT COUNT(*)::int AS count FROM "user"'),
   ]);
 
@@ -62,6 +99,7 @@ export async function getOverview() {
     songs: songs.rows[0].count,
     albums: albums.rows[0].count,
     artists: artists.rows[0].count,
+    playlists: playlists.rows[0].count,
     users: users.rows[0].count,
   };
 }
@@ -349,6 +387,175 @@ export async function deleteArtist(artistId) {
     await client.query('DELETE FROM artist_follow WHERE artist_id = $1', [id]);
     const result = await client.query('DELETE FROM artist WHERE id = $1 RETURNING id', [id]);
     await client.query('COMMIT');
+    return result.rows[0];
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getSystemPlaylists() {
+  await ensurePlaylistSystemColumn();
+
+  const result = await pool.query(`
+    WITH song_artists AS (
+      SELECT
+        ars.song_id,
+        json_agg(art.name ORDER BY art.name) AS artist_names
+      FROM artist_song ars
+      JOIN artist art ON art.id = ars.artist_id
+      GROUP BY ars.song_id
+    )
+    SELECT
+      p.id,
+      p.name,
+      p.name AS playlist_name,
+      p.image,
+      p.image AS playlist_image,
+      p.creator_id,
+      u.username,
+      p.ispublic,
+      p.isdefault,
+      p.issystem AS "isSystem",
+      COUNT(DISTINCT s.id)::int AS song_count,
+      COALESCE(array_agg(DISTINCT s.id) FILTER (WHERE s.id IS NOT NULL), '{}'::int[]) AS song_ids,
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', s.id,
+            'title', s.title,
+            'image', s.image,
+            'duration_seconds', s.duration_seconds,
+            'artist_names', sa.artist_names
+          )
+        ) FILTER (WHERE s.id IS NOT NULL),
+        '[]'
+      ) AS songs
+    FROM playlist p
+    LEFT JOIN "user" u ON u.id = p.creator_id
+    LEFT JOIN song_playlist sp ON sp.playlist_id = p.id
+    LEFT JOIN song s ON s.id = sp.song_id
+    LEFT JOIN song_artists sa ON sa.song_id = s.id
+    WHERE p.issystem = true
+    GROUP BY p.id, u.username
+    ORDER BY p.id DESC
+  `);
+
+  return result.rows;
+}
+
+export async function createSystemPlaylist(data, actorUserId) {
+  await ensurePlaylistSystemColumn();
+
+  const name = requireText(data.name || data.playlist_name, 'Tên playlist');
+  const creatorId = normalizeId(actorUserId);
+  const songIds = normalizeSongIds(data.songIds || data.song_ids || []);
+
+  if (!creatorId) {
+    const error = new Error('Không xác định được admin tạo playlist.');
+    error.status = 400;
+    throw error;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const result = await client.query(
+      `INSERT INTO playlist (name, creator_id, ispublic, image, isdefault, issystem)
+       VALUES ($1, $2, true, $3, false, true)
+       RETURNING *, issystem AS "isSystem"`,
+      [name, creatorId, data.image || data.playlist_image || DEFAULT_PLAYLIST_IMAGE]
+    );
+    const playlist = result.rows[0];
+
+    await replacePlaylistSongs(client, playlist.id, songIds);
+    await client.query('COMMIT');
+
+    return playlist;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateSystemPlaylist(playlistId, data) {
+  await ensurePlaylistSystemColumn();
+
+  const id = normalizeId(playlistId);
+  const name = requireText(data.name || data.playlist_name, 'Tên playlist');
+  const songIds = normalizeSongIds(data.songIds || data.song_ids || []);
+
+  if (!id) {
+    const error = new Error('ID playlist không hợp lệ.');
+    error.status = 400;
+    throw error;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const result = await client.query(
+      `UPDATE playlist
+       SET name = $1, image = $2, ispublic = true, isdefault = false, issystem = true
+       WHERE id = $3 AND issystem = true
+       RETURNING *, issystem AS "isSystem"`,
+      [name, data.image || data.playlist_image || DEFAULT_PLAYLIST_IMAGE, id]
+    );
+
+    if (!result.rows[0]) {
+      const error = new Error('Không tìm thấy playlist hệ thống.');
+      error.status = 404;
+      throw error;
+    }
+
+    await replacePlaylistSongs(client, id, songIds);
+    await client.query('COMMIT');
+
+    return result.rows[0];
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteSystemPlaylist(playlistId) {
+  await ensurePlaylistSystemColumn();
+
+  const id = normalizeId(playlistId);
+  if (!id) {
+    const error = new Error('ID playlist không hợp lệ.');
+    error.status = 400;
+    throw error;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const playlistResult = await client.query(
+      'SELECT id FROM playlist WHERE id = $1 AND issystem = true',
+      [id]
+    );
+
+    if (!playlistResult.rows[0]) {
+      const error = new Error('Không tìm thấy playlist hệ thống.');
+      error.status = 404;
+      throw error;
+    }
+
+    await client.query('DELETE FROM song_playlist WHERE playlist_id = $1', [id]);
+    await client.query('DELETE FROM favourite_playlists WHERE playlist_id = $1', [id]);
+    const result = await client.query('DELETE FROM playlist WHERE id = $1 AND issystem = true RETURNING id', [id]);
+    await client.query('COMMIT');
+
     return result.rows[0];
   } catch (error) {
     await client.query('ROLLBACK');

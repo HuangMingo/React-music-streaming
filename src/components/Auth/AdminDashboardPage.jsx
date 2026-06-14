@@ -34,6 +34,12 @@ const EMPTY_ARTIST_FORM = {
   follower_count: '',
 };
 
+const EMPTY_PLAYLIST_FORM = {
+  name: '',
+  image: '',
+  songIds: [],
+};
+
 const EMPTY_SONG_FILES = {
   audio: null,
   image: null,
@@ -52,6 +58,7 @@ const ADMIN_TAB_PATHS = {
   songs: '/admin/songs',
   albums: '/admin/albums',
   artists: '/admin/artists',
+  playlists: '/admin/playlists',
   users: '/admin/users',
 };
 
@@ -127,10 +134,11 @@ export function AdminDashboardPage() {
   const { currentUser, isAdmin, isSuperAdmin } = useAuthContext();
   const [activeTab, setActiveTab] = useState('songs');
   const [songMode, setSongMode] = useState('list');
-  const [overview, setOverview] = useState({ songs: 0, albums: 0, artists: 0, users: 0 });
+  const [overview, setOverview] = useState({ songs: 0, albums: 0, artists: 0, playlists: 0, users: 0 });
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [systemPlaylists, setSystemPlaylists] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [songSubmitting, setSongSubmitting] = useState(false);
@@ -138,14 +146,18 @@ export function AdminDashboardPage() {
   const [editingSongId, setEditingSongId] = useState(null);
   const [editingAlbumId, setEditingAlbumId] = useState(null);
   const [editingArtistId, setEditingArtistId] = useState(null);
+  const [editingPlaylistId, setEditingPlaylistId] = useState(null);
   const [albumFormOpen, setAlbumFormOpen] = useState(false);
   const [artistFormOpen, setArtistFormOpen] = useState(false);
+  const [playlistFormOpen, setPlaylistFormOpen] = useState(false);
+  const [playlistDropdownOpen, setPlaylistDropdownOpen] = useState(false);
   const [songForm, setSongForm] = useState(EMPTY_SONG_FORM);
   const [songFiles, setSongFiles] = useState(EMPTY_SONG_FILES);
   const [songDraftReady, setSongDraftReady] = useState(false);
   const [uploading, setUploading] = useState(EMPTY_UPLOAD_STATUS);
   const [albumForm, setAlbumForm] = useState(EMPTY_ALBUM_FORM);
   const [artistForm, setArtistForm] = useState(EMPTY_ARTIST_FORM);
+  const [playlistForm, setPlaylistForm] = useState(EMPTY_PLAYLIST_FORM);
 
   const adminHeaders = useMemo(
     () => ({ 'x-user-id': currentUser?.id }),
@@ -157,15 +169,16 @@ export function AdminDashboardPage() {
       { id: 'songs', label: 'Quản lý bài hát' },
       { id: 'albums', label: 'Quản lý album' },
       { id: 'artists', label: 'Quản lý nghệ sĩ' },
+      { id: 'playlists', label: 'Quản lý playlist' },
       ...(isSuperAdmin ? [{ id: 'users', label: 'Quản lý user' }] : []),
     ],
     [isSuperAdmin]
   );
 
   useEffect(() => {
-    const nextTab = ['songs', 'albums', 'artists', 'users'].includes(tab) ? tab : 'songs';
+    const nextTab = ['songs', 'albums', 'artists', 'playlists', 'users'].includes(tab) ? tab : 'songs';
     const isFormMode = ['create', 'edit'].includes(mode);
-    const canUseFormMode = ['songs', 'albums', 'artists'].includes(nextTab) && isFormMode;
+    const canUseFormMode = ['songs', 'albums', 'artists', 'playlists'].includes(nextTab) && isFormMode;
 
     if (nextTab === 'users' && !isSuperAdmin) {
       navigate('/admin/songs', { replace: true });
@@ -186,6 +199,7 @@ export function AdminDashboardPage() {
     setSongMode(nextTab === 'songs' && ['create', 'edit'].includes(mode) ? 'create' : 'list');
     setAlbumFormOpen(nextTab === 'albums' && isFormMode);
     setArtistFormOpen(nextTab === 'artists' && isFormMode);
+    setPlaylistFormOpen(nextTab === 'playlists' && isFormMode);
     setSongDraftReady(false);
   }, [isSuperAdmin, mode, navigate, songId, tab]);
 
@@ -293,6 +307,44 @@ export function AdminDashboardPage() {
   }, [artists, mode, navigate, songId, tab]);
 
   useEffect(() => {
+    if (tab !== 'playlists' || !['create', 'edit'].includes(mode)) {
+      return;
+    }
+
+    if (mode === 'create') {
+      setEditingPlaylistId(null);
+      setPlaylistForm(EMPTY_PLAYLIST_FORM);
+      setUploading((current) => ({ ...current, playlist: '' }));
+      setPlaylistDropdownOpen(false);
+      setPlaylistFormOpen(true);
+      return;
+    }
+
+    if (!songId || !systemPlaylists.length) {
+      return;
+    }
+
+    const playlist = systemPlaylists.find((item) => String(item.id) === String(songId));
+    if (!playlist) {
+      setMessage('Không tìm thấy playlist cần sửa.');
+      navigate(ADMIN_TAB_PATHS.playlists, { replace: true });
+      return;
+    }
+
+    setEditingPlaylistId(playlist.id);
+    setPlaylistForm({
+      name: playlist.name || playlist.playlist_name || '',
+      image: playlist.image || playlist.playlist_image || '',
+      songIds: Array.isArray(playlist.song_ids)
+        ? playlist.song_ids.map(Number).filter(Boolean)
+        : (playlist.songs || []).map((song) => Number(song.id)).filter(Boolean),
+    });
+    setUploading((current) => ({ ...current, playlist: '' }));
+    setPlaylistDropdownOpen(false);
+    setPlaylistFormOpen(true);
+  }, [mode, navigate, songId, systemPlaylists, tab]);
+
+  useEffect(() => {
     const draftKey = getSongDraftKey(mode, songId);
 
     if (!songDraftReady || tab !== 'songs' || !draftKey) {
@@ -319,17 +371,19 @@ export function AdminDashboardPage() {
         axios.get(`${API_URL}/api/admin/songs`, { headers: adminHeaders }),
         axios.get(`${API_URL}/api/admin/albums`, { headers: adminHeaders }),
         axios.get(`${API_URL}/api/admin/artists`, { headers: adminHeaders }),
+        axios.get(`${API_URL}/api/admin/playlists`, { headers: adminHeaders }),
       ];
 
       if (isSuperAdmin) {
         requests.push(axios.get(`${API_URL}/api/admin/users`, { headers: adminHeaders }));
       }
 
-      const [overviewRes, songsRes, albumsRes, artistsRes, usersRes] = await Promise.all(requests);
-      setOverview(overviewRes.data.data || { songs: 0, albums: 0, artists: 0, users: 0 });
+      const [overviewRes, songsRes, albumsRes, artistsRes, playlistsRes, usersRes] = await Promise.all(requests);
+      setOverview(overviewRes.data.data || { songs: 0, albums: 0, artists: 0, playlists: 0, users: 0 });
       setSongs(songsRes.data.data || []);
       setAlbums(albumsRes.data.data || []);
       setArtists(artistsRes.data.data || []);
+      setSystemPlaylists(playlistsRes.data.data || []);
       setUsers(usersRes?.data?.data || []);
     } catch (error) {
       setMessage(error.response?.data?.message || 'Không thể tải dữ liệu quản trị.');
@@ -398,6 +452,24 @@ export function AdminDashboardPage() {
     setArtistFormOpen(true);
     setUploading((current) => ({ ...current, artist: '' }));
     navigate('/admin/artists/create');
+  }
+
+  function resetPlaylistForm() {
+    setEditingPlaylistId(null);
+    setPlaylistForm(EMPTY_PLAYLIST_FORM);
+    setPlaylistFormOpen(false);
+    setPlaylistDropdownOpen(false);
+    setUploading((current) => ({ ...current, playlist: '' }));
+    navigate(ADMIN_TAB_PATHS.playlists);
+  }
+
+  function openCreatePlaylistForm() {
+    setEditingPlaylistId(null);
+    setPlaylistForm(EMPTY_PLAYLIST_FORM);
+    setPlaylistFormOpen(true);
+    setPlaylistDropdownOpen(false);
+    setUploading((current) => ({ ...current, playlist: '' }));
+    navigate('/admin/playlists/create');
   }
   //Hàm upload file lên Cloudinary và trả về URL của file đã upload
   async function uploadFile(file, type) {
@@ -507,6 +579,26 @@ export function AdminDashboardPage() {
     } catch (error) {
       setUploading((current) => ({ ...current, artist: '' }));
       setMessage(error.response?.data?.message || 'Upload file giới thiệu nghệ sĩ thất bại.');
+    }
+  }
+
+  async function uploadPlaylistImage(file) {
+    if (!file) {
+      setPlaylistForm((current) => ({ ...current, image: '' }));
+      setUploading((current) => ({ ...current, playlist: '' }));
+      return;
+    }
+
+    setUploading((current) => ({ ...current, playlist: 'Đang upload...' }));
+    setMessage('');
+
+    try {
+      const urlAndDuration = await uploadFile(file, 'album');
+      setPlaylistForm((current) => ({ ...current, image: urlAndDuration.url }));
+      setUploading((current) => ({ ...current, playlist: 'Upload thành công.' }));
+    } catch (error) {
+      setUploading((current) => ({ ...current, playlist: '' }));
+      setMessage(error.response?.data?.message || 'Upload ảnh playlist thất bại.');
     }
   }
 
@@ -624,6 +716,44 @@ export function AdminDashboardPage() {
     }
   }
 
+  async function submitPlaylist(event) {
+    event.preventDefault();
+
+    if (!playlistForm.name.trim()) {
+      setMessage('Vui lòng nhập tên playlist.');
+      return;
+    }
+
+    if (uploading.playlist === 'Đang upload...') {
+      setMessage('Vui lòng chờ upload ảnh playlist hoàn tất.');
+      return;
+    }
+
+    const playlistPayload = {
+      name: playlistForm.name.trim(),
+      image: playlistForm.image,
+      songIds: Array.isArray(playlistForm.songIds) ? playlistForm.songIds : [],
+      ispublic: true,
+      isSystem: true,
+      isdefault: false,
+    };
+
+    try {
+      if (editingPlaylistId) {
+        await axios.put(`${API_URL}/api/admin/playlists/${editingPlaylistId}`, playlistPayload, { headers: adminHeaders });
+        setNotice('Đã cập nhật playlist hệ thống.');
+      } else {
+        await axios.post(`${API_URL}/api/admin/playlists`, playlistPayload, { headers: adminHeaders });
+        setNotice('Đã thêm playlist hệ thống.');
+      }
+
+      resetPlaylistForm();
+      fetchAdminData();
+    } catch (error) {
+      setMessage(error.response?.data?.message || 'Không thể lưu playlist hệ thống.');
+    }
+  }
+
   async function removeItem(type, id) {
     if (!window.confirm('Bạn chắc chắn muốn xóa mục này?')) {
       return;
@@ -682,6 +812,40 @@ export function AdminDashboardPage() {
     navigate(`/admin/songs/edit/${song.id}`);
   }
 
+  function editPlaylist(playlist) {
+    setEditingPlaylistId(playlist.id);
+    setPlaylistFormOpen(true);
+    setPlaylistDropdownOpen(false);
+    setPlaylistForm({
+      name: playlist.name || playlist.playlist_name || '',
+      image: playlist.image || playlist.playlist_image || '',
+      songIds: Array.isArray(playlist.song_ids)
+        ? playlist.song_ids.map(Number).filter(Boolean)
+        : (playlist.songs || []).map((song) => Number(song.id)).filter(Boolean),
+    });
+    setUploading((current) => ({ ...current, playlist: '' }));
+    navigate(`/admin/playlists/edit/${playlist.id}`);
+  }
+
+  function updatePlaylistSongIds(nextSongIds) {
+    setPlaylistForm((current) => ({ ...current, songIds: nextSongIds }));
+  }
+
+  function togglePlaylistSong(songId) {
+    const normalizedSongId = Number(songId);
+    const currentIds = (playlistForm.songIds || []).map(Number);
+
+    if (currentIds.includes(normalizedSongId)) {
+      updatePlaylistSongIds(currentIds.filter((id) => id !== normalizedSongId));
+      return;
+    }
+
+    updatePlaylistSongIds([...currentIds, normalizedSongId]);
+  }
+
+  const selectedPlaylistSongIds = (playlistForm.songIds || []).map(Number);
+  const selectedPlaylistSongs = songs.filter((song) => selectedPlaylistSongIds.includes(Number(song.id)));
+
   return (
     <div className="admin-dashboard-shell">
       <aside className="admin-sidebar">
@@ -701,6 +865,9 @@ export function AdminDashboardPage() {
               onClick={() => {
                 navigate(ADMIN_TAB_PATHS[tab.id]);
                 setSongMode('list');
+                setAlbumFormOpen(false);
+                setArtistFormOpen(false);
+                setPlaylistFormOpen(false);
               }}
             >
               {tab.label}
@@ -710,7 +877,7 @@ export function AdminDashboardPage() {
       </aside>
 
       <main className="admin-main">
-        {songMode === 'list' && !albumFormOpen && !artistFormOpen ? (
+        {songMode === 'list' && !albumFormOpen && !artistFormOpen && !playlistFormOpen ? (
           <>
             <header className="admin-header">
               <div>
@@ -724,6 +891,7 @@ export function AdminDashboardPage() {
               <div><span>Bài hát</span><strong>{overview.songs}</strong></div>
               <div><span>Album</span><strong>{overview.albums}</strong></div>
               <div><span>Nghệ sĩ</span><strong>{overview.artists}</strong></div>
+              <div><span>Playlist hệ thống</span><strong>{overview.playlists || 0}</strong></div>
               {isSuperAdmin ? <div><span>User</span><strong>{overview.users}</strong></div> : null}
             </section>
           </>
@@ -914,6 +1082,151 @@ export function AdminDashboardPage() {
               </table>
             </div>
           </section> : null}
+
+        {activeTab === 'playlists' && playlistFormOpen ? (
+          <section className="admin-song-editor admin-playlist-manager">
+            <div className="admin-song-editor__topline">
+              <button className="admin-breadcrumb" type="button" onClick={resetPlaylistForm}>Quản lý playlist</button>
+              <span>&gt;</span>
+              <strong>{editingPlaylistId ? 'Sửa playlist hệ thống' : 'Thêm playlist hệ thống'}</strong>
+            </div>
+
+            <div className="admin-song-editor__header">
+              <div className="admin-song-editor__title">
+                <button type="button" className="admin-back-btn" onClick={resetPlaylistForm}>←</button>
+                <div>
+                  <h2>{editingPlaylistId ? 'Sửa playlist hệ thống' : 'Thêm playlist hệ thống'}</h2>
+                  <p>{editingPlaylistId ? 'Cập nhật tên, ảnh bìa và danh sách bài hát' : 'Tạo playlist hệ thống mới cho trang khám phá'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-song-editor__grid">
+              <form className="admin-song-card" onSubmit={submitPlaylist}>
+                <label>Tên playlist <span>*</span></label>
+                <input maxLength={255} placeholder="Nhập tên playlist" value={playlistForm.name} onChange={(e) => setPlaylistForm({ ...playlistForm, name: e.target.value })} />
+
+                <label>Ảnh bìa playlist</label>
+                <input id="admin-playlist-image-upload" hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => uploadPlaylistImage(e.target.files?.[0])} />
+                <div className="admin-cover-upload">
+                  {playlistForm.image ? <div className="admin-cover-preview">
+                    <img src={playlistForm.image} alt="Preview ảnh playlist" />
+                    <button type="button" onClick={() => uploadPlaylistImage(null)}>
+                      <i className="bi bi-x-lg"></i>
+                    </button>
+                  </div> : null}
+                  <label className="admin-cover-drop" htmlFor="admin-playlist-image-upload">
+                    <strong>Upload ảnh playlist</strong>
+                  </label>
+                </div>
+                {playlistForm.image ? (
+                  <p className="admin-cloudinary-link">
+                    <span>Đường dẫn Cloudinary ảnh playlist</span>
+                    <a href={playlistForm.image} target="_blank" rel="noreferrer" title={playlistForm.image}>{playlistForm.image}</a>
+                  </p>
+                ) : null}
+                {uploading.playlist ? <p className="admin-song-hint">{uploading.playlist}</p> : null}
+                <p className="admin-song-hint">Định dạng: JPG, PNG, WEBP</p>
+
+                <div className="admin-song-editor__actions">
+                  <button type="button" className="admin-cancel-btn" onClick={resetPlaylistForm}>Hủy</button>
+                  <button type="submit" className="admin-save-btn" disabled={uploading.playlist === 'Đang upload...'}>Lưu playlist</button>
+                </div>
+              </form>
+
+              <section className="admin-song-card">
+                <label>Chọn bài hát</label>
+                <div className={`admin-multi-select${playlistDropdownOpen ? ' is-open' : ''}`}>
+                  <div className="admin-multi-select__control">
+                    <div className="admin-multi-select__values">
+                      {selectedPlaylistSongs.length ? selectedPlaylistSongs.map((song) => (
+                        <span className="admin-multi-select__tag" key={song.id}>
+                          {song.title}
+                          <button type="button" onClick={() => togglePlaylistSong(song.id)}><i className="fa-solid fa-x"></i></button>
+                        </span>
+                      )) : <span className="admin-multi-select__placeholder">Chọn bài hát cho playlist</span>}
+                    </div>
+                    <button
+                      className="admin-multi-select__clear"
+                      disabled={!selectedPlaylistSongs.length}
+                      type="button"
+                      onClick={() => updatePlaylistSongIds([])}
+                    >
+                      <i className="bi bi-x-lg"></i>
+                    </button>
+                    <span className="admin-multi-select__divider"></span>
+                    <button
+                      className="admin-multi-select__arrow"
+                      type="button"
+                      onClick={() => setPlaylistDropdownOpen((current) => !current)}
+                    >
+                      <i className="bi bi-caret-down-fill"></i>
+                    </button>
+                  </div>
+                  {playlistDropdownOpen ? (
+                    <div className="admin-multi-select__menu">
+                      {songs.map((song) => (
+                        <label className="admin-multi-select__option" key={song.id}>
+                          <input
+                            checked={selectedPlaylistSongIds.includes(Number(song.id))}
+                            type="checkbox"
+                            onChange={() => togglePlaylistSong(song.id)}
+                          />
+                          <span>{song.title}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <p className="admin-song-hint">Có thể chọn một hoặc nhiều bài hát. Các cờ hệ thống được gửi tự động.</p>
+              </section>
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === 'playlists' && !playlistFormOpen ? (
+          <section className="admin-panel">
+            <div className="admin-panel__header">
+              <div>
+                <h3>Quản lý playlist hệ thống</h3>
+              </div>
+              <button type="button" className="admin-save-btn" onClick={openCreatePlaylistForm}>Thêm playlist</button>
+            </div>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Ảnh</th>
+                    <th>Tên playlist</th>
+                    <th>Số bài hát</th>
+                    <th>Người tạo</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {systemPlaylists.map((playlist, index) => (
+                    <tr key={playlist.id}>
+                      <td>{index + 1}</td>
+                      <td>{playlist.image || playlist.playlist_image ? <img src={playlist.image || playlist.playlist_image} alt="" /> : null}</td>
+                      <td>{playlist.name || playlist.playlist_name}</td>
+                      <td>{playlist.song_count || playlist.songs?.length || 0}</td>
+                      <td>{playlist.username || '--'}</td>
+                      <td>
+                        <button type="button" onClick={() => editPlaylist(playlist)}>
+                          Sửa
+                        </button>
+                        <button type="button" className="is-danger" onClick={() => removeItem('playlists', playlist.id)}>
+                          Xóa
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         {activeTab === 'users' && isSuperAdmin ? (
           <section className="admin-panel">

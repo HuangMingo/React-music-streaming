@@ -59,7 +59,7 @@ async function searchPlaylists(like, limit, userId) {
         SELECT p.*, u.username
         FROM playlist p join "user"  u on p.creator_id = u.id
         WHERE unaccent(name) ILIKE unaccent($1) and ispublic = TRUE
-            AND ($3::int IS NULL OR p.creator_id != $3)
+             issystem = TRUE
         ORDER BY name ASC
         LIMIT $2
         `,

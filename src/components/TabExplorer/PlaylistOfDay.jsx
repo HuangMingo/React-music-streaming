@@ -1,14 +1,14 @@
-export function FavoriteArtist() {
+export function PlaylistOfDay() {
     return (
         <>
             <div className="row container__section mt-30">
                 <div className="col l-12 m-12 c-12 mb-16">
                     <div className="container__header">
                         <a href="#" className="container__header-title">
-                            <h3>Nghệ sĩ nổi bật</h3>
+                            <h3>Dành cho bạn</h3>
                         </a>
                         <h3 className="container__header-subtitle">
-                            Nghệ sĩ nổi bật
+                            Dành cho bạn
                         </h3>
                         <div className="container__header-actions fav-artist--move hide-on-tablet-mobile">
                             <div className="container__move-btn move-btn--fav-artist btn--prev button--disabled">

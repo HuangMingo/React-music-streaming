@@ -131,7 +131,7 @@ const getUserCreatedPlaylist = async (userId) => {
     LEFT JOIN song_playlist sp ON p.id = sp.playlist_id
     LEFT JOIN song s ON sp.song_id = s.id
     LEFT JOIN song_artists sa ON s.id = sa.song_id
-	WHERE p.creator_id = $1
+	WHERE p.creator_id = $1 and p.issystem = false
     GROUP BY p.id, p.name, p.creator_id, u.username, p.image, p.isdefault, p.ispublic;
         `, [userId]);
     return result.rows;

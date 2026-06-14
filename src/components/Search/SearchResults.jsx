@@ -284,13 +284,13 @@ export function SearchResults() {
       console.error('Play album failed:', error);
     }
   }
-//Xử lí sự kiến nhấn bài hát
+  //Xử lí sự kiến nhấn bài hát
   function handleSongClick(song) {
     setExploreSelectedPlaylist(null);
     handleClickSong(song);
     setIsPlaying(true);
   }
-//Mở menu bài hát
+  //Mở menu bài hát
   function handleToggleSongMenu(event, songId) {
     event.stopPropagation();
     setOpenSongMenuId((prevSongId) => (prevSongId === songId ? null : songId));
@@ -609,63 +609,59 @@ export function SearchResults() {
                         const isMine = !isAlbum && Number(pl.creator_id) === Number(currentUser?.id);
                         const isFavouriteAlbum = favouriteAlbumIds.has(pl.id);
                         return (
-                        <div className="search-page__card-col" key={`${type}-${pl.id ?? idx}`}>
-                          <div className="row__item item--playlist search-page__card" onClick={() => (isAlbum ? navigateToAlbum(pl) : navigateToPlaylist(pl))}>
-                            <div className="row__item-container flex--top-left">
-                              <div className="row__item-display br-5 search-page__card-display">
-                                <div className="row__item-img img--square" style={{ background: `url(${getImage(pl)}) no-repeat center center / cover`, overflow: 'hidden' }} />
-                                <div className="row__item-actions">
-                                  <div
-                                    className="action-btn btn--heart"
-                                    onClick={(e) => {
-                                      if (isAlbum) {
-                                        toggleFavouriteAlbum(e, pl.id);
-                                        return;
+                          <div className="search-page__card-col" key={`${type}-${pl.id ?? idx}`}>
+                            <div className="row__item item--playlist search-page__card" onClick={() => (isAlbum ? navigateToAlbum(pl) : navigateToPlaylist(pl))}>
+                              <div className="row__item-container flex--top-left">
+                                <div className="row__item-display br-5 search-page__card-display">
+                                  <div className="row__item-img img--square" style={{ background: `url(${getImage(pl)}) no-repeat center center / cover`, overflow: 'hidden' }} />
+                                  <div className="row__item-actions">
+                                    <div
+                                      className="action-btn btn--heart"
+                                      onClick={(e) => {
+                                        if (isAlbum) {
+                                          toggleFavouriteAlbum(e, pl.id);
+                                          return;
+                                        }
+                                        if (isMine) {
+                                          e.stopPropagation();
+                                          return;
+                                        }
+                                        toggleFavouritePlaylist(e, pl.id);
+                                      }}
+                                      title={
+                                        isAlbum
+                                          ? (isFavouriteAlbum ? 'Bỏ thích album' : 'Thêm vào album yêu thích')
+                                          : (!isMine ? (favouritePlaylistIds.has(pl.id) ? 'Bỏ thích playlist' : 'Thêm vào playlist yêu thích') : undefined)
                                       }
-                                      if (isMine) {
-                                        e.stopPropagation();
-                                        return;
-                                      }
-                                      toggleFavouritePlaylist(e, pl.id);
-                                    }}
-                                    title={
-                                      isAlbum
-                                        ? (isFavouriteAlbum ? 'Bỏ thích album' : 'Thêm vào album yêu thích')
-                                        : (!isMine ? (favouritePlaylistIds.has(pl.id) ? 'Bỏ thích playlist' : 'Thêm vào playlist yêu thích') : undefined)
-                                    }
-                                  >
-                                    {isMine ? (
-                                      <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(pl.id)} />
-                                    ) : isAlbum ? (
-                                      <i className={`btn--icon icon--heart bi bi-heart${isFavouriteAlbum ? '-fill' : ''} primary`} />
-                                    ) : (
-                                      <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(pl.id) ? '-fill' : ''} primary`} />
-                                    )}
+                                    >
+                                      {isMine ? (
+                                        <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(pl.id)} />
+                                      ) : isAlbum ? (
+                                        <i className={`btn--icon icon--heart bi bi-heart${isFavouriteAlbum ? '-fill' : ''} primary`} />
+                                      ) : (
+                                        <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(pl.id) ? '-fill' : ''} primary`} />
+                                      )}
+                                    </div>
+                                    <div className="btn--play-playlist" onClick={(event) => (isAlbum ? handlePlayAlbum(event, pl) : handlePlayPlaylist(event, pl))}>
+                                      <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
+                                      <span className="song-note note-1">♪</span>
+                                      <span className="song-note note-2">♫</span>
+                                      <span className="song-note note-3">♪</span>
+                                      <span className="song-note note-4">♫</span>
+                                    </div>
+                                    <div className="action-btn" onClick={(event) => event.stopPropagation()}>
+                                      <i className="btn--icon bi bi-three-dots"></i>
+                                    </div>
                                   </div>
-                                  <div className="btn--play-playlist" onClick={(event) => (isAlbum ? handlePlayAlbum(event, pl) : handlePlayPlaylist(event, pl))}>
-                                    <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
-                                    <span className="song-note note-1">♪</span>
-                                    <span className="song-note note-2">♫</span>
-                                    <span className="song-note note-3">♪</span>
-                                    <span className="song-note note-4">♫</span>
-                                  </div>
-                                  <div className="playlist-actions">
-                                    {isMine && (
-                                      <button className="playlist-more-btn" onClick={(event) => event.stopPropagation()}>
-                                        ...
-                                      </button>
-                                    )}
-                                  </div>
+                                  <div className="overlay" />
                                 </div>
-                                <div className="overlay" />
-                              </div>
-                              <div className="row__item-info search-page__card-info">
-                                <span className="row__info-name is-twoline">{isAlbum ? getAlbumName(pl) : (pl.name || pl.playlist_name)}</span>
-                                <h3 className="row__info-creator">{isAlbum ? (pl.artist_name || 'Album') : (pl.username || pl.creator || 'Playlist')}</h3>
+                                <div className="row__item-info search-page__card-info">
+                                  <span className="row__info-name is-twoline">{isAlbum ? getAlbumName(pl) : (pl.name || pl.playlist_name)}</span>
+                                  <h3 className="row__info-creator">{isAlbum ? (pl.artist_name || 'Album') : (pl.username || pl.creator || 'Playlist')}</h3>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
                         );
                       })}
                     </div>

@@ -124,10 +124,7 @@ export function AlbumSection() {
                             <LoadingState />
                         ) : albums.length === 0 ? (
                             <div className="box--no-content">
-                                <div className="no-content-image">
-                                    <i className="bi bi-music-note-beamed" style={{ color: "black" }}></i>
-                                </div>
-                                <span className="no-content-text">Bạn chưa có album yêu thích nào.</span>
+                                <span className="no-content-text">Yêu những gì bạn yêu</span>
                             </div>
                         ) : (
                             albums.map((album, index) => {

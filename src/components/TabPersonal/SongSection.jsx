@@ -100,7 +100,6 @@ export function SongSection() {
                             <div className="playlist__list mb-30 overflow-visible">
                                 {songs.length === 0 ? (
                                     <div className="box--no-content">
-                                        <div className="no-content-image" />
                                         <span className="no-content-text">Chưa có bài hát nào trong playlist này!</span>
                                     </div>
                                 ) : (

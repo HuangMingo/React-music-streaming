@@ -194,10 +194,10 @@ export function Artist() {
                     <LoadingState />
                 ) : artists.length === 0 ? (
                     <div className="box--no-content">
-                        <div className="no-content-image">
-                            <i className="bi bi-person-heart" style={{ color: "black", fontSize: "8rem" }}></i>
+                        <div className="no-content-image" style={{color: "black"}}>
+                           <i class="icon main-icon ic-svg-artist-icon"></i>
                         </div>
-                        <span className="no-content-text">Bạn chưa theo dõi nghệ sĩ nào.</span>
+                        <span className="no-content-text">Dõi theo người bạn thích</span>
                     </div>
                 ) : (
                     <div className="row no-wrap artist--container artist__container">
@@ -241,7 +241,7 @@ export function Artist() {
                                                                             <div className="icon-overlay"></div>
                                                                         </i>
                                                                     </ArtistNameLink>
-                                                                    <h3 className="row__info-creator text-center">{formatFollowers(followersCount)} quan tâm</h3>
+                                                                    <h3 className="row__info-creator text-center">{formatFollowers(followersCount)} người theo dõi</h3>
                                                                 </div>
                                                             </div>
                                                             <div className="row__item-btn">

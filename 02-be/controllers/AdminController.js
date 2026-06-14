@@ -298,6 +298,38 @@ export async function deleteArtist(req, res) {
   }
 }
 
+export async function getSystemPlaylists(req, res) {
+  try {
+    sendSuccess(res, await adminService.getSystemPlaylists());
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+export async function createSystemPlaylist(req, res) {
+  try {
+    sendSuccess(res, await adminService.createSystemPlaylist(req.body, req.authUser.id), 'Đã thêm playlist hệ thống.');
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+export async function updateSystemPlaylist(req, res) {
+  try {
+    sendSuccess(res, await adminService.updateSystemPlaylist(req.params.id, req.body), 'Đã cập nhật playlist hệ thống.');
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+export async function deleteSystemPlaylist(req, res) {
+  try {
+    sendSuccess(res, await adminService.deleteSystemPlaylist(req.params.id), 'Đã xóa playlist hệ thống.');
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
 export async function getUsers(req, res) {
   try {
     sendSuccess(res, await adminService.getUsers());

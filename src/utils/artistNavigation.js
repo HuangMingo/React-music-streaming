@@ -10,7 +10,7 @@ export function createArtistSlug(artist) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
-
+//Lấy đường dẫn đến trang nghệ sĩ
 export function getArtistPath(artist) {
   const slug = createArtistSlug(artist);
   return slug ? `/${slug}` : "/";

@@ -1,5 +1,5 @@
 import { AllSongs } from "./AllSongs";
-import { FavoriteArtist } from "./FavoriteArtist";
+import { PlaylistOfDay } from "./PlaylistOfDay";
 import { NewPlaylist } from "./NewPlaylist";
 
 export function TabExplorer() {
@@ -15,8 +15,8 @@ export function TabExplorer() {
                             {/* Album nổi bật */}
                             <NewPlaylist />
 
-                            {/* Nghệ sĩ nổi bật */}
-                            <FavoriteArtist />
+                            {/* Dành cho bạn */}
+                            <PlaylistOfDay />
                         </div>
                     </div>
                 </div>

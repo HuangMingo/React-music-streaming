@@ -181,7 +181,7 @@ const getArtistDetailBySlug = async (slug, userId = null) => {
         ),
     ]);
 
-    // Trả kèm trạng thái follow và số follower để frontend không phải tự suy đoán.
+    // Trả kèm trạng thái follow và số follower
     const [isFollowing, followersCount] = await Promise.all([
         userId ? isFollowingArtist(userId, artist.id) : false,
         getArtistFollowersCount(artist.id),
@@ -252,12 +252,12 @@ const getArtistFollowersCount = async (artistId) => {
     await ensureArtistFollowUnique();
     // Count luôn lấy từ artist_follow để đồng bộ với dữ liệu follow thật.
     const result = await pool.query(`
-        SELECT COUNT(*)::int AS followers_count
-        FROM artist_follow
-        WHERE artist_id = $1
+        SELECT follower_count
+        FROM artist
+        WHERE id = $1
     `, [artistId]);
 
-    return Number(result.rows[0]?.followers_count) || 0;
+    return Number(result.rows[0]?.follower_count) || 0;
 };
 
 const toggleFollowArtist = async (userId, artistId) => {

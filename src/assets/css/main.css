@@ -1296,6 +1296,11 @@ label .container__header-icon {
     transform: translate3d(var(--offset-x-third), 0, 0) scale(var(--scale-rate-third), var(--scale-rate-third));
 }
 
+.container__slide--compact:not(.is-spread) .container__slide-item {
+    opacity: 1;
+    transform: translate3d(0, 0, 80px) scale(1, 1);
+}
+
 
 /* Content playlist */
 .container__playlist {
@@ -1394,7 +1399,8 @@ label .container__header-icon {
     box-shadow: 0 1px 1px var(--bg-color);
     border-bottom: 1px solid var(--bg-content-color);
 }
-.playlist__list-song.active{
+
+.playlist__list-song.active {
     background: rgba(128, 128, 128, 0.1);
 }
 
@@ -1525,9 +1531,11 @@ label .container__header-icon {
     display: none;
     overflow: hidden;
 }
-.playlist__list-song:hover{
-        background: rgba(128, 128, 128, 0.1);
+
+.playlist__list-song:hover {
+    background: rgba(128, 128, 128, 0.1);
 }
+
 .playlist__list-song.active.playing .thumb--animate {
     display: flex;
 }
@@ -2196,7 +2204,7 @@ label .container__header-icon {
     position: relative;
     align-items: center;
     justify-content: space-between;
-    margin-top:10px;
+    margin-top: 10px;
 }
 
 .progress__track {
@@ -2615,7 +2623,7 @@ label .container__header-icon {
 
 .player__popup-cd-info h2 {
     margin: 0;
-    padding: 0 ;
+    padding: 0;
     font-size: 2rem;
     line-height: 2.2rem;
     text-align: center;
@@ -2623,7 +2631,7 @@ label .container__header-icon {
 }
 
 .player__popup-cd-info h3 {
-    padding: 0 ;
+    padding: 0;
     font-size: 1.2rem;
     text-align: center;
     line-height: 1.2rem;
@@ -2648,11 +2656,13 @@ label .container__header-icon {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE 10+ */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
 
     /* Typography */
-    
+
     text-align: left;
     display: flex;
     flex-direction: column;
@@ -2665,7 +2675,8 @@ label .container__header-icon {
     line-height: 1.9;
     color: var(--text-color);
     word-break: break-word;
-    white-space: pre-wrap; /* preserve line breaks from lyrics source */
+    white-space: pre-wrap;
+    /* preserve line breaks from lyrics source */
 }
 
 .player__popup-lyrics::-webkit-scrollbar {

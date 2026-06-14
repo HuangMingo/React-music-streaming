@@ -6,14 +6,18 @@ import {
   deleteAlbum,
   deleteArtist,
   deleteSong,
+  deleteSystemPlaylist,
   getAlbums,
   getArtists,
   getOverview,
   getSongs,
+  getSystemPlaylists,
   getUsers,
+  createSystemPlaylist,
   updateAlbum,
   updateArtist,
   updateSong,
+  updateSystemPlaylist,
   updateUserRole,
 } from '../controllers/AdminController.js';
 import { requireAdminContent, requireSuperAdmin } from '../middlewares/AdminAuthMiddleware.js';
@@ -36,6 +40,11 @@ router.get('/artists', requireAdminContent, getArtists);
 router.post('/artists', requireAdminContent, createArtist);
 router.put('/artists/:id', requireAdminContent, updateArtist);
 router.delete('/artists/:id', requireAdminContent, deleteArtist);
+
+router.get('/playlists', requireAdminContent, getSystemPlaylists);
+router.post('/playlists', requireAdminContent, createSystemPlaylist);
+router.put('/playlists/:id', requireAdminContent, updateSystemPlaylist);
+router.delete('/playlists/:id', requireAdminContent, deleteSystemPlaylist);
 
 router.get('/users', requireSuperAdmin, getUsers);
 router.patch('/users/:id/role', requireSuperAdmin, updateUserRole);

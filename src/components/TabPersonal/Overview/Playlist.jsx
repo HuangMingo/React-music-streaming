@@ -339,7 +339,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                     </div>
                                                                     <div className="overlay"></div>
                                                                 </div>
-                                                                <div className="row__item-info">
+                                                                <div className="row__item-info" onClick={(e) => { e.stopPropagation();  }} >
                                                                     <a href="#" className="row__info-name is-twoline">{playlist.playlist_name}</a>
                                                                     <h3 className="row__info-creator" onClick= {(e) => {e.stopPropagation()}}>{playlist.username}</h3>
                                                                 </div>

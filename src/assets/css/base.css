@@ -165,6 +165,7 @@ a {
 
 .is-rounded {
     border-radius: 999px !important;
+    object-position: top center;
 }
 
 .is-outline--blue {
@@ -628,6 +629,7 @@ a {
     transition: transform 0.7s;
     backface-visibility: hidden;
     transform: perspective(1px) translateZ(0);
+    object-position: bottom center;
 }
 
 .img--square {
