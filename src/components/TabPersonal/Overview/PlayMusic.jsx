@@ -7,7 +7,7 @@ import { ArtistNameLink } from "../../ArtistNameLink/ArtistNameLink.jsx";
 import { LoadingState } from "../../LoadingState/LoadingState.jsx";
 import axios from "axios";
 import { API_URL } from '../../../api.js';
-export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false, playlistScope = "personal", loading = false, emptyMessage = "Chưa có bài hát nào trong playlist này!" }) {
+export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTitle = false, playlistScope = "personal", loading = false, emptyMessage = "Chưa có bài hát nào trong playlist này!", isAlbumDetail = false }) {
     const { currentSong,
         setCurrentSong,
         setCurrentTime,
@@ -16,6 +16,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
         toggleFavouriteSong,
         favouriteSongIds,
         favouritePlaylistIds,
+        favouriteAlbumIds,
         toggleFavouritePlaylist,
         setFavouriteSongIds,
         handleClickSong,
@@ -24,6 +25,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
         selectedPlaylistBySong,
         setPersonalSelectedPlaylist,
         setExploreSelectedPlaylist,
+        toggleFavouriteAlbum
     } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
     //Mở menu khi click vào 3 chấm của bài hát
@@ -44,6 +46,12 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
     const slideshowActive = useMemo(() => visibleSongs.length >= 2, [visibleSongs.length]);
     const compactSlideshow = visibleSongs.length > 1 && visibleSongs.length < 4;
     const playlistName = playlist?.playlist_name || playlist?.name || "";
+    const isFavouriteCollection = isAlbumDetail
+        ? favouriteAlbumIds.has(playlist?.id)
+        : favouritePlaylistIds.has(playlist?.id);
+    const favouriteCollectionTitle = isAlbumDetail
+        ? (isFavouriteCollection ? "Bỏ thích album" : "Thêm vào album yêu thích")
+        : (isFavouriteCollection ? "Bỏ thích playlist" : "Thêm vào playlist yêu thích");
 
     const formatSongDuration = (song) => {
         const durationInSeconds = Number(song?.duration_seconds ?? song?.duration ?? 0);
@@ -256,10 +264,13 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                 {renderPlayAllButton("playlist-detail__play-all")}
                                                 <div
                                                     className="action-btn btn--heart"
-                                                    onClick={(event) => toggleFavouritePlaylist(event, playlist.id)}
-                                                    title={favouritePlaylistIds.has(playlist.id) ? "Bỏ thích playlist" : "Thêm vào playlist yêu thích"}
+                                                    onClick={
+                                                        isAlbumDetail ?
+                                                            (event) => toggleFavouriteAlbum(event, playlist.id)
+                                                            :(event) => toggleFavouritePlaylist(event, playlist.id)}
+                                                    title={favouriteCollectionTitle}
                                                 >
-                                                    <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(playlist.id) ? "-fill" : ""} primary`}></i>
+                                                    <i className={`btn--icon icon--heart bi bi-heart${isFavouriteCollection ? "-fill" : ""} primary`}></i>
                                                 </div>
                                             </div>
                                         </div>

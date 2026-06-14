@@ -7,7 +7,10 @@ import { showNotificationToast } from '../../toast.js';
 import { InsertSong } from './InsertSong.jsx';
 import { UpdateAlbum } from './UpdateAlbum.jsx';
 import { UpdateArtist } from './UpdateArtist.jsx';
-
+import { SongManagementPage } from './SongManagementPage.jsx';
+import { AlbumManagementPage } from "./AlbumManagementPage.jsx";
+import { ArtistManagementPage } from "./ArtistManagementPage.jsx";
+import { PlaylistManagementPage } from "./PlaylistManagementPage.jsx";
 const EMPTY_SONG_FORM = {
   title: '',
   album_id: '',
@@ -53,6 +56,8 @@ const EMPTY_UPLOAD_STATUS = {
   album: '',
   artist: '',
 };
+
+const EMPTY_FORM_ERRORS = {};
 
 const ADMIN_TAB_PATHS = {
   songs: '/admin/songs',
@@ -158,6 +163,10 @@ export function AdminDashboardPage() {
   const [albumForm, setAlbumForm] = useState(EMPTY_ALBUM_FORM);
   const [artistForm, setArtistForm] = useState(EMPTY_ARTIST_FORM);
   const [playlistForm, setPlaylistForm] = useState(EMPTY_PLAYLIST_FORM);
+  const [songFormErrors, setSongFormErrors] = useState(EMPTY_FORM_ERRORS);
+  const [albumFormErrors, setAlbumFormErrors] = useState(EMPTY_FORM_ERRORS);
+  const [artistFormErrors, setArtistFormErrors] = useState(EMPTY_FORM_ERRORS);
+  const [playlistFormErrors, setPlaylistFormErrors] = useState(EMPTY_FORM_ERRORS);
 
   const adminHeaders = useMemo(
     () => ({ 'x-user-id': currentUser?.id }),
@@ -213,6 +222,7 @@ export function AdminDashboardPage() {
     setSongForm({ ...EMPTY_SONG_FORM, ...(draft || {}) });
     setSongFiles(EMPTY_SONG_FILES);
     setUploading(EMPTY_UPLOAD_STATUS);
+    setSongFormErrors(EMPTY_FORM_ERRORS);
     setSongDraftReady(true);
   }, [mode, songId, tab]);
 
@@ -233,6 +243,7 @@ export function AdminDashboardPage() {
     setSongForm({ ...getSongFormFromSong(song), ...(draft || {}) });
     setSongFiles(EMPTY_SONG_FILES);
     setUploading(EMPTY_UPLOAD_STATUS);
+    setSongFormErrors(EMPTY_FORM_ERRORS);
     setSongDraftReady(true);
   }, [mode, navigate, songId, songs, tab]);
 
@@ -245,6 +256,7 @@ export function AdminDashboardPage() {
       setEditingAlbumId(null);
       setAlbumForm(EMPTY_ALBUM_FORM);
       setUploading((current) => ({ ...current, album: '' }));
+      setAlbumFormErrors(EMPTY_FORM_ERRORS);
       setAlbumFormOpen(true);
       return;
     }
@@ -268,6 +280,7 @@ export function AdminDashboardPage() {
       artist_id: album.artist_id || '',
     });
     setUploading((current) => ({ ...current, album: '' }));
+    setAlbumFormErrors(EMPTY_FORM_ERRORS);
     setAlbumFormOpen(true);
   }, [albums, mode, navigate, songId, tab]);
 
@@ -280,6 +293,7 @@ export function AdminDashboardPage() {
       setEditingArtistId(null);
       setArtistForm(EMPTY_ARTIST_FORM);
       setUploading((current) => ({ ...current, artist: '' }));
+      setArtistFormErrors(EMPTY_FORM_ERRORS);
       setArtistFormOpen(true);
       return;
     }
@@ -303,6 +317,7 @@ export function AdminDashboardPage() {
       follower_count: artist.follower_count || artist.followers_count || '',
     });
     setUploading((current) => ({ ...current, artist: '' }));
+    setArtistFormErrors(EMPTY_FORM_ERRORS);
     setArtistFormOpen(true);
   }, [artists, mode, navigate, songId, tab]);
 
@@ -315,6 +330,7 @@ export function AdminDashboardPage() {
       setEditingPlaylistId(null);
       setPlaylistForm(EMPTY_PLAYLIST_FORM);
       setUploading((current) => ({ ...current, playlist: '' }));
+      setPlaylistFormErrors(EMPTY_FORM_ERRORS);
       setPlaylistDropdownOpen(false);
       setPlaylistFormOpen(true);
       return;
@@ -340,6 +356,7 @@ export function AdminDashboardPage() {
         : (playlist.songs || []).map((song) => Number(song.id)).filter(Boolean),
     });
     setUploading((current) => ({ ...current, playlist: '' }));
+    setPlaylistFormErrors(EMPTY_FORM_ERRORS);
     setPlaylistDropdownOpen(false);
     setPlaylistFormOpen(true);
   }, [mode, navigate, songId, systemPlaylists, tab]);
@@ -358,6 +375,47 @@ export function AdminDashboardPage() {
     setMessage(text);
     showNotificationToast(text);
   }, []);
+
+  function clearFieldError(setErrors, field) {
+    setErrors((current) => {
+      if (!current[field] && !current.form) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[field];
+      delete next.form;
+      return next;
+    });
+  }
+
+  function updateSongForm(nextForm, field) {
+    setSongForm(nextForm);
+    if (field) {
+      clearFieldError(setSongFormErrors, field);
+    }
+  }
+
+  function updateAlbumForm(nextForm, field) {
+    setAlbumForm(nextForm);
+    if (field) {
+      clearFieldError(setAlbumFormErrors, field);
+    }
+  }
+
+  function updateArtistForm(nextForm, field) {
+    setArtistForm(nextForm);
+    if (field) {
+      clearFieldError(setArtistFormErrors, field);
+    }
+  }
+
+  function updatePlaylistForm(nextForm, field) {
+    setPlaylistForm(nextForm);
+    if (field) {
+      clearFieldError(setPlaylistFormErrors, field);
+    }
+  }
 
   const fetchAdminData = useCallback(async () => {
     if (!currentUser?.id) {
@@ -407,6 +465,7 @@ export function AdminDashboardPage() {
     setSongFiles(EMPTY_SONG_FILES);
     setSongDraftReady(false);
     setUploading(EMPTY_UPLOAD_STATUS);
+    setSongFormErrors(EMPTY_FORM_ERRORS);
     setMessage('');
     navigate('/admin/songs/create');
   }
@@ -419,6 +478,7 @@ export function AdminDashboardPage() {
     setSongFiles(EMPTY_SONG_FILES);
     setSongDraftReady(false);
     setUploading(EMPTY_UPLOAD_STATUS);
+    setSongFormErrors(EMPTY_FORM_ERRORS);
     navigate(ADMIN_TAB_PATHS.songs);
   }
 
@@ -427,6 +487,7 @@ export function AdminDashboardPage() {
     setAlbumForm(EMPTY_ALBUM_FORM);
     setAlbumFormOpen(false);
     setUploading((current) => ({ ...current, album: '' }));
+    setAlbumFormErrors(EMPTY_FORM_ERRORS);
     navigate(ADMIN_TAB_PATHS.albums);
   }
 
@@ -435,6 +496,7 @@ export function AdminDashboardPage() {
     setAlbumForm(EMPTY_ALBUM_FORM);
     setAlbumFormOpen(true);
     setUploading((current) => ({ ...current, album: '' }));
+    setAlbumFormErrors(EMPTY_FORM_ERRORS);
     navigate('/admin/albums/create');
   }
 
@@ -443,6 +505,7 @@ export function AdminDashboardPage() {
     setArtistForm(EMPTY_ARTIST_FORM);
     setArtistFormOpen(false);
     setUploading((current) => ({ ...current, artist: '' }));
+    setArtistFormErrors(EMPTY_FORM_ERRORS);
     navigate(ADMIN_TAB_PATHS.artists);
   }
 
@@ -451,6 +514,7 @@ export function AdminDashboardPage() {
     setArtistForm(EMPTY_ARTIST_FORM);
     setArtistFormOpen(true);
     setUploading((current) => ({ ...current, artist: '' }));
+    setArtistFormErrors(EMPTY_FORM_ERRORS);
     navigate('/admin/artists/create');
   }
 
@@ -460,6 +524,7 @@ export function AdminDashboardPage() {
     setPlaylistFormOpen(false);
     setPlaylistDropdownOpen(false);
     setUploading((current) => ({ ...current, playlist: '' }));
+    setPlaylistFormErrors(EMPTY_FORM_ERRORS);
     navigate(ADMIN_TAB_PATHS.playlists);
   }
 
@@ -469,6 +534,7 @@ export function AdminDashboardPage() {
     setPlaylistFormOpen(true);
     setPlaylistDropdownOpen(false);
     setUploading((current) => ({ ...current, playlist: '' }));
+    setPlaylistFormErrors(EMPTY_FORM_ERRORS);
     navigate('/admin/playlists/create');
   }
   //Hàm upload file lên Cloudinary và trả về URL của file đã upload
@@ -490,6 +556,7 @@ export function AdminDashboardPage() {
   async function updateSongFile(field, file) {
     setSongFiles((current) => ({ ...current, [field]: file || null }));
     setSongForm((current) => ({ ...current, [field]: '' }));
+    clearFieldError(setSongFormErrors, field);
 
     if (!file) {
       setUploading((current) => ({ ...current, [field]: '' }));
@@ -512,13 +579,16 @@ export function AdminDashboardPage() {
       }
       setSongForm((current) => ({ ...current, [field]: urlAndDuration.url }));
       setUploading((current) => ({ ...current, [field]: 'Upload thành công.' }));
-      if(field === 'audio' && urlAndDuration.duration_seconds) {
+      if (field === 'audio' && urlAndDuration.duration_seconds) {
         setSongForm((current) => ({ ...current, duration_seconds: urlAndDuration.duration_seconds }));
       }
     } catch (error) {
       setSongFiles((current) => ({ ...current, [field]: null }));
       setUploading((current) => ({ ...current, [field]: '' }));
-      setMessage(error.response?.data?.message || error.message || 'Upload thất bại.');
+      setSongFormErrors((current) => ({
+        ...current,
+        [field]: error.response?.data?.message || error.message || 'Upload thất bại.',
+      }));
     }
   }
 
@@ -526,10 +596,12 @@ export function AdminDashboardPage() {
     if (!file) {
       setAlbumForm((current) => ({ ...current, image: '' }));
       setUploading((current) => ({ ...current, album: '' }));
+      clearFieldError(setAlbumFormErrors, 'image');
       return;
     }
 
     setUploading((current) => ({ ...current, album: 'Đang upload...' }));
+    clearFieldError(setAlbumFormErrors, 'image');
     setMessage('');
 
     try {
@@ -538,7 +610,7 @@ export function AdminDashboardPage() {
       setUploading((current) => ({ ...current, album: 'Upload thành công.' }));
     } catch (error) {
       setUploading((current) => ({ ...current, album: '' }));
-      setMessage(error.response?.data?.message || 'Upload ảnh album thất bại.');
+      setAlbumFormErrors((current) => ({ ...current, image: error.response?.data?.message || 'Upload ảnh album thất bại.' }));
     }
   }
 
@@ -546,10 +618,12 @@ export function AdminDashboardPage() {
     if (!file) {
       setArtistForm((current) => ({ ...current, image: '' }));
       setUploading((current) => ({ ...current, artist: '' }));
+      clearFieldError(setArtistFormErrors, 'image');
       return;
     }
 
     setUploading((current) => ({ ...current, artist: 'Đang upload...' }));
+    clearFieldError(setArtistFormErrors, 'image');
     setMessage('');
 
     try {
@@ -558,7 +632,7 @@ export function AdminDashboardPage() {
       setUploading((current) => ({ ...current, artist: 'Upload thành công.' }));
     } catch (error) {
       setUploading((current) => ({ ...current, artist: '' }));
-      setMessage(error.response?.data?.message || 'Upload avatar nghệ sĩ thất bại.');
+      setArtistFormErrors((current) => ({ ...current, image: error.response?.data?.message || 'Upload avatar nghệ sĩ thất bại.' }));
     }
   }
 
@@ -566,10 +640,12 @@ export function AdminDashboardPage() {
     if (!file) {
       setArtistForm((current) => ({ ...current, bio: '' }));
       setUploading((current) => ({ ...current, artist: '' }));
+      clearFieldError(setArtistFormErrors, 'bio');
       return;
     }
 
     setUploading((current) => ({ ...current, artist: 'Đang upload...' }));
+    clearFieldError(setArtistFormErrors, 'bio');
     setMessage('');
 
     try {
@@ -578,7 +654,7 @@ export function AdminDashboardPage() {
       setUploading((current) => ({ ...current, artist: 'Upload thành công.' }));
     } catch (error) {
       setUploading((current) => ({ ...current, artist: '' }));
-      setMessage(error.response?.data?.message || 'Upload file giới thiệu nghệ sĩ thất bại.');
+      setArtistFormErrors((current) => ({ ...current, bio: error.response?.data?.message || 'Upload file giới thiệu nghệ sĩ thất bại.' }));
     }
   }
 
@@ -586,10 +662,12 @@ export function AdminDashboardPage() {
     if (!file) {
       setPlaylistForm((current) => ({ ...current, image: '' }));
       setUploading((current) => ({ ...current, playlist: '' }));
+      clearFieldError(setPlaylistFormErrors, 'image');
       return;
     }
 
     setUploading((current) => ({ ...current, playlist: 'Đang upload...' }));
+    clearFieldError(setPlaylistFormErrors, 'image');
     setMessage('');
 
     try {
@@ -598,33 +676,36 @@ export function AdminDashboardPage() {
       setUploading((current) => ({ ...current, playlist: 'Upload thành công.' }));
     } catch (error) {
       setUploading((current) => ({ ...current, playlist: '' }));
-      setMessage(error.response?.data?.message || 'Upload ảnh playlist thất bại.');
+      setPlaylistFormErrors((current) => ({ ...current, image: error.response?.data?.message || 'Upload ảnh playlist thất bại.' }));
     }
   }
 
   async function submitSong(event) {
     event.preventDefault();
+    const errors = {};
 
     if (!songForm.title.trim()) {
-      setMessage('Vui lòng nhập tiêu đề bài hát.');
-      return;
+      errors.title = 'Vui lòng nhập tiêu đề bài hát.';
     }
 
     if (!songForm.audio) {
-      setMessage('Vui lòng chọn file audio MP3.');
-      return;
+      errors.audio = 'Vui lòng chọn file audio MP3.';
     }
 
     if (!songForm.image) {
-      setMessage('Vui lòng chọn ảnh bìa.');
-      return;
+      errors.image = 'Vui lòng chọn ảnh bìa.';
     }
 
     if (Object.values(uploading).some((status) => status === 'Đang upload...')) {
-      setMessage('Vui lòng chờ upload hoàn tất.');
+      errors.form = 'Vui lòng chờ upload hoàn tất.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setSongFormErrors(errors);
       return;
     }
 
+    setSongFormErrors(EMPTY_FORM_ERRORS);
     setSongSubmitting(true);
     try {
       if (editingSongId) {
@@ -637,7 +718,7 @@ export function AdminDashboardPage() {
       closeCreateSongForm();
       fetchAdminData();
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Không thể lưu bài hát.');
+      setSongFormErrors({ form: error.response?.data?.message || 'Không thể lưu bài hát.' });
     } finally {
       setSongSubmitting(false);
     }
@@ -645,22 +726,30 @@ export function AdminDashboardPage() {
 
   async function submitAlbum(event) {
     event.preventDefault();
+    const errors = {};
 
     if (!albumForm.title.trim()) {
-      setMessage('Vui lòng nhập tên album.');
-      return;
+      errors.title = 'Vui lòng nhập tên album.';
     }
 
     if (!albumForm.artist_id) {
-      setMessage('Vui lòng chọn nghệ sĩ cho album.');
-      return;
+      errors.artist_id = 'Vui lòng chọn nghệ sĩ cho album.';
+    }
+
+    if (!albumForm.image) {
+      errors.image = 'Vui lòng chọn ảnh bìa album.';
     }
 
     if (uploading.album === 'Đang upload...') {
-      setMessage('Vui lòng chờ upload ảnh album hoàn tất.');
+      errors.image = 'Vui lòng chờ upload ảnh album hoàn tất.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setAlbumFormErrors(errors);
       return;
     }
 
+    setAlbumFormErrors(EMPTY_FORM_ERRORS);
     const albumPayload = {
       ...albumForm,
       title: albumForm.title.trim(),
@@ -678,23 +767,28 @@ export function AdminDashboardPage() {
       resetAlbumForm();
       fetchAdminData();
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Không thể lưu album.');
+      setAlbumFormErrors({ form: error.response?.data?.message || 'Không thể lưu album.' });
     }
   }
 
   async function submitArtist(event) {
     event.preventDefault();
+    const errors = {};
 
     if (!artistForm.name.trim()) {
-      setMessage('Vui lòng nhập tên nghệ sĩ.');
-      return;
+      errors.name = 'Vui lòng nhập tên nghệ sĩ.';
     }
 
     if (uploading.artist === 'Đang upload...') {
-      setMessage('Vui lòng chờ upload ảnh nghệ sĩ hoàn tất.');
+      errors.image = 'Vui lòng chờ upload ảnh nghệ sĩ hoàn tất.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setArtistFormErrors(errors);
       return;
     }
 
+    setArtistFormErrors(EMPTY_FORM_ERRORS);
     const artistPayload = {
       ...artistForm,
       name: artistForm.name.trim(),
@@ -712,23 +806,28 @@ export function AdminDashboardPage() {
       resetArtistForm();
       fetchAdminData();
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Không thể lưu nghệ sĩ.');
+      setArtistFormErrors({ form: error.response?.data?.message || 'Không thể lưu nghệ sĩ.' });
     }
   }
 
   async function submitPlaylist(event) {
     event.preventDefault();
+    const errors = {};
 
     if (!playlistForm.name.trim()) {
-      setMessage('Vui lòng nhập tên playlist.');
-      return;
+      errors.name = 'Vui lòng nhập tên playlist.';
     }
 
     if (uploading.playlist === 'Đang upload...') {
-      setMessage('Vui lòng chờ upload ảnh playlist hoàn tất.');
+      errors.image = 'Vui lòng chờ upload ảnh playlist hoàn tất.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setPlaylistFormErrors(errors);
       return;
     }
 
+    setPlaylistFormErrors(EMPTY_FORM_ERRORS);
     const playlistPayload = {
       name: playlistForm.name.trim(),
       image: playlistForm.image,
@@ -750,7 +849,7 @@ export function AdminDashboardPage() {
       resetPlaylistForm();
       fetchAdminData();
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Không thể lưu playlist hệ thống.');
+      setPlaylistFormErrors({ form: error.response?.data?.message || 'Không thể lưu playlist hệ thống.' });
     }
   }
 
@@ -897,7 +996,7 @@ export function AdminDashboardPage() {
           </>
         ) : null}
 
-        {message ? <p className="admin-message">{message}</p> : null}
+        {message && songMode === 'list' && !albumFormOpen && !artistFormOpen && !playlistFormOpen ? <p className="admin-message">{message}</p> : null}
 
         {activeTab === 'songs' && songMode === 'create' ? (
           <InsertSong
@@ -905,183 +1004,108 @@ export function AdminDashboardPage() {
             artists={artists}
             songFiles={songFiles}
             songForm={songForm}
+            errors={songFormErrors}
             songSubmitting={songSubmitting}
             editingSongId={editingSongId}
             uploading={uploading}
             onClose={closeCreateSongForm}
             onFileChange={updateSongFile}
-            onFormChange={setSongForm}
+            onFormChange={updateSongForm}
             onSubmit={submitSong}
           />
         ) : null}
 
         {activeTab === 'songs' && songMode === 'list' ? (
-          <section className="admin-panel">
-            <div className="admin-panel__header">
-              <div>
-                <h3>
-                  Quản lý bài hát
-                </h3>
-              </div>
-            </div>
-            <div>
-              <form className="admin-form">
-                <input placeholder="Tìm kiếm bài hát" value={songForm.title} onChange={(e) => setSongForm({ ...songForm, title: e.target.value })} />
-              </form>
-              <button type="button" className="admin-save-btn" onClick={openCreateSongForm}>
-                Thêm bài hát
-              </button>
-            </div>
-
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Ảnh</th>
-                    <th>Tên bài hát</th>
-                    <th>Nghệ sĩ</th>
-                    <th>Album</th>
-                    <th>Thời lượng</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {songs.map((song, index) => (
-                    <tr key={song.id}>
-                      <td>{index + 1}</td>
-                      <td>{song.image ? <img src={song.image} alt="" /> : null}</td>
-                      <td>{song.title}</td>
-                      <td>{song.artists?.map((artist) => artist.name).join(', ') || '--'}</td>
-                      <td>{song.album_title || '--'}</td>
-                      <td>{formatDuration(song.duration_seconds)}</td>
-                      <td>
-                        <button type="button" onClick={() => editSong(song)}>
-                          Sửa
-                        </button>
-                        <button type="button" className="is-danger" onClick={() => removeItem('songs', song.id)}>
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <SongManagementPage
+            active={activeTab === 'songs'}
+            albums={albums}
+            artists={artists}
+            editingSongId={editingSongId}
+            errors={songFormErrors}
+            formatDuration={formatDuration}
+            onCloseForm={closeCreateSongForm}
+            onDeleteSong={removeItem}
+            onEditSong={editSong}
+            onFileChange={updateSongFile}
+            onFormChange={updateSongForm}
+            onOpenCreateForm={openCreateSongForm}
+            onSubmitSong={submitSong}
+            songFiles={songFiles}
+            songForm={songForm}
+            songMode={songMode}
+            songSubmitting={songSubmitting}
+            songs={songs}
+            uploading={uploading}
+          />
         ) : null}
 
         {activeTab === 'albums' && albumFormOpen ?
           <UpdateAlbum
             albumForm={albumForm}
+            errors={albumFormErrors}
             artists={artists}
             editingAlbumId={editingAlbumId}
             uploading={uploading}
             onClose={resetAlbumForm}
-            onFormChange={setAlbumForm}
+            onFormChange={updateAlbumForm}
             onImageChange={uploadAlbumImage}
             onSubmit={submitAlbum}
           /> : null}
 
-        {activeTab === 'albums' && !albumFormOpen ?
-          <section className="admin-panel">
-            <div className="admin-panel__header">
-              <div>
-                <h3>Quản lý album</h3>
-              </div>
-              <button type="button" className="admin-save-btn" onClick={openCreateAlbumForm}>Thêm album</button>
-            </div>
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Ảnh</th>
-                    <th>Tên album</th>
-                    <th>Nghệ sĩ</th>
-                    <th>Ngày phát hành</th>
-                    <th>Số bài hát</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {albums.map((album, index) => (
-                    <tr key={album.id}>
-                      <td>{index + 1}</td>
-                      <td>{album.image ? <img src={album.image} alt="" /> : null}</td>
-                      <td>{album.title || album.name}</td>
-                      <td>{album.artist_name || '--'}</td>
-                      <td>{toDateInput(album.release_date) || '--'}</td>
-                      <td>{album.song_count || 0}</td>
-                      <td>
-                        <button type="button" onClick={() => editAlbum(album)}>
-                          Sửa
-                        </button>
-                        <button type="button" className="is-danger" onClick={() => removeItem('albums', album.id)}>
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section> : null}
+        {
+          activeTab === 'albums' && !albumFormOpen ?
+            <AlbumManagementPage
+              active={activeTab === 'albums'}
+              albumForm={albumForm}
+              albumFormOpen={albumFormOpen}
+              albums={albums}
+              artists={artists}
+              editingAlbumId={editingAlbumId}
+              errors={albumFormErrors}
+              onCloseForm={resetAlbumForm}
+              onDeleteAlbum={removeItem}
+              onEditAlbum={editAlbum}
+              onFormChange={updateAlbumForm}
+              onImageChange={uploadAlbumImage}
+              onOpenCreateForm={openCreateAlbumForm}
+              onSubmitAlbum={submitAlbum}
+              toDateInput={toDateInput}
+              uploading={uploading}
+            /> : null
+        }
 
         {activeTab === 'artists' && artistFormOpen ?
           <UpdateArtist
             artistForm={artistForm}
+            errors={artistFormErrors}
             editingArtistId={editingArtistId}
             uploading={uploading}
             onClose={resetArtistForm}
-            onFormChange={setArtistForm}
+            onFormChange={updateArtistForm}
             onBioChange={uploadArtistBio}
             onImageChange={uploadArtistImage}
             onSubmit={submitArtist}
           /> : null}
 
         {activeTab === 'artists' && !artistFormOpen ?
-          <section className="admin-panel">
-            <div className="admin-panel__header">
-              <div>
-                <h3>Quản lý nghệ sĩ</h3>
-              </div>
-              <button type="button" className="admin-save-btn" onClick={openCreateArtistForm}>Thêm nghệ sĩ</button>
-            </div>
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Ảnh</th>
-                    <th>Tên nghệ sĩ</th>
-                    <th>Bài hát</th>
-                    <th>Follower</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {artists.map((artist, index) => (
-                    <tr key={artist.id}>
-                      <td>{index + 1}</td>
-                      <td>{artist.image ? <img src={artist.image} alt="" /> : null}</td>
-                      <td>{artist.name}</td>
-                      <td>{artist.song_count || 0}</td>
-                      <td>{artist.follower_count || artist.followers_count || 0}</td>
-                      <td>
-                        <button type="button" onClick={() => editArtist(artist)}>
-                          Sửa
-                        </button>
-                        <button type="button" className="is-danger" onClick={() => removeItem('artists', artist.id)}>
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section> : null}
+          <ArtistManagementPage
+            active={activeTab === 'artists'}
+            artistForm={artistForm}
+            artistFormOpen={artistFormOpen}
+            artists={artists}
+            editingArtistId={editingArtistId}
+            errors={artistFormErrors}
+            onCloseForm={resetArtistForm}
+            onDeleteArtist={removeItem}
+            onEditArtist={editArtist}
+            onFormChange={updateArtistForm}
+            onBioChange={uploadArtistBio}
+            onImageChange={uploadArtistImage}
+            onOpenCreateForm={openCreateArtistForm}
+            onSubmitArtist={submitArtist}
+            uploading={uploading}
+          />
+          : null}
 
         {activeTab === 'playlists' && playlistFormOpen ? (
           <section className="admin-song-editor admin-playlist-manager">
@@ -1104,7 +1128,8 @@ export function AdminDashboardPage() {
             <div className="admin-song-editor__grid">
               <form className="admin-song-card" onSubmit={submitPlaylist}>
                 <label>Tên playlist <span>*</span></label>
-                <input maxLength={255} placeholder="Nhập tên playlist" value={playlistForm.name} onChange={(e) => setPlaylistForm({ ...playlistForm, name: e.target.value })} />
+                <input maxLength={255} placeholder="Nhập tên playlist" value={playlistForm.name} onChange={(e) => updatePlaylistForm({ ...playlistForm, name: e.target.value }, 'name')} />
+                {playlistFormErrors.name ? <p className="admin-field-error">{playlistFormErrors.name}</p> : null}
 
                 <label>Ảnh bìa playlist</label>
                 <input id="admin-playlist-image-upload" hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => uploadPlaylistImage(e.target.files?.[0])} />
@@ -1126,12 +1151,14 @@ export function AdminDashboardPage() {
                   </p>
                 ) : null}
                 {uploading.playlist ? <p className="admin-song-hint">{uploading.playlist}</p> : null}
+                {playlistFormErrors.image ? <p className="admin-field-error">{playlistFormErrors.image}</p> : null}
                 <p className="admin-song-hint">Định dạng: JPG, PNG, WEBP</p>
 
                 <div className="admin-song-editor__actions">
                   <button type="button" className="admin-cancel-btn" onClick={resetPlaylistForm}>Hủy</button>
                   <button type="submit" className="admin-save-btn" disabled={uploading.playlist === 'Đang upload...'}>Lưu playlist</button>
                 </div>
+                {playlistFormErrors.form ? <p className="admin-field-error">{playlistFormErrors.form}</p> : null}
               </form>
 
               <section className="admin-song-card">
@@ -1185,47 +1212,29 @@ export function AdminDashboardPage() {
         ) : null}
 
         {activeTab === 'playlists' && !playlistFormOpen ? (
-          <section className="admin-panel">
-            <div className="admin-panel__header">
-              <div>
-                <h3>Quản lý playlist hệ thống</h3>
-              </div>
-              <button type="button" className="admin-save-btn" onClick={openCreatePlaylistForm}>Thêm playlist</button>
-            </div>
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Ảnh</th>
-                    <th>Tên playlist</th>
-                    <th>Số bài hát</th>
-                    <th>Người tạo</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {systemPlaylists.map((playlist, index) => (
-                    <tr key={playlist.id}>
-                      <td>{index + 1}</td>
-                      <td>{playlist.image || playlist.playlist_image ? <img src={playlist.image || playlist.playlist_image} alt="" /> : null}</td>
-                      <td>{playlist.name || playlist.playlist_name}</td>
-                      <td>{playlist.song_count || playlist.songs?.length || 0}</td>
-                      <td>{playlist.username || '--'}</td>
-                      <td>
-                        <button type="button" onClick={() => editPlaylist(playlist)}>
-                          Sửa
-                        </button>
-                        <button type="button" className="is-danger" onClick={() => removeItem('playlists', playlist.id)}>
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <PlaylistManagementPage
+            active={activeTab === 'playlists'}
+            editingPlaylistId={editingPlaylistId}
+            errors={playlistFormErrors}
+            onClearSongs={() => updatePlaylistSongIds([])}
+            onCloseForm={resetPlaylistForm}
+            onDeletePlaylist={removeItem}
+            onEditPlaylist={editPlaylist}
+            onFormChange={updatePlaylistForm}
+            onImageChange={uploadPlaylistImage}
+            onOpenCreateForm={openCreatePlaylistForm}
+            onSubmitPlaylist={submitPlaylist}
+            playlistDropdownOpen={playlistDropdownOpen}
+            playlistForm={playlistForm}
+            playlistFormOpen={playlistFormOpen}
+            selectedPlaylistSongIds={selectedPlaylistSongIds}
+            selectedPlaylistSongs={selectedPlaylistSongs}
+            setPlaylistDropdownOpen={setPlaylistDropdownOpen}
+            songs={songs}
+            systemPlaylists={systemPlaylists}
+            togglePlaylistSong={togglePlaylistSong}
+            uploading={uploading}
+          />
         ) : null}
 
         {activeTab === 'users' && isSuperAdmin ? (

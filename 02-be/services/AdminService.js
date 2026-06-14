@@ -170,16 +170,17 @@ export async function updateSong(songId, data) {
   const artistIds = normalizeArtistIds(data.artist_ids);
   const lyrics = data.lyrics ?? data.lyric ?? null;
   const durationSeconds = data.duration_seconds ? Number(data.duration_seconds) : null;
+  const trackNumber = data.track_number ? Number(data.track_number) : null;
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
     const result = await client.query(
       `UPDATE song
-       SET title = $1, image = $2, audio = $3, lyrics = $4, duration_seconds = $5, album_id = $6, release_date = CURRENT_DATE
-       WHERE id = $7
+       SET title = $1, image = $2, audio = $3, lyrics = $4, duration_seconds = $5, album_id = $6, track_number = $7, release_date = CURRENT_DATE
+       WHERE id = $8
        RETURNING *`,
-      [title, data.image || null, data.audio || null, lyrics || null, durationSeconds, albumId, id]
+      [title, data.image || null, data.audio || null, lyrics || null, durationSeconds, albumId, trackNumber, id]
     );
 
     if (!result.rows[0]) {
@@ -247,6 +248,7 @@ export async function getAlbums() {
 
 export async function createAlbum(data) {
   const title = requireText(data.title || data.name, 'Tên album');
+  const image = requireText(data.image, 'Ảnh album');
   const artistId = normalizeId(data.artist_id);
   if (!artistId) {
     const error = new Error('Vui lòng chọn nghệ sĩ cho album.');
@@ -258,7 +260,7 @@ export async function createAlbum(data) {
     `INSERT INTO album (title, image, release_date, artist_id)
      VALUES ($1, $2, $3, $4)
      RETURNING *`,
-    [title, data.image || null, data.release_date || null, artistId]
+    [title, image, data.release_date || null, artistId]
   );
 
   return result.rows[0];
@@ -267,6 +269,7 @@ export async function createAlbum(data) {
 export async function updateAlbum(albumId, data) {
   const id = normalizeId(albumId);
   const title = requireText(data.title || data.name, 'Tên album');
+  const image = requireText(data.image, 'Ảnh album');
   const artistId = normalizeId(data.artist_id);
 
   if (!id || !artistId) {
@@ -280,7 +283,7 @@ export async function updateAlbum(albumId, data) {
      SET title = $1, image = $2, release_date = $3, artist_id = $4
      WHERE id = $5
      RETURNING *`,
-    [title, data.image || null, data.release_date || null, artistId, id]
+    [title, image, data.release_date || null, artistId, id]
   );
 
   return result.rows[0];

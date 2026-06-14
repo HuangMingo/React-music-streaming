@@ -8,6 +8,7 @@ export function AlbumManagementPage({
   albums,
   artists,
   editingAlbumId,
+  errors,
   onCloseForm,
   onDeleteAlbum,
   onEditAlbum,
@@ -26,6 +27,7 @@ export function AlbumManagementPage({
     return (
       <UpdateAlbum
         albumForm={albumForm}
+        errors={errors}
         artists={artists}
         editingAlbumId={editingAlbumId}
         uploading={uploading}

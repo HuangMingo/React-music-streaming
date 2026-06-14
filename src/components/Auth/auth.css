@@ -713,7 +713,7 @@
 .admin-remove-btn {
   border: none;
   cursor: pointer;
-  color: var(--white-color);
+  color: var(--text-color);
   font-weight: 700;
   font-size: 1.5rem;
 }
@@ -951,6 +951,14 @@ input[type="number"] {
   font-size: 1.35rem;
 }
 
+.admin-field-error {
+  margin: -10px 0 18px;
+  color: #ff5370;
+  font-size: 1.32rem;
+  line-height: 1.8rem;
+  font-weight: 700;
+}
+
 .admin-file-box {
   min-height: 88px;
   border-radius: 8px;
@@ -1099,7 +1107,7 @@ input[type="number"] {
 
 .admin-cover-drop strong {
   border-radius: 8px;
-  color: var(--white-color);
+  color: var(--text-secondary) !important;
   padding: 12px 22px;
 }
 

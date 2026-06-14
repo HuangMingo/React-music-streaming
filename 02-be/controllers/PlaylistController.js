@@ -177,6 +177,18 @@ const deleteSongFromPlaylist = async (req, res) => {
         res.status(500).json({ message: 'Không thể xóa bài hát khỏi playlist lúc này' });
     }
 }
+
+const getRandomPlaylists = async (req, res) => {
+    try {
+        const limit = req.query.limit;
+        const result = await playlistService.getRandomPlaylists(limit);
+        res.json(result);
+    }
+    catch (error){
+        console.error('Get random playlists failed:', error);
+        res.status(500).json({ message: 'Lỗi hệ thống' });
+    }
+}
 export const PlaylistController = {
     getFavouritePlaylist,
     toggleFavouritePlaylist,
@@ -186,5 +198,6 @@ export const PlaylistController = {
     updatePlaylist,
     deletePlaylist, 
     addSongToPlaylist,
-    deleteSongFromPlaylist
+    deleteSongFromPlaylist,
+    getRandomPlaylists
 };

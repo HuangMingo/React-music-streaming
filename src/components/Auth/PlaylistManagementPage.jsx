@@ -3,10 +3,12 @@ import './PlaylistManagementPage.css';
 export function PlaylistManagementPage({
   active,
   editingPlaylistId,
+  errors,
   onClearSongs,
   onCloseForm,
   onDeletePlaylist,
   onEditPlaylist,
+  onFormChange,
   onImageChange,
   onOpenCreateForm,
   onSubmitPlaylist,
@@ -16,7 +18,6 @@ export function PlaylistManagementPage({
   selectedPlaylistSongIds,
   selectedPlaylistSongs,
   setPlaylistDropdownOpen,
-  setPlaylistForm,
   songs,
   systemPlaylists,
   togglePlaylistSong,
@@ -48,7 +49,8 @@ export function PlaylistManagementPage({
         <div className="admin-song-editor__grid">
           <form className="admin-song-card" onSubmit={onSubmitPlaylist}>
             <label>Tên playlist <span>*</span></label>
-            <input maxLength={255} placeholder="Nhập tên playlist" value={playlistForm.name} onChange={(e) => setPlaylistForm({ ...playlistForm, name: e.target.value })} />
+            <input maxLength={255} placeholder="Nhập tên playlist" value={playlistForm.name} onChange={(e) => onFormChange({ ...playlistForm, name: e.target.value }, 'name')} />
+            {errors?.name ? <p className="admin-field-error">{errors.name}</p> : null}
 
             <label>Ảnh bìa playlist</label>
             <input id="admin-playlist-image-upload" hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => onImageChange(e.target.files?.[0])} />
@@ -70,12 +72,14 @@ export function PlaylistManagementPage({
               </p>
             ) : null}
             {uploading.playlist ? <p className="admin-song-hint">{uploading.playlist}</p> : null}
+            {errors?.image ? <p className="admin-field-error">{errors.image}</p> : null}
             <p className="admin-song-hint">Định dạng: JPG, PNG, WEBP</p>
 
             <div className="admin-song-editor__actions">
               <button type="button" className="admin-cancel-btn" onClick={onCloseForm}>Hủy</button>
               <button type="submit" className="admin-save-btn" disabled={uploading.playlist === 'Đang upload...'}>Lưu playlist</button>
             </div>
+            {errors?.form ? <p className="admin-field-error">{errors.form}</p> : null}
           </form>
 
           <section className="admin-song-card">

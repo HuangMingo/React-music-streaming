@@ -6,6 +6,7 @@ export function SongManagementPage({
   albums,
   artists,
   editingSongId,
+  errors,
   formatDuration,
   onCloseForm,
   onDeleteSong,
@@ -32,6 +33,7 @@ export function SongManagementPage({
         artists={artists}
         songFiles={songFiles}
         songForm={songForm}
+        errors={errors}
         songSubmitting={songSubmitting}
         editingSongId={editingSongId}
         uploading={uploading}
@@ -46,14 +48,7 @@ export function SongManagementPage({
   return (
     <section className="admin-panel">
       <div className="admin-panel__header">
-        <div>
-          <h3>Quản lý bài hát</h3>
-        </div>
-      </div>
-      <div>
-        <form className="admin-form">
-          <input placeholder="Tìm kiếm bài hát" value={songForm.title} onChange={(e) => onFormChange({ ...songForm, title: e.target.value })} />
-        </form>
+        <h3>Quản lý bài hát</h3>
         <button type="button" className="admin-save-btn" onClick={onOpenCreateForm}>
           Thêm bài hát
         </button>

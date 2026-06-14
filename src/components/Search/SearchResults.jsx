@@ -633,14 +633,13 @@ export function SearchResults() {
                                           ? (isFavouriteAlbum ? 'Bỏ thích album' : 'Thêm vào album yêu thích')
                                           : (!isMine ? (favouritePlaylistIds.has(pl.id) ? 'Bỏ thích playlist' : 'Thêm vào playlist yêu thích') : undefined)
                                       }
-                                    >
-                                      {isMine ? (
-                                        <i className="btn--icon bi bi-x-lg" onClick={() => handleClickDeletePlaylist(pl.id)} />
-                                      ) : isAlbum ? (
-                                        <i className={`btn--icon icon--heart bi bi-heart${isFavouriteAlbum ? '-fill' : ''} primary`} />
-                                      ) : (
-                                        <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(pl.id) ? '-fill' : ''} primary`} />
-                                      )}
+                                    >{
+                                        isAlbum ? (
+                                          <i className={`btn--icon icon--heart bi bi-heart${isFavouriteAlbum ? '-fill' : ''} primary`} />
+                                        ) : (
+                                          <i className={`btn--icon icon--heart bi bi-heart${favouritePlaylistIds.has(pl.id) ? '-fill' : ''} primary`} />
+                                        )
+                                      }
                                     </div>
                                     <div className="btn--play-playlist" onClick={(event) => (isAlbum ? handlePlayAlbum(event, pl) : handlePlayPlaylist(event, pl))}>
                                       <div className="control-btn btn-toggle-play"><i className="bi bi-play-fill" /></div>
@@ -657,7 +656,10 @@ export function SearchResults() {
                                 </div>
                                 <div className="row__item-info search-page__card-info">
                                   <span className="row__info-name is-twoline">{isAlbum ? getAlbumName(pl) : (pl.name || pl.playlist_name)}</span>
-                                  <h3 className="row__info-creator">{isAlbum ? (pl.artist_name || 'Album') : (pl.username || pl.creator || 'Playlist')}</h3>
+                                  <h3 className="row__info-creator">{isAlbum ? (pl.artist_name || 'Album')
+                                    // : (pl.username || pl.creator || 'Playlist')
+                                    : ''
+                                  }</h3>
                                 </div>
                               </div>
                             </div>

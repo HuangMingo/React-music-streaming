@@ -1,5 +1,6 @@
 export function UpdateArtist({
   artistForm,
+  errors = {},
   editingArtistId,
   uploading,
   onBioChange,
@@ -32,7 +33,8 @@ export function UpdateArtist({
       <div className="admin-song-editor__grid">
         <form className="admin-song-card" onSubmit={onSubmit}>
           <label>Tên nghệ sĩ <span>*</span></label>
-          <input maxLength={255} placeholder="Nhập tên nghệ sĩ" value={artistForm.name} onChange={(e) => onFormChange({ ...artistForm, name: e.target.value })} />
+          <input maxLength={255} placeholder="Nhập tên nghệ sĩ" value={artistForm.name} onChange={(e) => onFormChange({ ...artistForm, name: e.target.value }, 'name')} />
+          {errors.name ? <p className="admin-field-error">{errors.name}</p> : null}
 
           <label>Ảnh nghệ sĩ</label>
           <input id="admin-artist-image-upload" hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => onImageChange(e.target.files?.[0])} />
@@ -54,6 +56,7 @@ export function UpdateArtist({
             </p>
           ) : null}
           {uploading.artist ? <p className="admin-song-hint">{uploading.artist}</p> : null}
+          {errors.image ? <p className="admin-field-error">{errors.image}</p> : null}
           <p className="admin-song-hint">Định dạng: JPG, PNG, WEBP</p>
 
           <label>Giới thiệu</label>
@@ -70,12 +73,14 @@ export function UpdateArtist({
               <a href={artistForm.bio} target="_blank" rel="noreferrer" title={artistForm.bio}>{artistForm.bio}</a>
             </p>
           ) : null}
+          {errors.bio ? <p className="admin-field-error">{errors.bio}</p> : null}
           <p className="admin-song-hint">Định dạng: TXT</p>
 
           <div className="admin-song-editor__actions">
             {editingArtistId ? <button type="button" className="admin-cancel-btn" onClick={onClose}>Hủy</button> : null}
             <button type="submit" className="admin-save-btn" disabled={uploading.artist === 'Đang upload...'}>Lưu nghệ sĩ</button>
           </div>
+          {errors.form ? <p className="admin-field-error">{errors.form}</p> : null}
         </form>
       </div>
     </section>

@@ -7,6 +7,7 @@ export function ArtistManagementPage({
   artistFormOpen,
   artists,
   editingArtistId,
+  errors,
   onBioChange,
   onCloseForm,
   onDeleteArtist,
@@ -25,6 +26,7 @@ export function ArtistManagementPage({
     return (
       <UpdateArtist
         artistForm={artistForm}
+        errors={errors}
         editingArtistId={editingArtistId}
         uploading={uploading}
         onClose={onCloseForm}

@@ -37,6 +37,7 @@ export function InsertSong({
   artists,
   songFiles,
   songForm,
+  errors = {},
   songSubmitting,
   editingSongId,
   uploading,
@@ -57,7 +58,7 @@ export function InsertSong({
   const selectedArtists = artists.filter((artist) => selectedArtistIds.map(Number).includes(Number(artist.id)));
 
   function updateArtistIds(nextArtistIds) {
-    onFormChange({ ...songForm, artist_ids: nextArtistIds });
+    onFormChange({ ...songForm, artist_ids: nextArtistIds }, 'artist_ids');
   }
 
   function toggleArtist(artistId) {
@@ -96,7 +97,7 @@ export function InsertSong({
 
       <div className="admin-song-editor__header">
         <div className="admin-song-editor__title">
-          <button type="button" className="admin-back-btn" onClick={onClose}>←</button>
+          <button type="button" className="admin-back-btn" onClick={onClose}><i class="bi bi-arrow-left"></i></button>
           <div>
             <h2>{songActionLabel}</h2>
           </div>
@@ -107,17 +108,19 @@ export function InsertSong({
       <div className="admin-song-editor__grid">
         <section className="admin-song-card">
           <label>Tiêu đề bài hát <span>*</span></label>
-          <input maxLength={255} placeholder="Nhập tiêu đề bài hát" value={songForm.title} onChange={(event) => onFormChange({ ...songForm, title: event.target.value })} />
+          <input maxLength={255} placeholder="Nhập tiêu đề bài hát" value={songForm.title} onChange={(event) => onFormChange({ ...songForm, title: event.target.value }, 'title')} />
+          {errors.title ? <p className="admin-field-error">{errors.title}</p> : null}
 
           <label>Album</label>
-          <select value={songForm.album_id} onChange={(event) => onFormChange({ ...songForm, album_id: event.target.value })}>
+          <select value={songForm.album_id} onChange={(event) => onFormChange({ ...songForm, album_id: event.target.value }, 'album_id')}>
             <option value="">Chọn album</option>
             {albums.map((album) => <option key={album.id} value={album.id}>{album.title || album.name}</option>)}
           </select>
           <p className="admin-song-hint">Chọn album chứa bài hát nếu có.</p>
 
           <label>Số thứ tự trong album</label>
-          <input type="number" min="1" placeholder="Ví dụ: 1, 2, 3..." value={songForm.track_number} onChange={(event) => onFormChange({ ...songForm, track_number: event.target.value })} />
+          <input type="number" min="1" placeholder="Ví dụ: 1, 2, 3..." value={songForm.track_number} onChange={(event) => onFormChange({ ...songForm, track_number: event.target.value }, 'track_number')} />
+          {errors.track_number ? <p className="admin-field-error">{errors.track_number}</p> : null}
           <p className="admin-song-hint">Ví dụ: 1, 2, 3...</p>
 
           <label>Nghệ sĩ</label>
@@ -173,6 +176,7 @@ export function InsertSong({
           </div>
           <CloudinaryFileLink label="Đường dẫn Cloudinary audio" url={songForm.audio} />
           {uploading?.audio ? <p className="admin-song-hint">{uploading.audio}</p> : null}
+          {errors.audio ? <p className="admin-field-error">{errors.audio}</p> : null}
           <p className="admin-song-hint">Định dạng: MP3</p>
         </section>
 
@@ -194,6 +198,7 @@ export function InsertSong({
           </div>
           <CloudinaryFileLink label="Đường dẫn Cloudinary ảnh bìa" url={songForm.image} />
           {uploading?.image ? <p className="admin-song-hint">{uploading.image}</p> : null}
+          {errors.image ? <p className="admin-field-error">{errors.image}</p> : null}
           <p className="admin-song-hint">Định dạng: JPG, PNG, WEBP</p>
 
           <label>Lyrics</label>
@@ -206,6 +211,7 @@ export function InsertSong({
           </div>
           <CloudinaryFileLink label="Đường dẫn Cloudinary lyrics" url={songForm.lyrics} />
           {uploading?.lyrics ? <p className="admin-song-hint">{uploading.lyrics}</p> : null}
+          {errors.lyrics ? <p className="admin-field-error">{errors.lyrics}</p> : null}
 
           <label>Thời lượng bài hát</label>
           <div className="admin-readonly-field">Tự động</div>
@@ -214,6 +220,7 @@ export function InsertSong({
             <button type="button" className="admin-cancel-btn" onClick={onClose}>Hủy</button>
             <button type="submit" className="admin-save-btn" disabled={songSubmitting || Object.values(uploading || {}).some((status) => status === 'Đang upload...')}>{songSubmitting ? 'Đang lưu...' : 'Lưu bài hát'}</button>
           </div>
+          {errors.form ? <p className="admin-field-error">{errors.form}</p> : null}
         </section>
       </div>
 

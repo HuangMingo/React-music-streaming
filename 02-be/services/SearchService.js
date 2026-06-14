@@ -59,11 +59,11 @@ async function searchPlaylists(like, limit, userId) {
         SELECT p.*, u.username
         FROM playlist p join "user"  u on p.creator_id = u.id
         WHERE unaccent(name) ILIKE unaccent($1) and ispublic = TRUE
-             issystem = TRUE
+             and issystem = TRUE
         ORDER BY name ASC
         LIMIT $2
         `,
-        [like, limit, userId ?? null]
+        [like, limit]
     );
 
     return result.rows;

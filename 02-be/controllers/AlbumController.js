@@ -84,5 +84,16 @@ export const AlbumController = {
             console.error('Create album failed:', error);
             res.status(500).json({ message: 'Không thể tạo album.' });
         }
+    },
+    async getRandomAlbums(req, res){
+        try {
+            const limit = req.query.limit;
+            const result = await albumService.getRandomAlbums(limit);
+            return res.json(result);
+        }
+        catch(error){
+            console.error("Get random albums failed", error);
+            res.status(500).json({ message: 'Lỗi hệ thống' });
+        }
     }
 };

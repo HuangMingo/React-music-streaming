@@ -1,5 +1,13 @@
 import { pool } from "../config/dbpg.js"
 
+function normalizeLimit(limit) {
+    const parsedLimit = Number(limit);
+    if (!Number.isInteger(parsedLimit) || parsedLimit <= 0) {
+        return 6;
+    }
+
+    return Math.min(parsedLimit, 24);
+}
 const DEFAULT_PLAYLIST_IMAGE = "https://res.cloudinary.com/dnsne0dgp/image/upload/v1775963817/macdinh_ivawgv.jpg";
 //Lấy tất cả playlist (dùng cho trang khám phá)
 const getAllPlaylist = async () => { }
@@ -136,6 +144,7 @@ const getUserCreatedPlaylist = async (userId) => {
         `, [userId]);
     return result.rows;
 }
+//Lệnh tạo playlist mới
 const createPlaylist = async ({ name, creatorId, ispublic, isDefault }) => {
     const result = await pool.query(
         `
@@ -298,6 +307,26 @@ const getPlaylistById = async (playlistId) => {
     return result.rows[0] ?? null;
 }
 
+const getRandomPlaylists = async (limit) => {
+    const safeLimit = normalizeLimit(limit);
+    const result = await pool.query(`
+         SELECT
+            p.id,
+            p.name AS playlist_name,
+            p.creator_id,
+            u.username,
+            p.image AS playlist_image,
+            p.ispublic,
+            p.isdefault,
+            p.issystem AS "isSystem"
+        FROM playlist p
+        JOIN "user" u ON u.id = p.creator_id
+        WHERE p.ispublic = TRUE and p.issystem = TRUE
+        ORDER BY RANDOM()
+        LIMIT $1
+        `, [safeLimit]);
+    return result.rows;
+}
 export const playlistService = {
     getAllPlaylist,
     getFavouritePlaylist,
@@ -310,5 +339,6 @@ export const playlistService = {
     addSongToPlaylist,
     deleteSongFromPlaylist,
     getDefaultPlaylistIdByUser,
-    getPlaylistById
+    getPlaylistById,
+    getRandomPlaylists,
 }

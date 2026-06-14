@@ -1,6 +1,6 @@
 import { AllSongs } from "./AllSongs";
 import { PlaylistOfDay } from "./PlaylistOfDay";
-import { NewPlaylist } from "./NewPlaylist";
+import { BestAlbums } from "./BestAlbums";
 
 export function TabExplorer() {
     return (
@@ -13,7 +13,7 @@ export function TabExplorer() {
                             <AllSongs />
 
                             {/* Album nổi bật */}
-                            <NewPlaylist />
+                            <BestAlbums />
 
                             {/* Dành cho bạn */}
                             <PlaylistOfDay />

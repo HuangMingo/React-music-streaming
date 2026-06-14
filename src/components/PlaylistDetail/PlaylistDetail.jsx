@@ -7,6 +7,8 @@ import { API_URL } from '../../api.js';
 export function PlaylistDetail() {
     const { id } = useParams();
     const location = useLocation();
+    console.log("Current location:", location);
+    //Xác định đây là album hay playlist
     const isAlbumDetail = location.pathname.startsWith("/album/");
     const [playlist, setPlaylist] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -87,6 +89,7 @@ export function PlaylistDetail() {
                             playlist={playlist}
                             hideHeaderTitle = {true}
                             playlistScope="explore"
+                            isAlbumDetail={isAlbumDetail}
                             loading={loading}
                             emptyMessage={isAlbumDetail ? "Album chưa có bài hát" : "Playlist chưa có bài hát"}
                         />

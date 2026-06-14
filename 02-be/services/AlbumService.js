@@ -1,4 +1,12 @@
-import {pool} from '../config/dbpg.js';
+import { pool } from '../config/dbpg.js';
+function normalizeLimit(limit) {
+    const parsedLimit = Number(limit);
+    if (!Number.isInteger(parsedLimit) || parsedLimit <= 0) {
+        return 6;
+    }
+
+    return Math.min(parsedLimit, 24);
+}
 const getAllAlbum = async () => {
     const result = await pool.query('SELECT * FROM album ORDER BY id');
     return result.rows;
@@ -136,12 +144,29 @@ const createAlbum = async ({ name, artistId, releaseDate }) => {
     );
     return result.rows[0];
 };
-
+const getRandomAlbums = async (limit) => {
+    const safeLimit = normalizeLimit(limit);
+    const result = await pool.query(`
+            SELECT
+            al.id,
+            al.title,
+            al.image,
+            al.release_date,
+            al.artist_id,
+            art.name AS artist_name
+        FROM album al
+        LEFT JOIN artist art ON art.id = al.artist_id
+        ORDER BY RANDOM()
+        LIMIT $1
+        `, [safeLimit]);
+    return result.rows;
+}
 export const albumService = {
     getAllAlbum,
     getAlbumById,
     createAlbum,
     getFavouriteAlbum,
     isFavouriteAlbum,
-    toggleFavouriteAlbum
+    toggleFavouriteAlbum,
+    getRandomAlbums
 };
