@@ -184,7 +184,7 @@ export function Header({ onClose }) {
             {/* Header */}
             < header className="header grid" >
                 <div className="header__with-search">
-                    <button
+                    {/* <button
                         className="header__button"
                         type="button"
                         onClick={handleBack}
@@ -201,7 +201,7 @@ export function Header({ onClose }) {
                         title={canGoForward ? 'Trang tiếp theo' : 'Không có trang tiếp theo'}
                     >
                         <i className="bi bi-arrow-right header__button-icon" />
-                    </button>
+                    </button> */}
                     <div className="header__search" ref={inputRef}>
                         <input
                             type="text"
