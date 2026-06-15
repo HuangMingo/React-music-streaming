@@ -328,6 +328,31 @@ const getRandomPlaylists = async (limit) => {
         `, [safeLimit]);
     return result.rows;
 }
+
+const getNewestPlaylists = async (limit = 5) => {
+    const safeLimit = Number.isInteger(Number(limit)) && Number(limit) > 0
+        ? Math.min(Number(limit), 24)
+        : 5;
+
+    const result = await pool.query(`
+        SELECT
+            p.id,
+            p.name AS playlist_name,
+            p.creator_id,
+            u.username,
+            p.image AS playlist_image,
+            p.ispublic,
+            p.isdefault,
+            p.issystem AS "isSystem"
+        FROM playlist p
+        LEFT JOIN "user" u ON u.id = p.creator_id
+        WHERE p.ispublic = TRUE and p.issystem = TRUE
+        ORDER BY p.id DESC
+        LIMIT $1
+    `, [safeLimit]);
+
+    return result.rows;
+}
 export const playlistService = {
     getAllPlaylist,
     getFavouritePlaylist,
@@ -342,4 +367,5 @@ export const playlistService = {
     getDefaultPlaylistIdByUser,
     getPlaylistById,
     getRandomPlaylists,
+    getNewestPlaylists,
 }

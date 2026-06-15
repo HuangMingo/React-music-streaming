@@ -91,12 +91,7 @@ export function SongSection() {
 
                     <div className="col l-12 m-12 c-12">
                         <div className="container__playlist">
-                            <div className="playlist__header mt-5">
-                                <span className="playlist__header-title">Bài hát</span>
-                                <span className="playlist__header-time">Thời gian</span>
-                                <span className="playlist__header-options hide-on-mobile">Tùy chọn</span>
-                            </div>
-
+            
                             <div className="playlist__list mb-30 overflow-visible">
                                 {songs.length === 0 ? (
                                     <div className="box--no-content">

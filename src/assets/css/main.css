@@ -1320,6 +1320,8 @@ label .container__header-icon {
     font-weight: 500;
     font-size: 1.2rem;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     color: var(--text-secondary);
     text-transform: uppercase;
     box-shadow: 0 1px 2px var(--bg-color);

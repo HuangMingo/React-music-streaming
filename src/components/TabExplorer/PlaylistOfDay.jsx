@@ -149,10 +149,7 @@ export function PlaylistOfDay() {
                                                         <div
                                                             className="action-btn btn--heart"
                                                             onClick={(event) => {
-                                                                if (isMine) {
-                                                                    event.stopPropagation();
-                                                                    return;
-                                                                }
+                                                               
                                                                 toggleFavouritePlaylist(event, playlist.id);
                                                             }}
                                                             title={!isMine ? (isFavouritePlaylist ? "Bỏ thích playlist" : "Thêm vào playlist yêu thích") : undefined}

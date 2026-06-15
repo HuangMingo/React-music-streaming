@@ -13,4 +13,5 @@ router.delete('/delete-playlist', PlaylistController.deletePlaylist);
 router.post('/add-song-to-playlist', PlaylistController.addSongToPlaylist);
 router.delete('/delete-song-from-playlist', PlaylistController.deleteSongFromPlaylist);
 router.get('/random-playlists', PlaylistController.getRandomPlaylists);
+router.get('/new', PlaylistController.getNewestPlaylists);
 export default router;

@@ -189,6 +189,18 @@ const getRandomPlaylists = async (req, res) => {
         res.status(500).json({ message: 'Lỗi hệ thống' });
     }
 }
+
+const getNewestPlaylists = async (req, res) => {
+    try {
+        const limit = req.query.limit;
+        const result = await playlistService.getNewestPlaylists(limit);
+        res.json(result);
+    }
+    catch (error){
+        console.error('Get newest playlists failed:', error);
+        res.status(500).json({ message: 'Lỗi hệ thống' });
+    }
+}
 export const PlaylistController = {
     getFavouritePlaylist,
     toggleFavouritePlaylist,
@@ -199,5 +211,6 @@ export const PlaylistController = {
     deletePlaylist, 
     addSongToPlaylist,
     deleteSongFromPlaylist,
-    getRandomPlaylists
+    getRandomPlaylists,
+    getNewestPlaylists,
 };

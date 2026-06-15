@@ -95,5 +95,16 @@ export const AlbumController = {
             console.error("Get random albums failed", error);
             res.status(500).json({ message: 'Lỗi hệ thống' });
         }
+    },
+    async getNewestAlbums(req, res){
+        try {
+            const limit = req.query.limit;
+            const result = await albumService.getNewestAlbums(limit);
+            return res.json(result);
+        }
+        catch(error){
+            console.error("Get newest albums failed", error);
+            res.status(500).json({ message: 'Lỗi hệ thống' });
+        }
     }
 };

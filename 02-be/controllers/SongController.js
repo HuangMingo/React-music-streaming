@@ -1,4 +1,6 @@
 import { songService } from './../services/SongService.js';
+import { playlistService } from './../services/PlaylistService.js';
+import { albumService } from './../services/AlbumService.js';
 //Lấy toàn bộ bài hát
 const getAllSong = async (req, res) => {
     const result = await songService.getAllSong();
@@ -72,11 +74,27 @@ const incrementPlayCount = async (req, res) => {
     }
 }
 
+const getNewMusic = async (req, res) => {
+    try {
+        const [songs, playlists, albums] = await Promise.all([
+            songService.getNewestSongs(req.query.songLimit ?? 6),
+            playlistService.getNewestPlaylists(req.query.playlistLimit ?? 5),
+            albumService.getNewestAlbums(req.query.albumLimit ?? 5),
+        ]);
+
+        res.json({ songs, playlists, albums });
+    } catch (error) {
+        console.error('Get new music failed:', error);
+        res.status(500).json({ message: 'Lỗi hệ thống' });
+    }
+}
+
 export const SongController = {
     getAllSong,
     getNewestSongs,
     isFavouriteSong,
     toggleFavouriteSong,
     getTop10MostPlayedSongs,
-    incrementPlayCount
+    incrementPlayCount,
+    getNewMusic,
 }

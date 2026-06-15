@@ -467,7 +467,9 @@ export function ArtistDetail() {
                   </div>
                   <div className="row__item-info">
                     <a href="#" className="row__info-name is-twoline" onClick={(event) => event.preventDefault()}>{albumTitle}</a>
-                    <h3 className="row__info-creator">{album.release_date ? new Date(album.release_date).getFullYear() : "Album"} · {album.song_count ?? album.songs?.length ?? 0} bài hát</h3>
+                    <h3 className="row__info-creator"
+                      onclick={(event) => e.stopPropagation()}
+                    >{album.release_date ? new Date(album.release_date).getFullYear() : "Album"} · {album.song_count ?? album.songs?.length ?? 0} bài hát</h3>
                   </div>
                 </div>
               </div>
@@ -527,7 +529,7 @@ export function ArtistDetail() {
                     </div>
                     <div className="overlay" />
                   </div>
-                  <div className="row__item-info">
+                  <div className="row__item-info" onclick={(event) => event.stopPropagation()}>
                     <a href="#" className="row__info-name is-twoline" onClick={(event) => event.preventDefault()}>{playlistTitle}</a>
                     <h3 className="row__info-creator">{playlist.song_count ?? playlist.songs?.length ?? 0} bài hát</h3>
                   </div>
