@@ -284,7 +284,7 @@ export function AddSongToPlaylist({
                         />
                     </div>
 
-                    <button
+                    {/* <button
                         type="button"
                         className="playlist__menu-option"
                         onClick={handleCreatePlaylistClick}
@@ -293,7 +293,7 @@ export function AddSongToPlaylist({
                     >
                         <i className="bi bi-plus-circle" style={{ fontSize: "1.4rem" }} />
                         <span className="playlist__menu-option-title">Tạo playlist mới</span>
-                    </button>
+                    </button> */}
                     <div className="playlist__menu-options-scroll">
                         {filteredPlaylists.length === 0 ? (
                             <div className="playlist__menu-empty">
