@@ -5,6 +5,16 @@ const getAllSong = async (req, res) => {
     res.send(result);
 }
 //Kiểm tra bài hát có phải là yêu thích của người dùng hay không
+const getNewestSongs = async (req, res) => {
+    try {
+        const result = await songService.getNewestSongs(req.query.limit);
+        res.json(result);
+    } catch (error) {
+        console.error('Get newest songs failed:', error);
+        res.status(500).json({ message: 'Lá»—i há»‡ thá»‘ng' });
+    }
+}
+
 const isFavouriteSong = async (req, res) => {
     try {
         const defaultPlaylistId = Number(req.query.defaultPlaylistId);
@@ -64,6 +74,7 @@ const incrementPlayCount = async (req, res) => {
 
 export const SongController = {
     getAllSong,
+    getNewestSongs,
     isFavouriteSong,
     toggleFavouriteSong,
     getTop10MostPlayedSongs,

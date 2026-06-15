@@ -309,7 +309,9 @@ export function SearchResults() {
   }
 
   function getArtistNames(song) {
-    return Array.isArray(song?.artist_names) ? song.artist_names.join(', ') : '';
+    return Array.isArray(song?.artist_names)
+      ? song.artist_names.filter((artist) => Boolean(String(artist || '').trim()))
+      : [];
   }
 
   const topSongs = activeTab === 'tat-ca' ? results.songs.slice(0, 5) : results.songs;
@@ -493,15 +495,20 @@ export function SearchResults() {
                                   <span className="playlist__song-title info__title">{song.title}</span>
                                   <p className="playlist__song-author info__author">
                                     {
-                                      song.artist_names.map((artist, artistIndex) => {
-                                        return (
-                                          <span key={`${artist}-${artistIndex}`}>
-                                            <ArtistNameLink artist={artist} />
-                                            {artistIndex < song.artist_names.length - 1 && ", "}
-                                          </span>
-                                        )
+                                      getArtistNames(song).length ?
+                                        (
+                                          getArtistNames(song).map((artist, artistIndex) => {
+                                          return (
+                                            <span key={`${artist}-${artistIndex}`}>
+                                              <ArtistNameLink artist={artist} />
+                                              {artistIndex < getArtistNames(song).length - 1 && ", "}
+                                            </span>
+                                          )
 
-                                      })
+                                        })
+                                      ) : (
+                                        "Unknown Artist"
+                                      )
                                     }
                                   </p>
                                 </div>

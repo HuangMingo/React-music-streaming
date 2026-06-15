@@ -64,7 +64,7 @@ export function SongSection() {
     const songs = personalSelectedPlaylist?.songs ?? [];
     const canRemoveFromCurrentPlaylist =
         personalSelectedPlaylist?.isdefault !== true &&
-        Number(personalSelectedPlaylist?.creator_id) === Number(currentUser?.id);
+        Number(personalSelectedPlaylist?.creator_id) === Number(currentUser?.id) && personalSelectedPlaylist.issystem === false;
 
    
 
@@ -151,7 +151,7 @@ export function SongSection() {
                                                                     </span>
                                                                 ))
                                                             ) : (
-                                                                "Đang cập nhật"
+                                                                "Unknown Artist"
                                                             )}
                                                         </p>
                                                     </div>

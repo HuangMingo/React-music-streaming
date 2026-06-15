@@ -16,6 +16,12 @@ import { API_URL } from '../../api.js';
 const SONGS_PER_COLUMN = 3;
 const NUM_COLUMNS = 2;
 
+function getValidArtistNames(song) {
+    return Array.isArray(song?.artist_names)
+        ? song.artist_names.filter((artist) => Boolean(String(artist || '').trim()))
+        : [];
+}
+
 export function AllSongs() {
     const { setCurrentSong,
         setCurrentTime,
@@ -200,7 +206,7 @@ export function AllSongs() {
                                             <div
                                                 className={`playlist__list-song media media mb-15 ${currentSong.id === song.id ? 'active' : ''} ${currentSong.id === song.id && isPlaying ? 'playing' : ''}`}
                                                 key={`${colIndex}-${rowIndex}`}
-                                                onClick={() => {handleClickSong(song); setExploreSelectedPlaylist(null);} }
+                                                onClick={() => { handleClickSong(song); setExploreSelectedPlaylist(null); }}
                                                 style={{ cursor: "pointer" }}
                                             >
                                                 <div className="playlist__song-info media__left">
@@ -227,14 +233,18 @@ export function AllSongs() {
                                                         <span className="playlist__song-title info__title">{song.title}</span>
                                                         <p className="playlist__song-author info__author">
                                                             {
-                                                                song?.artist_names?.map((artist, i) => {
-                                                                    return (
-                                                                        <span key={i}>
-                                                                            <ArtistNameLink artist={artist} />
-                                                                            {i < song?.artist_names?.length - 1 && ', '}
-                                                                        </span>
-                                                                    );
-                                                                })
+                                                                getValidArtistNames(song).length > 0 ?
+                                                                    (
+                                                                        getValidArtistNames(song).map((artist, i) => {
+                                                                            return (
+                                                                                <span key={i}>
+                                                                                    <ArtistNameLink artist={artist} />
+                                                                                    {i < getValidArtistNames(song).length - 1 && ', '}
+                                                                                </span>
+                                                                            );
+                                                                        })
+                                                                    )
+                                                                    : ("Unknown Artist")
                                                             }
                                                         </p>
                                                     </div>
@@ -258,7 +268,7 @@ export function AllSongs() {
                                                         <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? '-fill' : ''} primary`}></i>
                                                     </div>
                                                     <div className="playlist__song-btn option-btn playlist__song-more" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
-                                                         title="Khác">
+                                                        title="Khác">
                                                         <i className="btn--icon bi bi-three-dots"></i>
                                                         <AddSongToPlaylist
                                                             song={song}

@@ -4,6 +4,8 @@ import axios from 'axios';
 import { showNotificationToast } from '../toast.js';
 import { API_URL } from '../api.js';
 const MusicContext = createContext();
+const RECENT_SONGS_KEY = 'recentSongs';
+const RECENT_SONGS_LIMIT = 20;
 const EMPTY_SONG = {
   path: '',
   name: '',
@@ -26,6 +28,43 @@ function restorePlaylistFromStorage(key) {
   return null;
 }
 
+function getRecentSongsFromStorage() {
+  try {
+    const data = JSON.parse(localStorage.getItem(RECENT_SONGS_KEY));
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveRecentSongToStorage(song) {
+  if (!song?.id || !song?.audio) {
+    return getRecentSongsFromStorage();
+  }
+
+  const recentSong = {
+    id: song.id,
+    title: song.title,
+    image: song.image,
+    audio: song.audio,
+    duration_seconds: song.duration_seconds,
+    artists: song.artists,
+    artist_names: song.artist_names,
+    album_id: song.album_id,
+    lyrics: song.lyrics,
+  };
+
+  const oldSongs = getRecentSongsFromStorage();
+  const filteredSongs = oldSongs.filter(
+    (item) => Number(item.id) !== Number(song.id)
+  );
+  const newRecentSongs = [recentSong, ...filteredSongs].slice(0, RECENT_SONGS_LIMIT);
+
+  localStorage.setItem(RECENT_SONGS_KEY, JSON.stringify(newRecentSongs));
+
+  return newRecentSongs;
+}
+
 export function MusicProvider({ children }) {
   //Số bài hát yêu thích trong playlist  bản yêu thích của người dùng (0: mặc định, 1: yêu thích, 2: không yêu thích)
   const { currentUser, setCurrentUser } = useAuthContext();
@@ -34,6 +73,7 @@ export function MusicProvider({ children }) {
   const [favouriteSongIds, setFavouriteSongIds] = useState(new Set());
   const [favouritePlaylistIds, setFavouritePlaylistIds] = useState(new Set());
   const [favouriteAlbumIds, setFavouriteAlbumIds] = useState(new Set());
+  const [recentSongs, setRecentSongs] = useState(() => getRecentSongsFromStorage());
   const [activePlaylistScope, setActivePlaylistScope] = useState(() => (
     localStorage.getItem("activePlaylistScope") || "personal"
   ));
@@ -335,6 +375,14 @@ export function MusicProvider({ children }) {
     }
   }
   // Sau khi xóa bài hát khỏi playlist thành công, cập nhật lại danh sách bài hát trong playlist đã chọn
+  useEffect(() => {
+    if (!isPlaying || !currentSong?.id || !currentSong?.audio) {
+      return;
+    }
+
+    setRecentSongs(saveRecentSongToStorage(currentSong));
+  }, [currentSong?.id, currentSong?.audio, isPlaying]);
+
   function handleSongRemoved(removedSong) {
 
     setPersonalSelectedPlaylist((prevPlaylist) => {
@@ -660,6 +708,9 @@ export function MusicProvider({ children }) {
       setFavouriteAlbumIds,
       toggleFavouriteAlbum,
       favouriteAlbumVersion,
+      recentSongs,
+      setRecentSongs,
+      saveRecentSongToStorage,
       followedArtists,
       setFollowedArtists,
       artistFollowersCount,

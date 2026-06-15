@@ -267,7 +267,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                     onClick={
                                                         isAlbumDetail ?
                                                             (event) => toggleFavouriteAlbum(event, playlist.id)
-                                                            :(event) => toggleFavouritePlaylist(event, playlist.id)}
+                                                            : (event) => toggleFavouritePlaylist(event, playlist.id)}
                                                     title={favouriteCollectionTitle}
                                                 >
                                                     <i className={`btn--icon icon--heart bi bi-heart${isFavouriteCollection ? "-fill" : ""} primary`}></i>
@@ -312,14 +312,20 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                             <span className="playlist__song-title info__title">{song.title}</span>
                                                             <p className="playlist__song-author info__author">
                                                                 {
-                                                                    song?.artist_names?.map((artist, i) => {
-                                                                        return (
-                                                                            <span key={i}>
-                                                                                <ArtistNameLink artist={artist} />
-                                                                                {i < song?.artist_names?.length - 1 && ', '}
-                                                                            </span>
-                                                                        );
-                                                                    })
+                                                                    song?.artist_names ?
+                                                                        (
+                                                                            song?.artist_names?.map((artist, i) => {
+                                                                                return (
+                                                                                    <span key={i}>
+                                                                                        <ArtistNameLink artist={artist} />
+                                                                                        {i < song?.artist_names?.length - 1 && ', '}
+                                                                                    </span>
+                                                                                );
+                                                                            })
+                                                                        ) :
+                                                                        (
+                                                                            "Unknown artist"
+                                                                        )
                                                                 }
                                                             </p>
                                                         </div>
@@ -349,7 +355,7 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                                 playlists={userPlaylists}
                                                                 selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={!playlist.isdefault && Number(playlist?.creator_id) === Number(currentUser?.id)}
+                                                                canRemoveFromCurrentPlaylist={!playlist.isdefault && Number(playlist?.creator_id) === Number(currentUser?.id) && playlist.issystem === false}
                                                                 isAddingSong={isAddingSong}
                                                                 onCloseMenu={() => setOpenSongMenuId(null)}
                                                             />

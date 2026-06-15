@@ -5,7 +5,10 @@ const getAllSong = async () => {
     const result = await pool.query(`
         SELECT 
             s.*,
-            json_agg(art.name) AS artist_names
+            COALESCE(
+                json_agg(art.name) FILTER (WHERE art.name IS NOT NULL),
+                '[]'::json
+            ) AS artist_names
         FROM artist_song ars
             JOIN artist art ON art.id = ars.artist_id
             RIGHT JOIN song s ON ars.song_id = s.id
@@ -13,6 +16,39 @@ const getAllSong = async () => {
         ORDER BY RANDOM()
         LIMIT 6
     `);
+    return result.rows;
+}
+const getNewestSongs = async (limit = 6) => {
+    const safeLimit = Number.isInteger(Number(limit)) && Number(limit) > 0
+        ? Math.min(Number(limit), 24)
+        : 6;
+    const result = await pool.query(`
+        WITH song_artists AS (
+            SELECT
+                ars.song_id,
+                COALESCE(
+                    json_agg(art.name ORDER BY art.name) FILTER (WHERE art.name IS NOT NULL),
+                    '[]'::json
+                ) AS artist_names
+            FROM artist_song ars
+            JOIN artist art ON art.id = ars.artist_id
+            GROUP BY ars.song_id
+        )
+        SELECT
+            s.id,
+            s.title,
+            s.image,
+            s.audio,
+            s.duration_seconds,
+            s.release_date,
+            s.album_id,
+            s.lyrics,
+            COALESCE(sa.artist_names, '[]'::json) AS artist_names
+        FROM song s
+        LEFT JOIN song_artists sa ON sa.song_id = s.id
+        ORDER BY s.release_date DESC NULLS LAST, s.id DESC
+        LIMIT $1
+    `, [safeLimit]);
     return result.rows;
 }
 const isFavouriteSong = async (defaultPlaylistId, songId) => {
@@ -67,6 +103,7 @@ const incrementPlayCount = async (songId) => {
 
 export const songService = {
     getAllSong,
+    getNewestSongs,
     isFavouriteSong,
     toggleFavouriteSong,
     getTop10MostPlayedSongs,

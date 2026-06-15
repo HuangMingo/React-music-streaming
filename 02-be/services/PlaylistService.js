@@ -114,6 +114,7 @@ const getUserCreatedPlaylist = async (userId) => {
         p.image AS playlist_image,
         p.isdefault AS isdefault,
         p.ispublic AS ispublic,
+         p.issystem AS issystem,
         -- Bước 2: Chỉ gom nhóm JSON nếu bài hát tồn tại (tránh mảng null)
         COALESCE(
             json_agg(

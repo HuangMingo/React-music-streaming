@@ -21,6 +21,8 @@ import {
 import { DreamChart } from './components/Sidebar/DreamChart.jsx'
 import { Header } from './components/Header.jsx'
 import { initMusicData } from '../public/data/songPlaylists.js'
+import { GenresPage } from './components/GenresPage.jsx'
+import { NewMusicPage } from './components/NewMusicPage.jsx'
 import { OverviewSection } from './components/TabPersonal/Overview/OverviewSection.jsx'
 import { Player } from './components/Player.jsx'
 import { PlaylistSection } from './components/TabPersonal/PlaylistSection.jsx'
@@ -89,8 +91,10 @@ function App() {
     'album',
     'dashboard',
     'dream',
+    'genres',
     'guest',
     'login',
+    'new',
     'personal',
     'playlist',
     'recent',
@@ -205,6 +209,8 @@ function App() {
             </Route>
             <Route path="/dream" element={<DreamChart />} />
             <Route path="/recent" element={<RecentSong />} />
+            <Route path="/new" element={<NewMusicPage />} />
+            <Route path="/genres" element={<GenresPage />} />
             <Route path="/tim-kiem" element={<Navigate to="/tim-kiem/tat-ca" replace />} />
             <Route path="/tim-kiem/:tab" element={<SearchResults />} />
             <Route path="/album/:id" element={<PlaylistDetail />} />

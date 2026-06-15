@@ -1496,7 +1496,7 @@ label .container__header-icon {
     opacity: 0;
     font-size: 1.2rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-color);
     text-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
     pointer-events: none;
     will-change: transform, opacity;
@@ -1947,6 +1947,7 @@ label .container__header-icon {
     will-change: transform;
     animation: rotateThumb 10s linear infinite;
     -webkit-animation: rotateThumb 10s linear infinite;
+  
 }
 
 @keyframes rotateThumb {

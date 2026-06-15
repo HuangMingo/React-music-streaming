@@ -23,7 +23,6 @@ export function Player({ style }) {
     const {
         currentSong,
         setCurrentSong,
-        currentSongId,
         selectedPlaylist,
         currentTime,
         currentVolume,
@@ -235,12 +234,14 @@ export function Player({ style }) {
         setCurrentSong(nextSong)
         setCurrentTime(0);
         setPendingRestoreTime(null);
+        setIsPlaying(true);
     };
     //Hàm chọn bài hát ngẫu nhiên khác với bài hiện tại để phát khi ở chế độ phát ngẫu nhiên
+    const currentSongIndex = songs.findIndex((song) => Number(song.id) === Number(currentSong?.id));
     const pickRandomIndex = () => {
-        if (songs.length <= 1) return currentSongId;
-        let nextIndex = currentSongId;
-        while (nextIndex === currentSongId) {
+        if (songs.length <= 1) return currentSongIndex >= 0 ? currentSongIndex : 0;
+        let nextIndex = currentSongIndex >= 0 ? currentSongIndex : 0;
+        while (nextIndex === currentSongIndex) {
             nextIndex = Math.floor(Math.random() * songs.length);
         }
         return nextIndex;
@@ -248,13 +249,13 @@ export function Player({ style }) {
 
     const handleNextSong = () => {
         if (!songs.length) return;
-        const nextIndex = isRandom ? pickRandomIndex() : currentSongId + 1;
+        const nextIndex = isRandom ? pickRandomIndex() : currentSongIndex >= 0 ? currentSongIndex + 1 : 0;
         playSongAt(nextIndex);
     };
 
     const handlePrevSong = () => {
         if (!songs.length) return;
-        const prevIndex = isRandom ? pickRandomIndex() : currentSongId - 1;
+        const prevIndex = isRandom ? pickRandomIndex() : currentSongIndex >= 0 ? currentSongIndex - 1 : songs.length - 1;
         playSongAt(prevIndex);
     };
 
@@ -352,33 +353,34 @@ export function Player({ style }) {
                                         }}
                                     />
                                     <svg
-                                        fill="#fff"
+                                        fill="var(--text-color)"
                                         viewBox="0 0 512 512"
                                         className="thumb-note note-1"
                                     >
                                         <path d="M470.38 1.51L150.41 96A32 32 0 0 0 128 126.51v261.41A139 139 0 0 0 96 384c-53 0-96 28.66-96 64s43 64 96 64 96-28.66 96-64V214.32l256-75v184.61a138.4 138.4 0 0 0-32-3.93c-53 0-96 28.66-96 64s43 64 96 64 96-28.65 96-64V32a32 32 0 0 0-41.62-30.49z" />
                                     </svg>
                                     <svg
-                                        fill="#fff"
+                                        fill="var(--text-color)"
                                         viewBox="0 0 384 512"
                                         className="thumb-note note-2"
                                     >
                                         <path d="M310.94 1.33l-96.53 28.51A32 32 0 0 0 192 60.34V360a148.76 148.76 0 0 0-48-8c-61.86 0-112 35.82-112 80s50.14 80 112 80 112-35.82 112-80V148.15l73-21.39a32 32 0 0 0 23-30.71V32a32 32 0 0 0-41.06-30.67z" />
                                     </svg>
                                     <svg
-                                        fill="#fff"
+                                        fill="var(--text-color)"
                                         viewBox="0 0 512 512"
                                         className="thumb-note note-3"
                                     >
                                         <path d="M470.38 1.51L150.41 96A32 32 0 0 0 128 126.51v261.41A139 139 0 0 0 96 384c-53 0-96 28.66-96 64s43 64 96 64 96-28.66 96-64V214.32l256-75v184.61a138.4 138.4 0 0 0-32-3.93c-53 0-96 28.66-96 64s43 64 96 64 96-28.65 96-64V32a32 32 0 0 0-41.62-30.49z" />
                                     </svg>
                                     <svg
-                                        fill="#fff"
+                                        fill="var(--text-color)"
                                         viewBox="0 0 384 512"
                                         className="thumb-note note-4"
                                     >
                                         <path d="M310.94 1.33l-96.53 28.51A32 32 0 0 0 192 60.34V360a148.76 148.76 0 0 0-48-8c-61.86 0-112 35.82-112 80s50.14 80 112 80 112-35.82 112-80V148.15l73-21.39a32 32 0 0 0 23-30.71V32a32 32 0 0 0-41.06-30.67z" />
                                     </svg>
+
                                 </div>
                             </div>
                             <div className="media__content">
@@ -390,11 +392,7 @@ export function Player({ style }) {
                                     </div>
                                     <div className="player__song-author info__author">
                                         {
-                                            currentSong?.artist_names?.length === 0 ? (
-                                                <span key={index}>
-                                                    <ArtistNameLink artist={"Unknown Artist"} />
-                                                </span>
-                                            ):
+                                            currentSong?.artist_names?.length ?
                                                 (
                                                     currentSong?.artist_names?.map((artist, index) => {
                                                         return (
@@ -404,6 +402,9 @@ export function Player({ style }) {
                                                             </span>
                                                         )
                                                     })
+                                                )
+                                                :(
+                                                    "Unknown artist"
                                                 )
 
                                         }
@@ -608,28 +609,28 @@ export function Player({ style }) {
                                             }}
                                         />
                                         <svg
-                                            fill="#fff"
+                                            fill="var(--text-color)"
                                             viewBox="0 0 512 512"
                                             className="thumb-note note-1"
                                         >
                                             <path d="M470.38 1.51L150.41 96A32 32 0 0 0 128 126.51v261.41A139 139 0 0 0 96 384c-53 0-96 28.66-96 64s43 64 96 64 96-28.66 96-64V214.32l256-75v184.61a138.4 138.4 0 0 0-32-3.93c-53 0-96 28.66-96 64s43 64 96 64 96-28.65 96-64V32a32 32 0 0 0-41.62-30.49z" />
                                         </svg>
                                         <svg
-                                            fill="#fff"
+                                            fill="var(--text-color)"
                                             viewBox="0 0 384 512"
                                             className="thumb-note note-2"
                                         >
                                             <path d="M310.94 1.33l-96.53 28.51A32 32 0 0 0 192 60.34V360a148.76 148.76 0 0 0-48-8c-61.86 0-112 35.82-112 80s50.14 80 112 80 112-35.82 112-80V148.15l73-21.39a32 32 0 0 0 23-30.71V32a32 32 0 0 0-41.06-30.67z" />
                                         </svg>
                                         <svg
-                                            fill="#fff"
+                                            fill="var(--text-color)"
                                             viewBox="0 0 512 512"
                                             className="thumb-note note-3"
                                         >
                                             <path d="M470.38 1.51L150.41 96A32 32 0 0 0 128 126.51v261.41A139 139 0 0 0 96 384c-53 0-96 28.66-96 64s43 64 96 64 96-28.66 96-64V214.32l256-75v184.61a138.4 138.4 0 0 0-32-3.93c-53 0-96 28.66-96 64s43 64 96 64 96-28.65 96-64V32a32 32 0 0 0-41.62-30.49z" />
                                         </svg>
                                         <svg
-                                            fill="#fff"
+                                            fill="var(--text-color)"
                                             viewBox="0 0 384 512"
                                             className="thumb-note note-4"
                                         >
@@ -647,14 +648,18 @@ export function Player({ style }) {
                                         </div>
                                         <div className="player__song-author info__author">
                                             {
-                                                currentSong?.artist_names?.map((artist, index) => {
-                                                    return (
-                                                        <span key={index}>
-                                                            <ArtistNameLink artist={artist} />
-                                                            {index < currentSong?.artist_names?.length - 1 && ", "}
-                                                        </span>
-                                                    )
-                                                })
+                                                currentSong?.artist_names?.length === 0 ? (
+                                                    currentSong?.artist_names?.map((artist, index) => {
+                                                        return (
+                                                            <span key={index}>
+                                                                <ArtistNameLink artist={artist} />
+                                                                {index < currentSong?.artist_names?.length - 1 && ", "}
+                                                            </span>
+                                                        )
+                                                    })
+                                                ) : (
+                                                    "Unknown Artist"
+                                                )
                                             }
                                         </div>
                                     </div>

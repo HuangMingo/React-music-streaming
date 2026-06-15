@@ -11,6 +11,7 @@ import { SongManagementPage } from './SongManagementPage.jsx';
 import { AlbumManagementPage } from "./AlbumManagementPage.jsx";
 import { ArtistManagementPage } from "./ArtistManagementPage.jsx";
 import { PlaylistManagementPage } from "./PlaylistManagementPage.jsx";
+import { UserManagementPage } from "./UserManagementPage.jsx";
 const EMPTY_SONG_FORM = {
   title: '',
   album_id: '',
@@ -1238,57 +1239,12 @@ export function AdminDashboardPage() {
         ) : null}
 
         {activeTab === 'users' && isSuperAdmin ? (
-          <section className="admin-panel">
-            <div className="admin-panel__header">
-              <div>
-                <h3>Quản lý user</h3>
-                <p>Nâng hoặc hạ quyền tài khoản</p>
-              </div>
-            </div>
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id}>
-                      <td>{user.id}</td>
-                      <td>{user.username}</td>
-                      <td>{user.email || '--'}</td>
-                      <td><span className="admin-role">{user.role}</span></td>
-                      <td>
-                        {user.role === 'user' && (
-                          <button type="button" onClick={() => updateRole(user.id, 'admin')}>
-                            Nâng admin
-                          </button>
-                        )}
-                        {(user.role === 'user' || user.role === 'admin') && (
-                          <button type="button" onClick={() => updateRole(user.id, 'super_admin')}>
-                            Nâng super admin
-                          </button>
-                        )}
-                        {user.role === 'admin' && (
-                          <button type="button" onClick={() => updateRole(user.id, 'user')}>
-                            Hạ user
-                          </button>
-                        )}
-                        {user.role === 'super_admin' && (
-                          <span>Không đổi</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section >
+          <UserManagementPage
+            active={activeTab === 'users'}
+            isSuperAdmin={isSuperAdmin}
+            onUpdateRole={updateRole}
+            users={users}
+          />
         ) : null}
       </main >
     </div >

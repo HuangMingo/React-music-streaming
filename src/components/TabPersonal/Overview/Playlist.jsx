@@ -89,11 +89,14 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
         setIsDeleting(true);
 
     }
-    function isPlaylistMine(playlist) {
-        return Number(playlist?.creator_id) === Number(currentUser?.id);
+    function isPlaylistDelete(playlist) {
+        if (playlist.issystem === false) {
+            return Number(playlist?.creator_id) === Number(currentUser?.id);
+        }
+        return false;
     }
     function handleClickEditPlaylist(playlist) {
-        if (isPlaylistMine(playlist) && playlist.isdefault !== true) {
+        if (isPlaylistDelete(playlist) && playlist.isdefault !== true) {
             setOpenPlaylistMenuId(null);
             setPlaylistMenuTrigger(null);
             setPlaylistToEdit(playlist);
@@ -102,7 +105,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
     }
     function handleTogglePlaylistMenu(event, playlist) {
         event.stopPropagation();
-        if (isPlaylistMine(playlist) && playlist.isdefault !== true) {
+        if (isPlaylistDelete(playlist) && playlist.isdefault !== true) {
             const triggerElement = event.currentTarget;
             setOpenPlaylistMenuId((currentId) => {
                 if (currentId === playlist.id) {
@@ -271,7 +274,7 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                 const absoluteIndex = pageIndex * itemsPerPage + playlistIndex;
                                                 const isPlaylistActive = personalSelectedPlaylist?.id === playlist.id;
                                                 const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
-                                                const isMine = isPlaylistMine(playlist);
+                                                const isMine = isPlaylistDelete(playlist);
                                                 return (
 
                                                     <div
@@ -339,9 +342,9 @@ export function Playlist({ playlists = [], onPlaylistsChanged }) {
                                                                     </div>
                                                                     <div className="overlay"></div>
                                                                 </div>
-                                                                <div className="row__item-info" onClick={(e) => { e.stopPropagation();  }} >
+                                                                <div className="row__item-info" onClick={(e) => { e.stopPropagation(); }} >
                                                                     <a href="#" className="row__info-name is-twoline">{playlist.playlist_name}</a>
-                                                                    <h3 className="row__info-creator" onClick= {(e) => {e.stopPropagation()}}>{playlist.username}</h3>
+                                                                    <h3 className="row__info-creator" onClick={(e) => { e.stopPropagation() }}>{playlist.username}</h3>
                                                                 </div>
                                                             </div>
                                                         </div>

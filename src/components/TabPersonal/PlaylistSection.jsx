@@ -39,11 +39,14 @@ export function PlaylistSection() {
         setIsDeleting(false);
         setPlaylistIdToDelete(null);
     }
-    function isPlaylistMine(playlist) {
-        return Number(playlist?.creator_id) === Number(currentUser?.id);
+    function isPlaylistDelete(playlist) {
+        if( playlist.issystem === false){
+            return Number(playlist?.creator_id) === Number(currentUser?.id);
+        }
+        return false;
     }
     function handleClickEditPlaylist(playlist) {
-        if (isPlaylistMine(playlist) && playlist.isdefault !== true) {
+        if (isPlaylistDelete(playlist) && playlist.isdefault !== true) {
             setOpenPlaylistMenuId(null);
             setPlaylistMenuTrigger(null);
             setPlaylistToEdit(playlist);
@@ -52,7 +55,7 @@ export function PlaylistSection() {
     }
     function handleTogglePlaylistMenu(event, playlist) {
         event.stopPropagation();
-        if (isPlaylistMine(playlist) && playlist.isdefault !== true) {
+        if (isPlaylistDelete(playlist) && playlist.isdefault !== true) {
             const triggerElement = event.currentTarget;
             setOpenPlaylistMenuId((currentId) => {
                 if (currentId === playlist.id) {
@@ -173,7 +176,7 @@ export function PlaylistSection() {
                             {playlists.map((playlist, playlistIndex) => {
                                 const isPlaylistActive = personalSelectedPlaylist?.id === playlist.id;
                                 const isPlaylistPlaying = isPlaylistActive && isPlaying && playlist?.songs?.some(song => song.id === currentSong.id);
-                                const isMine = isPlaylistMine(playlist);
+                                const isMine = isPlaylistDelete(playlist);
                                 return (
                                     <div
                                         className={`col l-2-4 m-3 c-4 ${playlistIndex === 1 ? "mb-30" : ""} `}

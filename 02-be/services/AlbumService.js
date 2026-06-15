@@ -161,6 +161,25 @@ const getRandomAlbums = async (limit) => {
         `, [safeLimit]);
     return result.rows;
 }
+const getNewestAlbums = async (limit = 5) => {
+    const safeLimit = Number.isInteger(Number(limit)) && Number(limit) > 0
+        ? Math.min(Number(limit), 24)
+        : 5;
+    const result = await pool.query(`
+        SELECT
+            al.id,
+            al.title,
+            al.image,
+            al.release_date,
+            al.artist_id,
+            art.name AS artist_name
+        FROM album al
+        LEFT JOIN artist art ON art.id = al.artist_id
+        ORDER BY al.release_date DESC NULLS LAST, al.id DESC
+        LIMIT $1
+    `, [safeLimit]);
+    return result.rows;
+}
 export const albumService = {
     getAllAlbum,
     getAlbumById,
@@ -168,5 +187,6 @@ export const albumService = {
     getFavouriteAlbum,
     isFavouriteAlbum,
     toggleFavouriteAlbum,
-    getRandomAlbums
+    getRandomAlbums,
+    getNewestAlbums
 };
