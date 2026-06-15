@@ -28,6 +28,9 @@ export async function getUserByCredentials({ username, password }) {
   `;
   const result = await pool.query(query, [username, password]);
   const user = mapUserAttributes(result.rows[0]);
+  if (!user) {
+    return null;
+  }
   const defaultPlaylistId = await playlistService.getDefaultPlaylistIdByUser(user.id);
   return { ...user, defaultPlaylistId };
 }
