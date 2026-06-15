@@ -232,7 +232,11 @@ export async function deleteSong(songId) {
 export async function getAlbums() {
   const result = await pool.query(`
     SELECT
-      al.*,
+      al.id,
+      al.title,
+      al.image,
+      TO_CHAR(al.release_date, 'YYYY-MM-DD') AS release_date,
+      al.artist_id,
       al.title AS name,
       ar.name AS artist_name,
       COUNT(DISTINCT s.id)::int AS song_count
@@ -257,10 +261,10 @@ export async function createAlbum(data) {
   }
 
   const result = await pool.query(
-    `INSERT INTO album (title, image, release_date, artist_id)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO album (title, image, artist_id)
+     VALUES ($1, $2, $3)
      RETURNING *`,
-    [title, image, data.release_date || null, artistId]
+    [title, image, artistId]
   );
 
   return result.rows[0];
@@ -280,10 +284,10 @@ export async function updateAlbum(albumId, data) {
 
   const result = await pool.query(
     `UPDATE album
-     SET title = $1, image = $2, release_date = $3, artist_id = $4
-     WHERE id = $5
+     SET title = $1, image = $2, artist_id = $3
+     WHERE id = $4
      RETURNING *`,
-    [title, image, data.release_date || null, artistId, id]
+    [title, image, artistId, id]
   );
 
   return result.rows[0];

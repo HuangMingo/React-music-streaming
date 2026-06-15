@@ -1,0 +1,123 @@
+.genre-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  padding-bottom: 24px;
+}
+
+.genre-page__card {
+  position: relative;
+  min-height: 130px;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 18px;
+  text-align: left;
+  background-color: #1c1c1c;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.genre-page__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.58));
+  transition: background 0.22s ease;
+}
+
+
+.genre-page__card:hover::before {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.66));
+}
+
+.genre-page__card-name {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
+}
+
+.genre-detail__header {
+  position: relative;
+  min-height: 130px;
+  width: 100%;
+  max-width: 220px;
+  margin: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: flex-end;
+}
+
+.genre-detail__header-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.55));
+}
+
+.genre-detail__header-content {
+  position: relative;
+  z-index: 1;
+  padding: 18px;
+  color: #fff;
+}
+
+.genre-detail__eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.genre-detail__title {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.4);
+}
+
+.genre-detail .playlist__list-song {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .genre-page__grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .genre-page__card {
+    min-height: 110px;
+  }
+
+  .genre-page__card-name {
+    font-size: 1.6rem;
+  }
+
+  .genre-detail__header {
+    min-height: 130px;
+    max-width: 160px;
+    border-radius: 18px;
+  }
+
+  .genre-detail__header-content {
+    padding: 18px;
+  }
+}

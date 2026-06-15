@@ -529,7 +529,7 @@ export function ArtistDetail() {
                     </div>
                     <div className="overlay" />
                   </div>
-                  <div className="row__item-info" onclick={(event) => event.stopPropagation()}>
+                  <div className="row__item-info" onClick={(event) => event.stopPropagation()}>
                     <a href="#" className="row__info-name is-twoline" onClick={(event) => event.preventDefault()}>{playlistTitle}</a>
                     <h3 className="row__info-creator">{playlist.song_count ?? playlist.songs?.length ?? 0} bài hát</h3>
                   </div>
