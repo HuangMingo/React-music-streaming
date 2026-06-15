@@ -18,6 +18,7 @@ const EMPTY_SONG_FORM = {
   track_number: '',
   release_date: '',
   artist_ids: [],
+  genre_ids: [],
   audio: '',
   image: '',
   lyrics: '',
@@ -116,6 +117,9 @@ function getSongFormFromSong(song) {
     track_number: song.track_number || '',
     release_date: toDateInput(song.release_date),
     artist_ids: song.artists?.map((artist) => Number(artist.id)).filter(Boolean) || [],
+    genre_ids: Array.isArray(song.genre_ids)
+      ? song.genre_ids.map(Number).filter(Boolean)
+      : (song.genres?.map((genre) => Number(genre.id)).filter(Boolean) || []),
     audio: song.audio || '',
     image: song.image || '',
     lyrics: song.lyrics || '',
@@ -144,6 +148,7 @@ export function AdminDashboardPage() {
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [systemPlaylists, setSystemPlaylists] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -430,6 +435,7 @@ export function AdminDashboardPage() {
         axios.get(`${API_URL}/api/admin/songs`, { headers: adminHeaders }),
         axios.get(`${API_URL}/api/admin/albums`, { headers: adminHeaders }),
         axios.get(`${API_URL}/api/admin/artists`, { headers: adminHeaders }),
+        axios.get(`${API_URL}/api/genres`),
         axios.get(`${API_URL}/api/admin/playlists`, { headers: adminHeaders }),
       ];
 
@@ -437,11 +443,12 @@ export function AdminDashboardPage() {
         requests.push(axios.get(`${API_URL}/api/admin/users`, { headers: adminHeaders }));
       }
 
-      const [overviewRes, songsRes, albumsRes, artistsRes, playlistsRes, usersRes] = await Promise.all(requests);
+      const [overviewRes, songsRes, albumsRes, artistsRes, genresRes, playlistsRes, usersRes] = await Promise.all(requests);
       setOverview(overviewRes.data.data || { songs: 0, albums: 0, artists: 0, playlists: 0, users: 0 });
       setSongs(songsRes.data.data || []);
       setAlbums(albumsRes.data.data || []);
       setArtists(artistsRes.data.data || []);
+      setGenres(Array.isArray(genresRes.data) ? genresRes.data : []);
       setSystemPlaylists(playlistsRes.data.data || []);
       setUsers(usersRes?.data?.data || []);
     } catch (error) {
@@ -1003,6 +1010,7 @@ export function AdminDashboardPage() {
           <InsertSong
             albums={albums}
             artists={artists}
+            genres={genres}
             songFiles={songFiles}
             songForm={songForm}
             errors={songFormErrors}
@@ -1021,6 +1029,7 @@ export function AdminDashboardPage() {
             active={activeTab === 'songs'}
             albums={albums}
             artists={artists}
+            genres={genres}
             editingSongId={editingSongId}
             errors={songFormErrors}
             formatDuration={formatDuration}

@@ -72,6 +72,16 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
             : setPersonalSelectedPlaylist;
 
         setScopedSelectedPlaylist(playlist);
+
+        const isCurrentSongInThisPlaylist = visibleSongs.some(
+            (song) => Number(song.id) === Number(currentSong?.id)
+        );
+
+        if (isCurrentSongInThisPlaylist) {
+            setIsPlaying(true);
+            return;
+        }
+
         setCurrentSong(firstSong);
         setCurrentTime(0);
         setIsPlaying(true);

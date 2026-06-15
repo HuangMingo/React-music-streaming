@@ -5,6 +5,7 @@ export function SongManagementPage({
   active,
   albums,
   artists,
+  genres,
   editingSongId,
   errors,
   formatDuration,
@@ -31,6 +32,7 @@ export function SongManagementPage({
       <InsertSong
         albums={albums}
         artists={artists}
+        genres={genres}
         songFiles={songFiles}
         songForm={songForm}
         errors={errors}

@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useMusicContext } from "../../context/MusicContext";
 import { DeleteSongFromPlaylistDialog } from "./DeleteSongFromPlaylistDialog";
 import { AddSongToPlaylist } from "../AddSongToPlaylist/AddSongToPlaylist";
@@ -40,6 +40,28 @@ export function SongSection() {
         isAddingSong,
     } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
+   function handlePlayAll() {
+    const firstSong = songs[0];
+
+    if (!firstSong) {
+        return;
+    }
+
+    setPersonalSelectedPlaylist(personalSelectedPlaylist);
+
+    const isCurrentSongInThisPlaylist = songs.some(
+        (song) => Number(song.id) === Number(currentSong?.id)
+    );
+
+    if (isCurrentSongInThisPlaylist) {
+        setIsPlaying(true);
+        return;
+    }
+
+    handleClickSong(firstSong);
+    setCurrentTime(0);
+    setIsPlaying(true);
+}
     //Mở menu khi click vào 3 chấm của bài hát
     function handleToggleSongMenu(event, songId) {
         event.stopPropagation();
@@ -48,7 +70,7 @@ export function SongSection() {
             prevSongId === songId ? null : songId
         );
     }
-     //--------------Xử lí khi click bên ngoài----------
+    //--------------Xử lí khi click bên ngoài----------
     useEffect(() => {
         function handleClickOutside(event) {
             if (playlistMenuRef.current && !playlistMenuRef.current.contains(event.target)) {
@@ -66,7 +88,7 @@ export function SongSection() {
         personalSelectedPlaylist?.isdefault !== true &&
         Number(personalSelectedPlaylist?.creator_id) === Number(currentUser?.id) && personalSelectedPlaylist.issystem === false;
 
-   
+
 
     return (
         <>
@@ -81,7 +103,9 @@ export function SongSection() {
                             <div className="container__header-actions">
 
                                 <button
-                                    className="button is-small button-primary container__header-btn btn--play-all">
+                                    className="button is-small button-primary container__header-btn btn--play-all"
+                                    onClick={handlePlayAll}
+                                >
                                     <i className="bi bi-play-fill container__header-icon"></i>
                                     <span>Phát tất cả</span>
                                 </button>
@@ -91,7 +115,7 @@ export function SongSection() {
 
                     <div className="col l-12 m-12 c-12">
                         <div className="container__playlist">
-            
+
                             <div className="playlist__list mb-30 overflow-visible">
                                 {songs.length === 0 ? (
                                     <div className="box--no-content">
@@ -164,8 +188,8 @@ export function SongSection() {
                                                             <i className={`btn--icon song__icon icon--heart bi bi-heart${favouriteSongIds.has(song.id) ? "-fill" : ""} primary`} />
                                                         </div>
                                                         <div className="playlist__song-btn option-btn" onClick={(event) => handleToggleSongMenu(event, song.id)} ref={openSongMenuId === song.id ? playlistMenuRef : null}
-                                                                title="Khác"
-                                                            >
+                                                            title="Khác"
+                                                        >
                                                             <i className="btn--icon bi bi-three-dots" />
                                                             <AddSongToPlaylist
                                                                 song={song}
@@ -181,7 +205,7 @@ export function SongSection() {
                                                         </div>
                                                     </div>
 
-                                                  
+
                                                 </div>
                                             </div>
                                         );

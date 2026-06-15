@@ -18,6 +18,14 @@ function normalizeArtistIds(value) {
   return [...new Set(value.map(normalizeId).filter(Boolean))];
 }
 
+function normalizeGenreIds(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return [...new Set(value.map(normalizeId).filter(Boolean))];
+}
+
 function normalizeSongIds(value) {
   if (!Array.isArray(value)) {
     const error = new Error('Danh sách bài hát không hợp lệ.');
@@ -72,17 +80,6 @@ async function replacePlaylistSongs(client, playlistId, songIds) {
   }
 }
 
-async function syncAlbumSong(client, songId, albumId) {
-  await client.query('DELETE FROM album_song WHERE song_id = $1', [songId]);
-
-  if (albumId) {
-    await client.query(
-      'INSERT INTO album_song (album_id, song_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-      [albumId, songId]
-    );
-  }
-}
-
 export async function getOverview() {
   await ensureUserRoleColumn();
   await ensurePlaylistSystemColumn();
@@ -106,6 +103,23 @@ export async function getOverview() {
 
 export async function getSongs() {
   const result = await pool.query(`
+    WITH song_genres AS (
+      SELECT
+        gs.song_id,
+        COALESCE(
+          jsonb_agg(DISTINCT jsonb_build_object('id', g.id, 'name', g.name, 'image', g.image))
+            FILTER (WHERE g.id IS NOT NULL),
+          '[]'::jsonb
+        ) AS genres,
+        COALESCE(
+          jsonb_agg(DISTINCT g.id)
+            FILTER (WHERE g.id IS NOT NULL),
+          '[]'::jsonb
+        ) AS genre_ids
+      FROM genre_song gs
+      JOIN genre g ON g.id = gs.genre_id
+      GROUP BY gs.song_id
+    )
     SELECT
       s.*,
       al.title AS album_title,
@@ -113,12 +127,15 @@ export async function getSongs() {
         json_agg(DISTINCT jsonb_build_object('id', ar.id, 'name', ar.name))
           FILTER (WHERE ar.id IS NOT NULL),
         '[]'
-      ) AS artists
+      ) AS artists,
+      COALESCE(sg.genres, '[]'::jsonb) AS genres,
+      COALESCE(sg.genre_ids, '[]'::jsonb) AS genre_ids
     FROM song s
     LEFT JOIN album al ON al.id = s.album_id
     LEFT JOIN artist_song ars ON ars.song_id = s.id
     LEFT JOIN artist ar ON ar.id = ars.artist_id
-    GROUP BY s.id, al.title
+    LEFT JOIN song_genres sg ON sg.song_id = s.id
+    GROUP BY s.id, al.title, sg.genres, sg.genre_ids
     ORDER BY s.id DESC
   `);
 
@@ -129,6 +146,7 @@ export async function createSong(data) {
   const title = requireText(data.title, 'Tên bài hát');
   const albumId = normalizeId(data.album_id);
   const artistIds = normalizeArtistIds(data.artist_ids);
+  const genreIds = normalizeGenreIds(data.genre_ids);
   const lyrics = data.lyrics ?? data.lyric ?? null;
   const durationSeconds = data.duration_seconds ? Number(data.duration_seconds) : null;
   const trackNumber = data.track_number ? Number(data.track_number) : null;
@@ -145,7 +163,7 @@ export async function createSong(data) {
     const song = result.rows[0];
 
     await replaceSongArtists(client, song.id, artistIds);
-    await syncAlbumSong(client, song.id, albumId);
+    await replaceSongGenres(client, song.id, genreIds);
     await client.query('COMMIT');
 
     return song;
@@ -168,6 +186,7 @@ export async function updateSong(songId, data) {
   const title = requireText(data.title, 'Tên bài hát');
   const albumId = normalizeId(data.album_id);
   const artistIds = normalizeArtistIds(data.artist_ids);
+  const genreIds = normalizeGenreIds(data.genre_ids);
   const lyrics = data.lyrics ?? data.lyric ?? null;
   const durationSeconds = data.duration_seconds ? Number(data.duration_seconds) : null;
   const trackNumber = data.track_number ? Number(data.track_number) : null;
@@ -190,7 +209,7 @@ export async function updateSong(songId, data) {
     }
 
     await replaceSongArtists(client, id, artistIds);
-    await syncAlbumSong(client, id, albumId);
+    await replaceSongGenres(client, id, genreIds);
     await client.query('COMMIT');
 
     return result.rows[0];
@@ -216,6 +235,7 @@ export async function deleteSong(songId) {
   try {
     await client.query('BEGIN');
     await client.query('DELETE FROM artist_song WHERE song_id = $1', [id]);
+    await client.query('DELETE FROM genre_song WHERE song_id = $1', [id]);
     await client.query('DELETE FROM album_song WHERE song_id = $1', [id]);
     await client.query('DELETE FROM song_playlist WHERE song_id = $1', [id]);
     const result = await client.query('DELETE FROM song WHERE id = $1 RETURNING id', [id]);
@@ -487,6 +507,17 @@ export async function createSystemPlaylist(data, actorUserId) {
     throw error;
   } finally {
     client.release();
+  }
+}
+
+async function replaceSongGenres(client, songId, genreIds) {
+  await client.query('DELETE FROM genre_song WHERE song_id = $1', [songId]);
+
+  for (const genreId of genreIds) {
+    await client.query(
+      'INSERT INTO genre_song (genre_id, song_id, updated_date) VALUES ($1, $2, CURRENT_TIMESTAMP)',
+      [genreId, songId]
+    );
   }
 }
 

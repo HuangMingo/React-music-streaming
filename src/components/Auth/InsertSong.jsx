@@ -35,6 +35,7 @@ function CloudinaryFileLink({ label, url }) {
 export function InsertSong({
   albums,
   artists,
+  genres = [],
   songFiles,
   songForm,
   errors = {},
@@ -48,6 +49,7 @@ export function InsertSong({
 }) {
   const [imagePreview, setImagePreview] = useState('');
   const [artistDropdownOpen, setArtistDropdownOpen] = useState(false);
+  const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
   const songActionLabel = editingSongId ? 'Sửa bài hát' : 'Thêm bài hát';
   const audioFileLabel = songFiles.audio?.name || (songForm.audio ? 'Đã có file audio' : 'Chưa chọn file audio');
   const audioFileMeta = songFiles.audio ? formatFileSize(songFiles.audio) : (songForm.audio ? getCloudinaryFileName(songForm.audio) : 'Định dạng: MP3');
@@ -56,6 +58,8 @@ export function InsertSong({
 
   const selectedArtistIds = songForm.artist_ids || [];
   const selectedArtists = artists.filter((artist) => selectedArtistIds.map(Number).includes(Number(artist.id)));
+  const selectedGenreIds = songForm.genre_ids || [];
+  const selectedGenres = genres.filter((genre) => selectedGenreIds.map(Number).includes(Number(genre.id)));
 
   function updateArtistIds(nextArtistIds) {
     onFormChange({ ...songForm, artist_ids: nextArtistIds }, 'artist_ids');
@@ -71,6 +75,22 @@ export function InsertSong({
     }
 
     updateArtistIds([...currentIds, normalizedArtistId]);
+  }
+
+  function updateGenreIds(nextGenreIds) {
+    onFormChange({ ...songForm, genre_ids: nextGenreIds }, 'genre_ids');
+  }
+
+  function toggleGenre(genreId) {
+    const normalizedGenreId = Number(genreId);
+    const currentIds = selectedGenreIds.map(Number);
+
+    if (currentIds.includes(normalizedGenreId)) {
+      updateGenreIds(currentIds.filter((id) => id !== normalizedGenreId));
+      return;
+    }
+
+    updateGenreIds([...currentIds, normalizedGenreId]);
   }
 
   useEffect(() => {
@@ -166,6 +186,53 @@ export function InsertSong({
               </div>
             ) : null}
           </div>
+          {errors.artist_ids ? <p className="admin-field-error">{errors.artist_ids}</p> : null}
+
+          <label>Thể loại</label>
+          <div className={`admin-multi-select${genreDropdownOpen ? ' is-open' : ''}`}>
+            <div className="admin-multi-select__control">
+              <div className="admin-multi-select__values">
+                {selectedGenres.length ? selectedGenres.map((genre) => (
+                  <span className="admin-multi-select__tag" key={genre.id}>
+                    {genre.name}
+                    <button type="button" onClick={() => toggleGenre(genre.id)}><i className="fa-solid fa-x"></i></button>
+                  </span>
+                )) : <span className="admin-multi-select__placeholder">Chọn thể loại cho bài hát</span>}
+              </div>
+              <button
+                className="admin-multi-select__clear"
+                disabled={!selectedGenres.length}
+                type="button"
+                onClick={() => updateGenreIds([])}
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+              <span className="admin-multi-select__divider"></span>
+              <button
+                className="admin-multi-select__arrow"
+                type="button"
+                onClick={() => setGenreDropdownOpen((current) => !current)}
+              >
+                <i className="bi bi-caret-down-fill"></i>
+              </button>
+            </div>
+            {genreDropdownOpen ? (
+              <div className="admin-multi-select__menu">
+                {genres.map((genre) => (
+                  <label className="admin-multi-select__option" key={genre.id}>
+                    <input
+                      checked={selectedGenreIds.map(Number).includes(Number(genre.id))}
+                      type="checkbox"
+                      onChange={() => toggleGenre(genre.id)}
+                    />
+                    <span>{genre.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          {errors.genre_ids ? <p className="admin-field-error">{errors.genre_ids}</p> : null}
+
           <label>File audio (MP3) <span>*</span></label>
           <input id="admin-audio-upload" hidden name="audio" type="file" accept="audio/mpeg,.mp3" onChange={(event) => onFileChange('audio', event.target.files?.[0])} />
           <div className="admin-file-box">

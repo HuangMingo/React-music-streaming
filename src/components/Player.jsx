@@ -281,6 +281,7 @@ export function Player({ style }) {
         setIsPlaying(false);
     };
     //Cập nhật thời gian hiện tại của bài hát khi phát và lưu tiến trình vào localStorage
+    // Cập nhật thời gian phát và cộng dồn thời gian nghe thật của bài hát.
     const handleTimeUpdate = () => {
         if (!audioRef.current || !currentSong?.audio) return;
         const newTime = audioRef.current.currentTime;
@@ -288,6 +289,7 @@ export function Player({ style }) {
         const audioDuration = audioRef.current.duration;
         if (audioDuration && currentSong?.id) {
             //Tính toán thời gian nghe thực tế (bỏ qua nếu tua)
+            // Chỉ tính thời gian nghe khi bài chạy bình thường; nếu tua thì bỏ qua.
             if (lastTimeRef.current !== null) {
                 const timeDiff = newTime - lastTimeRef.current;
                 if (timeDiff > 0 && timeDiff < 2) {
@@ -296,11 +298,13 @@ export function Player({ style }) {
             }
             lastTimeRef.current = newTime;
             //Kiểm tra xem đã đủ 50% audio chưa
+            // Nghe đủ 50% bài hát thì tăng play_count một lần.
             const halfDuration = audioDuration * 0.5;
             const sessionKey = `${currentSong.id}- ${playSessionRef.current}`;
             if (incrementedSongIdRef.current !== sessionKey && listenedTimeRef.current >= halfDuration) {
                 incrementedSongIdRef.current = sessionKey;
                 // Gọi API để tăng play_count
+                // Gọi backend để tăng lượt nghe.
                 axios.post(`${API_URL}/api/songs/increment-play-count`, {
                     songId: currentSong.id
                 }).catch(error => {
