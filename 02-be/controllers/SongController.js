@@ -19,12 +19,12 @@ const getNewestSongs = async (req, res) => {
 
 const isFavouriteSong = async (req, res) => {
     try {
-        const defaultPlaylistId = Number(req.query.defaultPlaylistId);
-        const songId = Number(req.query.songId);
-
-        if (!defaultPlaylistId || !songId)
-            return res.status(400).json({ message: 'Thiếu defaultPlaylistId hoặc songId' });
-
+        const defaultPlaylistId = req.query.defaultPlaylistId;
+        const songId = req.query.songId;
+        if (!defaultPlaylistId)
+            return res.status(400).json({ message: 'Thiếu defaultPlaylistId' });
+        if (!songId)
+            return res.status(400).json({ message: "Thiếu songId" });
         const isFav = await songService.isFavouriteSong(defaultPlaylistId, songId);
         res.json({ isFavouriteSong: isFav });
     } catch (error) {
@@ -35,10 +35,13 @@ const isFavouriteSong = async (req, res) => {
 const toggleFavouriteSong = async (req, res) => {
     try {
         const { defaultPlaylistId, songId } = req.body;
-        if (!defaultPlaylistId || !songId) {
-            return res.status(400).json({ message: 'Thiếu defaultPlaylistId hoặc songId' });
+        if (!defaultPlaylistId) {
+            return res.status(400).json({ message: 'Thiếu defaultPlaylistId' });
         }
-        const newStatus = await songService.toggleFavouriteSong(Number(defaultPlaylistId), Number(songId));
+        if (!songId) {
+            return res.status(400).json({ message: "Thiếu songId" });
+        }
+        const newStatus = await songService.toggleFavouriteSong(defaultPlaylistId, songId);
         res.json({ isFavouriteSong: newStatus });
     } catch (error) {
         console.error('Toggle favourite failed:', error);
@@ -54,7 +57,7 @@ const getTop10MostPlayedSongs = async (req, res) => {
     }
     catch (error) {
         console.log(error.message);
-        res.status(500).json({ message: 'Lỗi hệ thống' });
+        res.status(500).json({ message: `${error.message}` });
     }
 }
 
@@ -65,7 +68,7 @@ const incrementPlayCount = async (req, res) => {
         if (!songId) {
             return res.status(400).json({ message: 'Thiếu songId' });
         }
-        const result = await songService.incrementPlayCount(Number(songId));
+        const result = await songService.incrementPlayCount(songId);
         res.json({ success: true, playCount: result?.play_count });
     }
     catch (error) {
@@ -89,6 +92,49 @@ const getNewMusic = async (req, res) => {
     }
 }
 
+const getAudioBySongId = async (req, res) => {
+    try {
+        const songId = req.query.songId || req.params.songId;
+        if (!songId) {
+            return res.status(400).json({ message: "Thiếu songId" });
+        }
+        const result = await songService.getAudioBySongId(songId);
+        if (!result?.audio) {
+            return res.status(404).json({ message: "Bài hát này chưa có audio" });
+        }
+        res.json(result);
+    }
+    catch (error) {
+        console.error("Get audio failed", error);
+        res.status(500).json({ message: "Lỗi hệ thống" });
+    }
+}
+const streamSong = async (req, res) => {
+    try {
+        const { songId } = req.params;
+        if (!songId) {
+            res.status(400).json({
+                message: "Thiếu songId"
+            });
+        }
+        const result = await songService.getAudioBySongId(songId);
+        const file_path = result?.audio;
+        if (!file_path) {
+            return res.status(400).json({
+                message: "Bài hát này chưa có audio"
+            })
+        }
+        return res.redirect(file_path);
+    }
+    catch(error){
+        console.log("Lỗi hệ thống", error);
+        return res.status(500).json(
+            {
+                message: "Lỗi hệ thống"
+            }
+        );
+    }
+}
 export const SongController = {
     getAllSong,
     getNewestSongs,
@@ -97,4 +143,6 @@ export const SongController = {
     getTop10MostPlayedSongs,
     incrementPlayCount,
     getNewMusic,
+    getAudioBySongId,
+    streamSong
 }

@@ -40,28 +40,28 @@ export function SongSection() {
         isAddingSong,
     } = useMusicContext();
     const [openSongMenuId, setOpenSongMenuId] = useState(null);
-   function handlePlayAll() {
-    const firstSong = songs[0];
+    function handlePlayAll() {
+        const firstSong = songs[0];
 
-    if (!firstSong) {
-        return;
-    }
+        if (!firstSong) {
+            return;
+        }
 
-    setPersonalSelectedPlaylist(personalSelectedPlaylist);
+        setPersonalSelectedPlaylist(personalSelectedPlaylist);
 
-    const isCurrentSongInThisPlaylist = songs.some(
-        (song) => Number(song.id) === Number(currentSong?.id)
-    );
+        const isCurrentSongInThisPlaylist = songs.some(
+            (song) => Number(song.id) === Number(currentSong?.id)
+        );
 
-    if (isCurrentSongInThisPlaylist) {
+        if (isCurrentSongInThisPlaylist) {
+            setIsPlaying(true);
+            return;
+        }
+
+        handleClickSong(firstSong);
+        setCurrentTime(0);
         setIsPlaying(true);
-        return;
     }
-
-    handleClickSong(firstSong);
-    setCurrentTime(0);
-    setIsPlaying(true);
-}
     //Mở menu khi click vào 3 chấm của bài hát
     function handleToggleSongMenu(event, songId) {
         event.stopPropagation();
@@ -84,11 +84,24 @@ export function SongSection() {
         };
     }, []);
     const songs = personalSelectedPlaylist?.songs ?? [];
-    const canRemoveFromCurrentPlaylist =
-        personalSelectedPlaylist?.isdefault !== true &&
-        Number(personalSelectedPlaylist?.creator_id) === Number(currentUser?.id) && personalSelectedPlaylist.issystem === false;
+    
+    const canRemoveFromCurrentPlaylist = (personalSelectedPlaylist) => {
+        if (!personalSelectedPlaylist) return false;
+        if (personalSelectedPlaylist.issystem === true) 
+            return false;
+        if(personalSelectedPlaylist?.isdefault === true)
+            return false;
+        return Number(personalSelectedPlaylist?.creator_id) === Number(currentUser?.id);
+    };
 
-
+    const handleDeleteSongCompleted = async (deletedSong) => {
+        // Cập nhật danh sách bài hát trong playlist sau khi xóa
+        const updatedSongs = songs.filter((s) => Number(s.id) !== Number(deletedSong.id));
+        setPersonalSelectedPlaylist({
+            ...personalSelectedPlaylist,
+            songs: updatedSongs,
+        });
+    };
 
     return (
         <>
@@ -198,7 +211,7 @@ export function SongSection() {
                                                                 selectedPlaylist={personalSelectedPlaylist}
                                                                 onCloseMenu={() => setOpenSongMenuId(null)}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={canRemoveFromCurrentPlaylist}
+                                                                canRemoveFromCurrentPlaylist={canRemoveFromCurrentPlaylist()}
                                                                 isAddingSong={isAddingSong}
                                                                 ondeleteSong={handleOpenRemoveSongDialog}
                                                             />
@@ -216,6 +229,15 @@ export function SongSection() {
                     </div>
                 </div>
             </div>
+            
+            {songToRemove && (
+                <DeleteSongFromPlaylistDialog
+                    playlistId={personalSelectedPlaylist?.id}
+                    song={songToRemove}
+                    onClose={handleCloseRemoveSongDialog}
+                    onDeleted={handleDeleteSongCompleted}
+                />
+            )}
         </>
     );
 }

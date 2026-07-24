@@ -19,6 +19,7 @@ export function AuthForm({ title, submitLabel, footerText, footerAction, onSubmi
 
   return (
     <div className="auth-page auth-entry-page" onClick={footerAction.onDismiss}>
+      
       <section className="auth-card auth-card--split" onClick={(event) => event.stopPropagation()}>
         <div className="auth-panel auth-panel--form">
           <h1>{title === 'Đăng nhập' ? 'Welcome Back!' : 'Create Your Account'}</h1>

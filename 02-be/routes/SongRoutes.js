@@ -11,5 +11,6 @@ router.get('/is-favourite-song', SongController.isFavouriteSong);
 router.post('/toggle-favourite-song', SongController.toggleFavouriteSong);
 router.get('/top10-most-played-songs', SongController.getTop10MostPlayedSongs);
 router.post('/increment-play-count', SongController.incrementPlayCount);
-
+router.get('/get-audio-by-song-id', SongController.getAudioBySongId);
+router.get('/stream/:songId', SongController.streamSong);
 export default router;

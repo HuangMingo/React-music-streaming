@@ -1,94 +1,69 @@
-const getUserCreatedPlaylist = async (userId) => {
-    const result = await pool.query(`
-        WITH song_artists AS (
-            -- Bước 1: Gom nhóm nghệ sĩ cho từng bài hát trước
-        SELECT 
-            ars.song_id, 
-            json_agg(art.name) AS artist_names
-        FROM artist_song ars
-        JOIN artist art ON art.id = ars.artist_id
-        GROUP BY ars.song_id
-    )
-    SELECT 
-        p.id,
-        p.name AS playlist_name, 
-        u.username,
-        p.image AS playlist_image,
-		p.creator_id,
-        p.isdefault AS isdefault,
-        -- Bước 2: Chỉ gom nhóm JSON nếu bài hát tồn tại (tránh mảng null)
-        COALESCE(
-            json_agg(
-                json_build_object(
-                    'id', s.id,
-                    'title', s.title,
-                    'album_id', s.album_id,
-                    'duration_seconds', s.duration_seconds,
-                    'track_number', s.track_number,
-                    'release_date', s.release_date,
-                    'lyrics', s.lyrics,
-                    'audio', s.audio,
-                    'added_at', sp.added_at,
-                    'image', s.image,
-                    'duration', s.duration_seconds,
-                    'artist_names', sa.artist_names
-                )
-                ORDER BY sp.added_at DESC, s.id asc
-            ) FILTER (WHERE s.id IS NOT NULL), '[]'::json
-        ) AS songs
-    FROM playlist p 
-    JOIN "user" u ON u.id = p.creator_id
-    LEFT JOIN song_playlist sp ON p.id = sp.playlist_id
-    LEFT JOIN song s ON sp.song_id = s.id
-    LEFT JOIN song_artists sa ON s.id = sa.song_id
-	WHERE p.creator_id = $1
-    GROUP BY p.id, p.name, u.username, p.image, p.isdefault;
-        `, [userId]);
-    return result.rows;
-}
+import fs from 'fs';
 
-const getFavouritePlaylist = async (userId) => {
-    const result = await pool.query(`
-        WITH song_artists AS (
-            -- Bước 1: Gom nhóm nghệ sĩ cho từng bài hát trước
-        SELECT 
-            ars.song_id, 
-            json_agg(art.name) AS artist_names
-        FROM artist_song ars
-        JOIN artist art ON art.id = ars.artist_id
-        GROUP BY ars.song_id
-    )
-    SELECT 
-        p.id,
-        p.name AS playlist_name, 
-        u.username,
-        p.image AS playlist_image,
-        -- Bước 2: Chỉ gom nhóm JSON nếu bài hát tồn tại (tránh mảng null)
-        COALESCE(
-            json_agg(
-                json_build_object(
-                    'id', s.id,
-                    'title', s.title,
-                    'album_id', s.album_id,
-                    'duration_seconds', s.duration_seconds,
-                    'track_number', s.track_number,
-                    'release_date', s.release_date,
-                    'lyrics', s.lyrics,
-                    'audio', s.audio,
-                    'added_at', sp.added_at,
-                    'image', s.image,
-                    'artist_names', sa.artist_names
-                )
-                ORDER BY sp.added_at DESC
-            ) FILTER (WHERE s.id IS NOT NULL), '[]'::json
-        ) AS songs
-    FROM playlist p 
-    JOIN favourite_playlists fp ON fp.playlist_id = p.id AND fp.user_id = $1
-    JOIN "user" u ON u.id = p.creator_id
-    LEFT JOIN song_playlist sp ON p.id = sp.playlist_id
-    LEFT JOIN song s ON sp.song_id = s.id
-    LEFT JOIN song_artists sa ON s.id = sa.song_id
-    GROUP BY p.id, p.name, u.username, p.image;
-    `, [userId]);
-    return result.rows;
-}
+const streamSong = async (req, res) => {
+    try {
+        const { songId } = req.params;
+
+        if (!songId) {
+            return res.status(400).json({
+                message: 'Thiếu songId'
+            });
+        }
+
+        // Lấy thông tin bài hát từ DB
+        const song = await songService.getSongById(songId);
+
+        if (!song) {
+            return res.status(404).json({
+                message: 'Không tìm thấy bài hát'
+            });
+        }
+
+        const filePath = song.audio_url; // hoặc song.file_path
+
+        const stat = fs.statSync(filePath);
+        const fileSize = stat.size;
+
+        const range = req.headers.range;
+
+        if (range) {
+            const parts = range.replace('bytes=', '').split('-');
+
+            const start = parseInt(parts[0], 10);
+
+            const end = parts[1]
+                ? parseInt(parts[1], 10)
+                : fileSize - 1;
+
+            const chunkSize = end - start + 1;
+
+            const stream = fs.createReadStream(filePath, {
+                start,
+                end
+            });
+
+            res.writeHead(206, {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunkSize,
+                'Content-Type': 'audio/mpeg'
+            });
+
+            stream.pipe(res);
+        } else {
+            res.writeHead(200, {
+                'Content-Length': fileSize,
+                'Content-Type': 'audio/mpeg'
+            });
+
+            fs.createReadStream(filePath).pipe(res);
+        }
+    }
+    catch (error) {
+        console.error('Stream song failed:', error);
+
+        res.status(500).json({
+            message: 'Không thể phát nhạc lúc này'
+        });
+    }
+};

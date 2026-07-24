@@ -8,8 +8,7 @@
   "type": "module",
   "main": "eslint.config.js",
   "scripts": {
-    "start": "node 02-be/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon 02-be/server.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -33,6 +32,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.0",

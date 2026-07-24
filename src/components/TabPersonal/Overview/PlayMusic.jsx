@@ -365,9 +365,16 @@ export function PlayMusic({ playlist, canRemoveFromCurrentPlaylist, hideHeaderTi
                                                                 playlists={userPlaylists}
                                                                 selectedTargetPlaylist={selectedPlaylistBySong[song.id] ?? ""}
                                                                 onSelectPlaylist={handleSelectTargetPlaylist}
-                                                                canRemoveFromCurrentPlaylist={!playlist.isdefault && Number(playlist?.creator_id) === Number(currentUser?.id) && playlist.issystem === false}
-                                                                isAddingSong={isAddingSong}
-                                                                onCloseMenu={() => setOpenSongMenuId(null)}
+                                                                canRemoveFromCurrentPlaylist={(playlist) => {
+                                                                    if (playlist.issystem === true)
+                                                                        return false;
+                                                                    if (playlist.isdefault === true)
+                                                                        return false;
+                                                                    return Number(playlist?.creator_id) === Number(currentUser?.id);
+                                                                }
+                                                            }
+                                                            isAddingSong={isAddingSong}
+                                                            onCloseMenu={() => setOpenSongMenuId(null)}
                                                             />
                                                         </div>
                                                     </div>

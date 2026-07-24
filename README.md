@@ -146,3 +146,7 @@ src/api.js          Cấu hình API URL cho frontend
 - Backend đọc biến môi trường từ `02-be/.env`.
 - API local mặc định chạy ở port `3000`.
 - Frontend local mặc định chạy ở port `5173`.
+
+11/7/2026
+- Xử lí việc chuyển đổi sang HTTP Range request
+- Nghiên cứu liệu Nodejs có phù hợp không. có thể chuyển đổi sang kiểu khác không

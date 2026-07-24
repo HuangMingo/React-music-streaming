@@ -3562,7 +3562,6 @@ label .container__header-icon {
 .playlist__song-rank {
     height: 100%;
     display: flex;
-    cursor: default;
     margin-right: 15px;
     align-items: center;
 }

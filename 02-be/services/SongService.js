@@ -4,7 +4,8 @@ import { playlistService } from './PlaylistService.js';
 const getAllSong = async () => {
     const result = await pool.query(`
         SELECT 
-            s.*,
+            s.id,
+            title, s.image, duration_seconds,
             COALESCE(
                 json_agg(art.name) FILTER (WHERE art.name IS NOT NULL),
                 '[]'::json
@@ -38,7 +39,6 @@ const getNewestSongs = async (limit = 6) => {
             s.id,
             s.title,
             s.image,
-            s.audio,
             s.duration_seconds,
             s.release_date,
             s.album_id,
@@ -61,7 +61,7 @@ const isFavouriteSong = async (defaultPlaylistId, songId) => {
 }
 // Toggle trạng thái yêu thích của bài hát cho người dùng.
 const toggleFavouriteSong = async (defaultPlaylistId, songId) => {
-    console.log(defaultPlaylistId);
+
     const isFavourite = await isFavouriteSong(defaultPlaylistId, songId);
     if (isFavourite) {
         if (defaultPlaylistId) {
@@ -72,18 +72,28 @@ const toggleFavouriteSong = async (defaultPlaylistId, songId) => {
     if (defaultPlaylistId) {
         await playlistService.addSongToPlaylist(defaultPlaylistId, songId);
     }
+    else{
+        return res.status(400).json({message: "defaultPlaylistId không tồn tại"})
+    }
     return true;
 }
 
 //Lấy top 10 bài hát được nghe nhiều nhất
 const getTop10MostPlayedSongs = async () => {
     const result = await pool.query(`
-        SELECT s.*, 
-	           json_agg(art.name) artist_names
+        SELECT s.id,
+            s.title, 
+            s.image, 
+            s.duration_seconds,
+            s.play_count,
+	        COALESCE(
+                json_agg(art.name) FILTER (WHERE art.name IS NOT NULL),
+                '[]'::json
+            ) AS artist_names
         FROM song s
-        JOIN artist_song ars
+        LEFT JOIN artist_song ars
             ON s.id = ars.song_id 
-        JOIN artist art
+        LEFT JOIN artist art
             ON art.id = ars.artist_id
         GROUP BY s.id
         ORDER BY play_count DESC
@@ -100,6 +110,16 @@ const incrementPlayCount = async (songId) => {
     );
     return result.rows[0];
 }
+//Lấy file mp3 qua songId
+const getAudioBySongId = async (songId) => {
+    const result = await pool.query(`
+        SELECT audio 
+        FROM song 
+        where id = $1
+    `, [songId]);
+    console.log(result.rows[0]);
+    return result.rows[0];
+};
 
 export const songService = {
     getAllSong,
@@ -107,5 +127,6 @@ export const songService = {
     isFavouriteSong,
     toggleFavouriteSong,
     getTop10MostPlayedSongs,
-    incrementPlayCount
+    incrementPlayCount,
+    getAudioBySongId
 }

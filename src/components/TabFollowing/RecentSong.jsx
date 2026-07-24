@@ -11,7 +11,6 @@ function formatDuration(durationSeconds) {
     const seconds = Math.floor(duration % 60)
         .toString()
         .padStart(2, "0");
-
     return `${minutes}:${seconds}`;
 }
 
@@ -35,13 +34,13 @@ export function RecentSong() {
         isPlaying,
         playlistMenuRef,
         recentSongs,
+        setRecentSongs,
         saveRecentSongToStorage,
         selectedPlaylistBySong,
         setCurrentSong,
         setCurrentTime,
         setExploreSelectedPlaylist,
         setIsPlaying,
-        setRecentSongs,
         toggleFavouriteSong,
         userPlaylists,
     } = useMusicContext();

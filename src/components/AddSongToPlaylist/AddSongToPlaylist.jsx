@@ -176,15 +176,15 @@ export function AddSongToPlaylist({
             return;
         }
 
-        const playlistIdNumber = Number(targetPlaylistId);
-        if (!playlistIdNumber || !song.id) {
+        if (!targetPlaylistId || !song.id) {
             showNotificationToast("Vui lòng chọn playlist trước khi thêm");
             return;
         }
 
         try {
-            await axios.post(`${API_URL}/api/playlists/add-song-to-playlist`, null, {
-                params: { playlistId: playlistIdNumber, songId: song.id },
+            await axios.post(`${API_URL}/api/playlists/add-song-to-playlist`, {
+                playlistId: targetPlaylistId,
+                songId: song.id,
             });
             showNotificationToast(`Đã thêm bài hát thành công vào playlist "${playlist?.playlist_name}"`);
             setIsAddSubmenuOpen(false);

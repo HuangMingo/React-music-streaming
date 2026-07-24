@@ -189,20 +189,25 @@ export function DreamChart() {
                                                                         <span className="playlist__song-title info__title">{song.title}</span>
                                                                         <p className="playlist__song-author info__author">
                                                                             {
-                                                                                song.artist_names.map((artist, artistIndex) => {
-                                                                                    return (
-                                                                                        <span key={`${artist}-${artistIndex}`}>
-                                                                                            <ArtistNameLink artist={artist} />
-                                                                                            {artistIndex < song.artist_names.length - 1 && ", "}
-                                                                                        </span>
+                                                                                song.artist_names.length === 0 ?
+                                                                                    (<span>Unknown Artist</span>)
+                                                                                    :
+                                                                                    (
+                                                                                        song.artist_names.map((artist, artistIndex) => {
+                                                                                            return (
+                                                                                                <span key={`${artist}-${artistIndex}`}>
+                                                                                                    <ArtistNameLink artist={artist} />
+                                                                                                    {artistIndex < song.artist_names.length - 1 && ", "}
+                                                                                                </span>
+                                                                                            )
+
+                                                                                        })
                                                                                     )
 
-                                                                                })
                                                                             }
                                                                         </p>
                                                                     </div>
                                                                 </div>
-
                                                             </div>
                                                             <span className="playlist__song-time media__content">
                                                                 {

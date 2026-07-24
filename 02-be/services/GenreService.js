@@ -32,7 +32,6 @@ const getSongsByGenreSlug = async (slug) => {
 	if (!genre) {
 		return null;
 	}
-
 	const result = await pool.query(`
 		WITH song_artists AS (
 			SELECT

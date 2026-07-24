@@ -20,15 +20,21 @@ function mapUserAttributes(row) {
 
 // Tìm user theo username + password (dùng cho đăng nhập).
 export async function getUserByCredentials({ username, password }) {
+
   const query = `
     SELECT *
     FROM "user"
-    WHERE username = $1 AND password = $2
+    WHERE username = $1
     LIMIT 1
   `;
-  const result = await pool.query(query, [username, password]);
-  const user = mapUserAttributes(result.rows[0]);
+  const result = await pool.query(query, [username]);
+  const user = result.rows[0];
   if (!user) {
+    return null;
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if(!isMatch){
     return null;
   }
   const defaultPlaylistId = await playlistService.getDefaultPlaylistIdByUser(user.id);
@@ -62,19 +68,20 @@ export async function isUsernameTaken(username) {
 
 // Tạo user mới với role mặc định là "user".
 export async function createUser({ username, password }) {
+  const hashedPassword = await bcrypt.hash(password, 10);
   const query = `
     INSERT INTO "user" (username, password, role, avatar)
     VALUES ($1, $2, 'user', $3)
     RETURNING id, username, role, avatar
   `;
-  const result = await pool.query(query, [username, password, USER_DEFAULT_AVATAR]);
-  const defaultPlaylistId = await playlistService.createPlaylist({
+  const result = await pool.query(query, [username, hashedPassword, USER_DEFAULT_AVATAR]);
+  const defaultPlaylist = await playlistService.createPlaylist({
     name: `Nhạc của ${username}`,
-    creatorId: result.rows[0].id,
+    creator_id: result.rows[0].id,
     ispublic: false,
     isDefault: true
   });
-  return { ...mapUserAttributes(result.rows[0]), defaultPlaylistId };
+  return { ...mapUserAttributes(result.rows[0]), defaultPlaylistId: defaultPlaylist.id };
 }
 
 // Export dạng object để tiện import theo service tổng hợp.

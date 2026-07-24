@@ -3,29 +3,29 @@ import { albumService } from '../services/AlbumService.js';
 export const AlbumController = {
     async getFavouriteAlbums(req, res) {
         try {
-            const userId = Number(req.query.userId);
-
+            const userId = req.query.userId;
             if (!userId) {
-                return res.status(400).json({ message: 'Thiáº¿u userId' });
+                return res.status(400).json({ message: 'Thiếu userId' });
             }
-
             const albums = await albumService.getFavouriteAlbum(userId);
             res.json(albums);
         } catch (error) {
             console.error('Get favourite albums failed:', error);
-            res.status(500).json({ message: 'KhÃ´ng thá»ƒ láº¥y album yÃªu thÃ­ch.' });
+            res.status(500).json({ message: 'Lỗi hệ thống' });
         }
     },
 
     async toggleFavouriteAlbum(req, res) {
         try {
-            const userId = Number(req.body.userId);
-            const albumId = Number(req.body.albumId);
+            const userId = req.body.userId;
+            const albumId = req.body.albumId;
 
-            if (!userId || !albumId) {
-                return res.status(400).json({ message: 'Thiáº¿u userId hoáº·c albumId' });
+            if (!userId) {
+                return res.status(400).json({ message: 'Thiếu userId' });
             }
-
+            if (!albumId) {
+                return res.status(400).json({ message: "Thiếu albumId" });
+            }
             const isFavouriteAlbum = await albumService.toggleFavouriteAlbum(userId, albumId);
             res.json({ isFavouriteAlbum });
         } catch (error) {
@@ -46,9 +46,9 @@ export const AlbumController = {
 
     async getAlbumById(req, res) {
         try {
-            const albumId = Number(req.params.id);
-            
-            if (!Number.isInteger(albumId) || albumId <= 0) {
+            const albumId = req.params.id;
+
+            if (!albumId) {
                 return res.status(400).json({ message: 'Album id không hợp lệ.' });
             }
 
@@ -69,13 +69,15 @@ export const AlbumController = {
         try {
             const { name, artistId, releaseDate } = req.body;
 
-            if (!name || !artistId) {
-                return res.status(400).json({ message: 'Tên album và ID nghệ sĩ là bắt buộc.' });
+            if (!name) {
+                return res.status(400).json({ message: 'thiếu tên album' });
             }
-
+            if (!artistId) {
+                return res.status(400).json({ message: "Thiếu artistId" });
+            }
             const album = await albumService.createAlbum({
                 name: name.trim(),
-                artistId: Number(artistId),
+                artistId: artistId,
                 releaseDate
             });
 
@@ -85,24 +87,24 @@ export const AlbumController = {
             res.status(500).json({ message: 'Không thể tạo album.' });
         }
     },
-    async getRandomAlbums(req, res){
+    async getRandomAlbums(req, res) {
         try {
             const limit = req.query.limit;
             const result = await albumService.getRandomAlbums(limit);
             return res.json(result);
         }
-        catch(error){
+        catch (error) {
             console.error("Get random albums failed", error);
             res.status(500).json({ message: 'Lỗi hệ thống' });
         }
     },
-    async getNewestAlbums(req, res){
+    async getNewestAlbums(req, res) {
         try {
             const limit = req.query.limit;
             const result = await albumService.getNewestAlbums(limit);
             return res.json(result);
         }
-        catch(error){
+        catch (error) {
             console.error("Get newest albums failed", error);
             res.status(500).json({ message: 'Lỗi hệ thống' });
         }

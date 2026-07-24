@@ -142,7 +142,7 @@ export function Player({ style }) {
     }
     //Khôi phục bài hát/thời gian khi đổi bài hoặc reload.
     useEffect(() => {
-        if (audioRef.current && currentSong?.audio) {
+        if (audioRef.current && currentSong?.id) {
             const savedTime = currentTime;
             if (savedTime && savedTime !== "undefined") {
                 setPendingRestoreTime(savedTime);
@@ -157,7 +157,7 @@ export function Player({ style }) {
 
     useEffect(() => {
         const audio = audioRef.current;
-        if (!audio || !currentSong?.audio) return;
+        if (!audio || !currentSong?.id) return;
 
         if (isPlaying) {
             audio
@@ -167,7 +167,7 @@ export function Player({ style }) {
         }
 
         audio.pause();
-    }, [currentSong?.audio, isPlaying, setIsPlaying]);
+    }, [currentSong?.id, isPlaying, setIsPlaying]);
     //Cập nhật âm lượng của thẻ audio khi currentVolume thay đổi
     useEffect(() => {
         const audio = audioRef.current;
@@ -283,7 +283,7 @@ export function Player({ style }) {
     //Cập nhật thời gian hiện tại của bài hát khi phát và lưu tiến trình vào localStorage
     // Cập nhật thời gian phát và cộng dồn thời gian nghe thật của bài hát.
     const handleTimeUpdate = () => {
-        if (!audioRef.current || !currentSong?.audio) return;
+        if (!audioRef.current || !currentSong?.id) return;
         const newTime = audioRef.current.currentTime;
         setCurrentTime(newTime);
         const audioDuration = audioRef.current.duration;
@@ -507,7 +507,7 @@ export function Player({ style }) {
                     </div>
                     <audio
                         ref={audioRef}
-                        src={currentSong?.audio || undefined}
+                        src={currentSong?.id ? `${API_URL}/api/songs/stream/${currentSong.id}` : undefined}
                         id="audio"
                         onTimeUpdate={handleTimeUpdate}
                         onLoadedMetadata={handleLoadedMetadata}

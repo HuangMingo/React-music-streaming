@@ -1,7 +1,7 @@
 import { playlistService } from "../services/PlaylistService.js";
 const getFavouritePlaylist = async (req, res) => {
     try {
-        const userId = Number(req.query.userId);
+        const userId = req.query.userId;
         if (!userId) {
             return res.status(400).json({ message: 'Thiếu userId' });
         }
@@ -16,24 +16,27 @@ const getFavouritePlaylist = async (req, res) => {
 
 const toggleFavouritePlaylist = async (req, res) => {
     try {
-        const userId = Number(req.body.userId);
-        const playlistId = Number(req.body.playlistId);
+        const userId = req.body.userId;
+        const playlistId = req.body.playlistId;
 
-        if (!userId || !playlistId) {
-            return res.status(400).json({ message: 'Thiáº¿u userId hoáº·c playlistId' });
+        if (!userId) {
+            return res.status(400).json({ message: 'Thiếu userId' });
         }
 
+        if (!playlistId) {
+            return res.status(400).json({ message: 'Thiếu playlistId' });
+        }
         const newStatus = await playlistService.toggleFavouritePlaylist(userId, playlistId);
         res.json({ isFavouritePlaylist: newStatus });
     } catch (error) {
         console.error('Toggle favourite playlist failed:', error);
-        res.status(500).json({ message: 'Lá»—i há»‡ thá»‘ng' });
+        res.status(500).json({ message: 'Lỗi hệ thống' });
     }
 }
 
 const getUserCreatedPlaylist = async (req, res) => {
     try {
-        const userId = Number(req.query.userId);
+        const userId = req.query.userId;
         if (!userId) {
             return res.status(400).json({ message: 'Thiếu userId' });
         }
@@ -42,13 +45,16 @@ const getUserCreatedPlaylist = async (req, res) => {
     }
     catch (error) {
         console.error('Get user created playlists failed:', error);
-        res.status(500).json({ message: 'Lỗi hệ thống' });
+        res.status(500).json({
+            status: 500,
+            message: 'Lỗi hệ thống'
+        });
     }
 }
 
 const getPlaylistById = async (req, res) => {
     try {
-        const playlistId = Number(req.query.playlistId);
+        const playlistId = req.query.playlistId;
         if (!playlistId) {
             return res.status(400).json({ message: 'Thiếu playlistId' });
         }
@@ -71,14 +77,13 @@ const createPlaylist = async (req, res) => {
             res.status(400).json({ message: 'Playlist name is required' });
             return;
         }
-        const creatorId = Number(creator_id);
-        if (!Number.isInteger(creatorId) || creatorId <= 0) {
+        if (!creator_id) {
             res.status(400).json({ message: 'creator_id is invalid' });
             return;
         }
         const newPlaylist = await playlistService.createPlaylist({
             name: name.trim(),
-            creatorId: creatorId,
+            creator_id: creator_id,
             ispublic: Boolean(ispublic),
             isDefault: Boolean(isdefault)
         });
@@ -92,7 +97,7 @@ const createPlaylist = async (req, res) => {
 //chỉnh sửa thông tin playlist (tên, công khai/riêng tư)
 const updatePlaylist = async (req, res) => {
     try {
-        const playlistId = Number(req.params.playlistId ?? req.query.playlistId ?? req.body.playlistId);
+        const playlistId = req.body.playlistId;
         const { name, userId, ispublic } = req.body;
         if (!playlistId) {
             return res.status(400).json({ message: 'Thiếu playlistId' });
@@ -100,8 +105,8 @@ const updatePlaylist = async (req, res) => {
         if (!name || !name.trim()) {
             return res.status(400).json({ message: 'Playlist name is required' });
         }
-        const currentUserId = Number(userId);
-        if (!Number.isInteger(currentUserId) || currentUserId <= 0) {
+
+        if (!currentUserId) {
             return res.status(400).json({ message: 'userId is invalid' });
         }
 
@@ -123,8 +128,8 @@ const updatePlaylist = async (req, res) => {
 }
 const deletePlaylist = async (req, res) => {
     try {
-        const playlistId = Number(req.query.playlistId);
-        const userId = Number(req.query.userId);
+        const playlistId = req.query.playlistId;
+        const userId = req.query.userId;
         if (!playlistId || !userId) {
             return res.status(400).json({ message: 'Thiếu playlistId hoặc userId' });
         }
@@ -143,10 +148,13 @@ const deletePlaylist = async (req, res) => {
 //Thêm bài hát vào playlist
 const addSongToPlaylist = async (req, res) => {
     try {
-        const playlistId = Number(req.query.playlistId ?? req.body.playlistId);
-        const songId = Number(req.query.songId ?? req.body.songId);
-        if (!playlistId || !songId) {
-            return res.status(400).json({ message: 'Thiếu playlistId hoặc songId' });
+        const playlistId = req.body.playlistId;
+        const songId = req.body.songId;
+        if (!playlistId) {
+            return res.status(400).json({ message: 'Thiếu playlistId' });
+        }
+        if (!songId) {
+            return res.status(400).json({ message: "Thiếu songId" });
         }
         const result = await playlistService.addSongToPlaylist(playlistId, songId);
         res.json({ success: true, result });
@@ -158,9 +166,9 @@ const addSongToPlaylist = async (req, res) => {
 }
 const deleteSongFromPlaylist = async (req, res) => {
     try {
-        const playlistId = Number(req.query.playlistId ?? req.body.playlistId);
-        const songId = Number(req.query.songId ?? req.body.songId);
-        const userId = Number(req.query.userId ?? req.body.userId);
+        const playlistId = req.query.playlistId;
+        const songId = req.query.songId ?? req.body.songId;
+        const userId = req.query.userId ?? req.body.userId;
         if (!playlistId || !songId || !userId) {
             return res.status(400).json({ message: 'Thiếu playlistId, songId hoặc userId' });
         }
@@ -184,7 +192,7 @@ const getRandomPlaylists = async (req, res) => {
         const result = await playlistService.getRandomPlaylists(limit);
         res.json(result);
     }
-    catch (error){
+    catch (error) {
         console.error('Get random playlists failed:', error);
         res.status(500).json({ message: 'Lỗi hệ thống' });
     }
@@ -196,7 +204,7 @@ const getNewestPlaylists = async (req, res) => {
         const result = await playlistService.getNewestPlaylists(limit);
         res.json(result);
     }
-    catch (error){
+    catch (error) {
         console.error('Get newest playlists failed:', error);
         res.status(500).json({ message: 'Lỗi hệ thống' });
     }
@@ -208,7 +216,7 @@ export const PlaylistController = {
     getPlaylistById,
     createPlaylist,
     updatePlaylist,
-    deletePlaylist, 
+    deletePlaylist,
     addSongToPlaylist,
     deleteSongFromPlaylist,
     getRandomPlaylists,

@@ -41,7 +41,6 @@ function requireRole(allowedRoles) {
   return async (req, res, next) => {
     try {
       const user = await getRequestUser(req);
-
       if (!user) {
         return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập.' });
       }

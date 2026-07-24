@@ -180,7 +180,7 @@ function getMp3DurationSeconds(buffer) {
   return seconds > 0 ? Math.round(seconds) : null;
 }
 
-export async function getOverview(req, res) {
+async function getOverview(req, res) {
   try {
     sendSuccess(res, await adminService.getOverview());
   } catch (error) {
@@ -188,7 +188,7 @@ export async function getOverview(req, res) {
   }
 }
 
-export async function getSongs(req, res) {
+async function getSongs(req, res) {
   try {
     sendSuccess(res, await adminService.getSongs());
   } catch (error) {
@@ -196,7 +196,7 @@ export async function getSongs(req, res) {
   }
 }
 
-export async function createSong(req, res) {
+async function createSong(req, res) {
   try {
     const { fields, files } = parseMultipartBody(req);
     const data = { ...fields };
@@ -218,7 +218,7 @@ export async function createSong(req, res) {
   }
 }
 
-export async function updateSong(req, res) {
+async function updateSong(req, res) {
   try {
     sendSuccess(res, await adminService.updateSong(req.params.id, req.body), 'Đã cập nhật bài hát.');
   } catch (error) {
@@ -226,7 +226,7 @@ export async function updateSong(req, res) {
   }
 }
 
-export async function deleteSong(req, res) {
+async function deleteSong(req, res) {
   try {
     sendSuccess(res, await adminService.deleteSong(req.params.id), 'Đã xóa bài hát.');
   } catch (error) {
@@ -234,7 +234,7 @@ export async function deleteSong(req, res) {
   }
 }
 
-export async function getAlbums(req, res) {
+async function getAlbums(req, res) {
   try {
     sendSuccess(res, await adminService.getAlbums());
   } catch (error) {
@@ -242,7 +242,7 @@ export async function getAlbums(req, res) {
   }
 }
 
-export async function createAlbum(req, res) {
+async function createAlbum(req, res) {
   try {
     sendSuccess(res, await adminService.createAlbum(req.body), 'Đã thêm album.');
   } catch (error) {
@@ -250,7 +250,7 @@ export async function createAlbum(req, res) {
   }
 }
 
-export async function updateAlbum(req, res) {
+async function updateAlbum(req, res) {
   try {
     sendSuccess(res, await adminService.updateAlbum(req.params.id, req.body), 'Đã cập nhật album.');
   } catch (error) {
@@ -258,7 +258,7 @@ export async function updateAlbum(req, res) {
   }
 }
 
-export async function deleteAlbum(req, res) {
+async function deleteAlbum(req, res) {
   try {
     sendSuccess(res, await adminService.deleteAlbum(req.params.id), 'Đã xóa album.');
   } catch (error) {
@@ -266,7 +266,7 @@ export async function deleteAlbum(req, res) {
   }
 }
 
-export async function getArtists(req, res) {
+async function getArtists(req, res) {
   try {
     sendSuccess(res, await adminService.getArtists());
   } catch (error) {
@@ -274,7 +274,7 @@ export async function getArtists(req, res) {
   }
 }
 
-export async function createArtist(req, res) {
+async function createArtist(req, res) {
   try {
     sendSuccess(res, await adminService.createArtist(req.body), 'Đã thêm nghệ sĩ.');
   } catch (error) {
@@ -282,7 +282,7 @@ export async function createArtist(req, res) {
   }
 }
 
-export async function updateArtist(req, res) {
+async function updateArtist(req, res) {
   try {
     sendSuccess(res, await adminService.updateArtist(req.params.id, req.body), 'Đã cập nhật nghệ sĩ.');
   } catch (error) {
@@ -290,7 +290,7 @@ export async function updateArtist(req, res) {
   }
 }
 
-export async function deleteArtist(req, res) {
+async function deleteArtist(req, res) {
   try {
     sendSuccess(res, await adminService.deleteArtist(req.params.id), 'Đã xóa nghệ sĩ.');
   } catch (error) {
@@ -298,7 +298,7 @@ export async function deleteArtist(req, res) {
   }
 }
 
-export async function getSystemPlaylists(req, res) {
+async function getSystemPlaylists(req, res) {
   try {
     sendSuccess(res, await adminService.getSystemPlaylists());
   } catch (error) {
@@ -306,7 +306,7 @@ export async function getSystemPlaylists(req, res) {
   }
 }
 
-export async function createSystemPlaylist(req, res) {
+async function createSystemPlaylist(req, res) {
   try {
     sendSuccess(res, await adminService.createSystemPlaylist(req.body, req.authUser.id), 'Đã thêm playlist hệ thống.');
   } catch (error) {
@@ -314,7 +314,7 @@ export async function createSystemPlaylist(req, res) {
   }
 }
 
-export async function updateSystemPlaylist(req, res) {
+async function updateSystemPlaylist(req, res) {
   try {
     sendSuccess(res, await adminService.updateSystemPlaylist(req.params.id, req.body), 'Đã cập nhật playlist hệ thống.');
   } catch (error) {
@@ -322,7 +322,7 @@ export async function updateSystemPlaylist(req, res) {
   }
 }
 
-export async function deleteSystemPlaylist(req, res) {
+async function deleteSystemPlaylist(req, res) {
   try {
     sendSuccess(res, await adminService.deleteSystemPlaylist(req.params.id), 'Đã xóa playlist hệ thống.');
   } catch (error) {
@@ -330,7 +330,7 @@ export async function deleteSystemPlaylist(req, res) {
   }
 }
 
-export async function getUsers(req, res) {
+async function getUsers(req, res) {
   try {
     sendSuccess(res, await adminService.getUsers());
   } catch (error) {
@@ -338,7 +338,7 @@ export async function getUsers(req, res) {
   }
 }
 
-export async function updateUserRole(req, res) {
+async function updateUserRole(req, res) {
   try {
     sendSuccess(
       res,
