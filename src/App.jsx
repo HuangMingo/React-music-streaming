@@ -42,9 +42,9 @@ import { ArtistDetail } from './components/ArtistsDetail/ArtistsDetail.jsx'
 
 function GuestOnlyRoute({ children }) {
   const { isAuthenticated, isAdmin } = useAuthContext();
-  if (isAuthenticated) {
+  if (isAuthenticated) {sfgsgfsfs
     // Người đã đăng nhập không cần quay lại trang login/register.
-    return <Navigate to={'/'} replace />;
+    return <Navigate to={'/'} />;
   }
 
   return children;
@@ -206,8 +206,6 @@ function App() {
               <Route path="playlist" element={<PlaylistSection />} />
               <Route path="album" element={<AlbumSection />} />
               <Route path="artist" element={<ArtistSection />} />
-              {/* Upload chỉ cho admin để tránh user thường truy cập trực tiếp */}
-              <Route path="upload" element={<AdminRoute><UploadSection /></AdminRoute>} />
             </Route>
             <Route path="/dream" element={<DreamChart />} />
             <Route path="/recent" element={<RecentSong />} />

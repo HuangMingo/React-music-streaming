@@ -65,16 +65,13 @@ export function InsertSong({
     onFormChange({ ...songForm, artist_ids: nextArtistIds }, 'artist_ids');
   }
 
-  function toggleArtist(artistId) {
-    const normalizedArtistId = Number(artistId);
-    const currentIds = selectedArtistIds.map(Number);
-
-    if (currentIds.includes(normalizedArtistId)) {
-      updateArtistIds(currentIds.filter((id) => id !== normalizedArtistId));
+  function toggleArtist(artistId) {;
+    if (selectedArtistIds.includes(artistId)) {
+      updateArtistIds(selectedArtistIds.filter((id) => id !== artistId));
       return;
     }
 
-    updateArtistIds([...currentIds, normalizedArtistId]);
+    updateArtistIds([...selectedArtistIds, artistId]);
   }
 
   function updateGenreIds(nextGenreIds) {
@@ -82,15 +79,14 @@ export function InsertSong({
   }
 
   function toggleGenre(genreId) {
-    const normalizedGenreId = Number(genreId);
     const currentIds = selectedGenreIds.map(Number);
 
-    if (currentIds.includes(normalizedGenreId)) {
-      updateGenreIds(currentIds.filter((id) => id !== normalizedGenreId));
+    if (currentIds.includes(genreId)) {
+      updateGenreIds(currentIds.filter((id) => id !== genreId));
       return;
     }
 
-    updateGenreIds([...currentIds, normalizedGenreId]);
+    updateGenreIds([...currentIds, genreId]);
   }
 
   useEffect(() => {
@@ -147,12 +143,14 @@ export function InsertSong({
           <div className={`admin-multi-select${artistDropdownOpen ? ' is-open' : ''}`}>
             <div className="admin-multi-select__control">
               <div className="admin-multi-select__values">
-                {selectedArtists.length ? selectedArtists.map((artist) => (
-                  <span className="admin-multi-select__tag" key={artist.id}>
-                    {artist.name}
-                    <button type="button" onClick={() => toggleArtist(artist.id)}><i class="fa-solid fa-x"></i></button>
-                  </span>
-                )) : <span className="admin-multi-select__placeholder">Chọn nghệ sĩ</span>}
+                {
+                  selectedArtists.length ? selectedArtists.map((artist) => (
+                    <span className="admin-multi-select__tag" key={artist.id}>
+                      {artist.name}
+                      <button type="button" onClick={() => toggleArtist(artist.id)}><i class="fa-solid fa-x"></i></button>
+                    </span>
+                  )) : <span className="admin-multi-select__placeholder">Chọn nghệ sĩ</span>
+                }
               </div>
               <button
                 className="admin-multi-select__clear"
@@ -176,7 +174,7 @@ export function InsertSong({
                 {artists.map((artist) => (
                   <label className="admin-multi-select__option" key={artist.id}>
                     <input
-                      checked={selectedArtistIds.map(Number).includes(Number(artist.id))}
+                      checked={selectedArtistIds.map(Number).includes(artist.id)}
                       type="checkbox"
                       onChange={() => toggleArtist(artist.id)}
                     />

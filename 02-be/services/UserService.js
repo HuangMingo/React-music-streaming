@@ -20,7 +20,6 @@ function mapUserAttributes(row) {
 
 // Tìm user theo username + password (dùng cho đăng nhập).
 export async function getUserByCredentials({ username, password }) {
-
   const query = `
     SELECT *
     FROM "user"
@@ -34,11 +33,14 @@ export async function getUserByCredentials({ username, password }) {
   }
   const isMatch = await bcrypt.compare(password, user.password);
 
-  if(!isMatch){
+  if (!isMatch) {
     return null;
   }
   const defaultPlaylistId = await playlistService.getDefaultPlaylistIdByUser(user.id);
-  return { ...user, defaultPlaylistId };
+  return {
+    ...mapUserAttributes(user),
+    defaultPlaylistId
+  };
 }
 
 // Lấy thông tin user theo id.

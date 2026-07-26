@@ -5,27 +5,15 @@ const SUPER_ADMIN_ROLE = 'super_admin';
 
 let roleColumnReady = false;
 
-export async function ensureUserRoleColumn() {
-  if (roleColumnReady) {
-    return;
-  }
-
-  await pool.query(`
-    ALTER TABLE "user"
-    ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user'
-  `);
-  roleColumnReady = true;
-}
 
 function getRequestUserId(req) {
-  return req.headers['x-user-id'] || req.query.userId || req.body.userId;
+
+  return req.headers['x-user-id'] || req.query?.userId || req.body?.userid || req.params?.userId || null;
 }
 
 async function getRequestUser(req) {
-  await ensureUserRoleColumn();
-
-  const userId = Number(getRequestUserId(req));
-  if (!Number.isInteger(userId) || userId <= 0) {
+  const userId = getRequestUserId(req);
+  if (!userId) {
     return null;
   }
 

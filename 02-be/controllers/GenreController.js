@@ -25,8 +25,31 @@ const getSongsByGenreSlug = async (req, res) => {
 		res.status(500).json({ message: 'Lỗi hệ thống' });
 	}
 };
-
+const createGenreSong = async (req, res) => {
+	try {
+		const songId = req.body.songId;
+		const genreId = req.body.genreId;
+		if (!songId) {
+			return res.status(400).json({
+				message: 'songId không hợp lệ'
+			})
+		}
+		if (!genreId) {
+			return res.status(400).json({
+				message: 'genreId không hợp lệ'
+			})
+		}
+		const result = await genreService.createGenreSong(songId, genreId);
+		return res.json(result);
+	}
+	catch (error) {
+		return res.status(500).json({
+			message: error.message
+		})
+	}
+}
 export const GenreController = {
 	getAllGenres,
 	getSongsByGenreSlug,
+	createGenreSong
 };

@@ -1,40 +1,10 @@
 import { pool } from '../config/dbpg.js';
-import { ensureUserRoleColumn } from '../middlewares/AdminAuthMiddleware.js';
 
 const VALID_USER_ROLES = ['user', 'admin', 'super_admin'];
 const DEFAULT_PLAYLIST_IMAGE = 'https://res.cloudinary.com/dnsne0dgp/image/upload/v1775963817/macdinh_ivawgv.jpg';
 let playlistSystemColumnReady = false;
 
-function normalizeId(value) {
-  const id = Number(value);
-  return Number.isInteger(id) && id > 0 ? id : null;
-}
 
-function normalizeArtistIds(value) {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return [...new Set(value.map(normalizeId).filter(Boolean))];
-}
-
-function normalizeGenreIds(value) {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return [...new Set(value.map(normalizeId).filter(Boolean))];
-}
-
-function normalizeSongIds(value) {
-  if (!Array.isArray(value)) {
-    const error = new Error('Danh sách bài hát không hợp lệ.');
-    error.status = 400;
-    throw error;
-  }
-
-  return [...new Set(value.map(normalizeId).filter(Boolean))];
-}
 
 function requireText(value, fieldName) {
   const text = String(value || '').trim();
@@ -57,18 +27,6 @@ async function replaceSongArtists(client, songId, artistIds) {
   }
 }
 
-async function ensurePlaylistSystemColumn() {
-  if (playlistSystemColumnReady) {
-    return;
-  }
-
-  await pool.query(`
-    ALTER TABLE playlist
-    ADD COLUMN IF NOT EXISTS issystem BOOLEAN DEFAULT false
-  `);
-  playlistSystemColumnReady = true;
-}
-
 async function replacePlaylistSongs(client, playlistId, songIds) {
   await client.query('DELETE FROM song_playlist WHERE playlist_id = $1', [playlistId]);
 
@@ -81,8 +39,6 @@ async function replacePlaylistSongs(client, playlistId, songIds) {
 }
 
 export async function getOverview() {
-  await ensureUserRoleColumn();
-  await ensurePlaylistSystemColumn();
 
   const [songs, albums, artists, playlists, users] = await Promise.all([
     pool.query('SELECT COUNT(*)::int AS count FROM song'),
@@ -144,8 +100,8 @@ export async function getSongs() {
 
 export async function createSong(data) {
   const title = requireText(data.title, 'Tên bài hát');
-  const albumId = normalizeId(data.album_id);
-  const artistIds = normalizeArtistIds(data.artist_ids);
+  const albumId = data.album_id;
+  const artistIds = data.artist_ids;
   const genreIds = normalizeGenreIds(data.genre_ids);
   const lyrics = data.lyrics ?? data.lyric ?? null;
   const durationSeconds = data.duration_seconds ? Number(data.duration_seconds) : null;
@@ -176,7 +132,7 @@ export async function createSong(data) {
 }
 
 export async function updateSong(songId, data) {
-  const id = normalizeId(songId);
+  const id = songId;
   if (!id) {
     const error = new Error('ID bài hát không hợp lệ.');
     error.status = 400;
@@ -184,14 +140,13 @@ export async function updateSong(songId, data) {
   }
 
   const title = requireText(data.title, 'Tên bài hát');
-  const albumId = normalizeId(data.album_id);
-  const artistIds = normalizeArtistIds(data.artist_ids);
-  const genreIds = normalizeGenreIds(data.genre_ids);
+  const artistIds = data.artist_ids;
+  const genreIds = data.genre_ids;
   const lyrics = data.lyrics ?? data.lyric ?? null;
   const durationSeconds = data.duration_seconds ? Number(data.duration_seconds) : null;
   const trackNumber = data.track_number ? Number(data.track_number) : null;
   const client = await pool.connect();
-
+  const albumId = data.albumId;
   try {
     await client.query('BEGIN');
     const result = await client.query(
@@ -224,7 +179,6 @@ export async function updateSong(songId, data) {
 //  là một prepared statement và không cho phép nhiều 
 // câu SQL trong một statement.
 export async function deleteSong(songId) {
-  const id = normalizeId(songId);
   if (!id) {
     const error = new Error('ID bài hát không hợp lệ.');
     error.status = 400;
@@ -273,7 +227,6 @@ export async function getAlbums() {
 export async function createAlbum(data) {
   const title = requireText(data.title || data.name, 'Tên album');
   const image = requireText(data.image, 'Ảnh album');
-  const artistId = normalizeId(data.artist_id);
   if (!artistId) {
     const error = new Error('Vui lòng chọn nghệ sĩ cho album.');
     error.status = 400;
@@ -291,10 +244,8 @@ export async function createAlbum(data) {
 }
 
 export async function updateAlbum(albumId, data) {
-  const id = normalizeId(albumId);
   const title = requireText(data.title || data.name, 'Tên album');
   const image = requireText(data.image, 'Ảnh album');
-  const artistId = normalizeId(data.artist_id);
 
   if (!id || !artistId) {
     const error = new Error('Dữ liệu album không hợp lệ.');
@@ -314,7 +265,6 @@ export async function updateAlbum(albumId, data) {
 }
 
 export async function deleteAlbum(albumId) {
-  const id = normalizeId(albumId);
   if (!id) {
     const error = new Error('ID album không hợp lệ.');
     error.status = 400;
@@ -370,7 +320,6 @@ export async function createArtist(data) {
 }
 
 export async function updateArtist(artistId, data) {
-  const id = normalizeId(artistId);
   const name = requireText(data.name, 'Tên nghệ sĩ');
   const image = data.image || data.avatar || data.cover_image || data.backgroundImage || null;
   const followerCount = data.follower_count ? Number(data.follower_count) : 0;
@@ -393,7 +342,6 @@ export async function updateArtist(artistId, data) {
 }
 
 export async function deleteArtist(artistId) {
-  const id = normalizeId(artistId);
   if (!id) {
     const error = new Error('ID nghệ sĩ không hợp lệ.');
     error.status = 400;
@@ -424,8 +372,6 @@ export async function deleteArtist(artistId) {
 }
 
 export async function getSystemPlaylists() {
-  await ensurePlaylistSystemColumn();
-
   const result = await pool.query(`
     WITH song_artists AS (
       SELECT
@@ -447,7 +393,7 @@ export async function getSystemPlaylists() {
       p.isdefault,
       p.issystem AS "isSystem",
       COUNT(DISTINCT s.id)::int AS song_count,
-      COALESCE(array_agg(DISTINCT s.id) FILTER (WHERE s.id IS NOT NULL), '{}'::int[]) AS song_ids,
+      COALESCE(array_agg(DISTINCT s.id) FILTER (WHERE s.id IS NOT NULL), '{}'::uuid[]) AS song_ids,
       COALESCE(
         json_agg(
           DISTINCT jsonb_build_object(
@@ -474,10 +420,8 @@ export async function getSystemPlaylists() {
 }
 
 export async function createSystemPlaylist(data, actorUserId) {
-  await ensurePlaylistSystemColumn();
 
   const name = requireText(data.name || data.playlist_name, 'Tên playlist');
-  const creatorId = normalizeId(actorUserId);
   const songIds = normalizeSongIds(data.songIds || data.song_ids || []);
 
   if (!creatorId) {
@@ -522,9 +466,6 @@ async function replaceSongGenres(client, songId, genreIds) {
 }
 
 export async function updateSystemPlaylist(playlistId, data) {
-  await ensurePlaylistSystemColumn();
-
-  const id = normalizeId(playlistId);
   const name = requireText(data.name || data.playlist_name, 'Tên playlist');
   const songIds = normalizeSongIds(data.songIds || data.song_ids || []);
 
@@ -565,10 +506,7 @@ export async function updateSystemPlaylist(playlistId, data) {
 }
 
 export async function deleteSystemPlaylist(playlistId) {
-  await ensurePlaylistSystemColumn();
-
-  const id = normalizeId(playlistId);
-  if (!id) {
+  if (!playlistId) {
     const error = new Error('ID playlist không hợp lệ.');
     error.status = 400;
     throw error;
@@ -604,7 +542,6 @@ export async function deleteSystemPlaylist(playlistId) {
 }
 
 export async function getUsers() {
-  await ensureUserRoleColumn();
 
   const emailColumn = await pool.query(`
     SELECT column_name
@@ -625,10 +562,9 @@ export async function getUsers() {
 }
 
 export async function updateUserRole(actorUserId, targetUserId, nextRole) {
-  await ensureUserRoleColumn();
 
-  const targetId = normalizeId(targetUserId);
-  const actorId = normalizeId(actorUserId);
+  const targetId = targetUserId;
+  const actorId = actorUserId;
 
   if (!targetId || !VALID_USER_ROLES.includes(nextRole)) {
     const error = new Error('Dữ liệu phân quyền không hợp lệ.');

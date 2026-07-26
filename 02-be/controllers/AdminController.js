@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import * as adminService from '../services/AdminService.js';
+import { getTabbableOptions } from '@floating-ui/react/utils';
 
 const uploadsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'uploads', 'admin');
 
@@ -348,4 +349,28 @@ async function updateUserRole(req, res) {
   } catch (error) {
     sendError(res, error);
   }
+}
+export const adminController = {
+  uploadToCloudinary,
+  storeUploadedFile,
+  getMp3DurationSeconds,
+  getOverview,
+  getSongs,
+  createSong,
+  updateSong,
+  deleteSong,
+  getAlbums,
+  createAlbum,
+  updateAlbum,
+  deleteAlbum,
+  getArtists,
+  createArtist,
+  updateArtist,
+  deleteArtist,
+  getSystemPlaylists,
+  createSystemPlaylist,
+  updateSystemPlaylist,
+  deleteSystemPlaylist,
+  getUsers,
+  updateUserRole,
 }
