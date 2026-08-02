@@ -57,9 +57,9 @@ export function InsertSong({
   const lyricsFileMeta = songFiles.lyrics ? formatFileSize(songFiles.lyrics) : (songForm.lyrics ? getCloudinaryFileName(songForm.lyrics) : 'Định dạng: TXT, LRC hoặc SRT');
 
   const selectedArtistIds = songForm.artist_ids || [];
-  const selectedArtists = artists.filter((artist) => selectedArtistIds.map(Number).includes(Number(artist.id)));
+  const selectedArtists = artists.filter((artist) => selectedArtistIds.includes(artist.id));
   const selectedGenreIds = songForm.genre_ids || [];
-  const selectedGenres = genres.filter((genre) => selectedGenreIds.map(Number).includes(Number(genre.id)));
+  const selectedGenres = genres.filter((genre) => selectedGenreIds.includes(genre.id));
 
   function updateArtistIds(nextArtistIds) {
     onFormChange({ ...songForm, artist_ids: nextArtistIds }, 'artist_ids');
@@ -79,14 +79,12 @@ export function InsertSong({
   }
 
   function toggleGenre(genreId) {
-    const currentIds = selectedGenreIds.map(Number);
-
-    if (currentIds.includes(genreId)) {
-      updateGenreIds(currentIds.filter((id) => id !== genreId));
+    if (selectedGenreIds.includes(genreId)) {
+      updateGenreIds(selectedGenreIds.filter((id) => id !== genreId));
       return;
     }
 
-    updateGenreIds([...currentIds, genreId]);
+    updateGenreIds([...selectedGenreIds, genreId]);
   }
 
   useEffect(() => {
@@ -174,7 +172,7 @@ export function InsertSong({
                 {artists.map((artist) => (
                   <label className="admin-multi-select__option" key={artist.id}>
                     <input
-                      checked={selectedArtistIds.map(Number).includes(artist.id)}
+                      checked={selectedArtistIds.includes(artist.id)}
                       type="checkbox"
                       onChange={() => toggleArtist(artist.id)}
                     />
@@ -219,7 +217,7 @@ export function InsertSong({
                 {genres.map((genre) => (
                   <label className="admin-multi-select__option" key={genre.id}>
                     <input
-                      checked={selectedGenreIds.map(Number).includes(Number(genre.id))}
+                      checked={selectedGenreIds.includes(genre.id)}
                       type="checkbox"
                       onChange={() => toggleGenre(genre.id)}
                     />

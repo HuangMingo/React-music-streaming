@@ -107,7 +107,7 @@ export function MusicProvider({ children }) {
 
   // Helper dùng trong component để kiểm tra nhanh trạng thái follow.
   function isArtistFollowed(artistId) {
-    return followedArtists.has(Number(artistId));
+    return followedArtists.has(artistId);
   }
 
   // Đồng bộ trạng thái follow vào Set mà không reload trang.
@@ -180,21 +180,17 @@ export function MusicProvider({ children }) {
 
   // Gọi API follow rồi cập nhật context sau khi backend thành công.
   async function followArtist(artistId) {
-    const normalizedArtistId = Number(artistId);
-    if (!currentUser?.id || !normalizedArtistId) {
-      showNotificationToast("Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ theo dÃµi nghá»‡ sÄ©.");
+    if (!currentUser?.id) {
+      showNotificationToast("Vui lòng đăng nhập để theo dõi nghệ sĩ.");
       return null;
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/artists/follow`, {
-        userId: currentUser.id,
-        artistId: normalizedArtistId,
-      });
+      const response = await axios.post(`${API_URL}/api/artists/follow?userId=${currentUser.id}&artistId=${artistId}`);
       const followersCount = Number(response?.data?.followersCount) || 0;
-      syncArtistFollowStatus(normalizedArtistId, true);
-      syncArtistFollowersCount(normalizedArtistId, followersCount);
-      return { isFollowing: true, followersCount };
+      syncArtistFollowStatus(artistId, true);
+      syncArtistFollowersCount(artistId, followersCount);
+      return { isFollowing: true, followersCount};
     } catch (error) {
       console.error("Follow artist failed:", error);
       return null;
@@ -203,22 +199,16 @@ export function MusicProvider({ children }) {
 
   // Gọi API unfollow rồi cập nhật context sau khi backend thành công.
   async function unfollowArtist(artistId) {
-    const normalizedArtistId = Number(artistId);
-    if (!currentUser?.id || !normalizedArtistId) {
-      showNotificationToast("Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ theo dÃµi nghá»‡ sÄ©.");
+    if (!currentUser?.id) {
+      showNotificationToast("Vui lòng đăng nhập để bỏ theo dõi nghệ sĩ.");
       return null;
     }
 
     try {
-      const response = await axios.delete(`${API_URL}/api/artists/follow`, {
-        data: {
-          userId: currentUser.id,
-          artistId: normalizedArtistId,
-        },
-      });
+      const response = await axios.delete(`${API_URL}/api/artists/follow?userId=${currentUser.id}&artistId=${artistId}`);
       const followersCount = Number(response?.data?.followersCount) || 0;
-      syncArtistFollowStatus(normalizedArtistId, false);
-      syncArtistFollowersCount(normalizedArtistId, followersCount);
+      syncArtistFollowStatus(artistId, false);
+      syncArtistFollowersCount(artistId, followersCount);
       return { isFollowing: false, followersCount };
     } catch (error) {
       console.error("Unfollow artist failed:", error);

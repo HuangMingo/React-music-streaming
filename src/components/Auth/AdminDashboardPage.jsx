@@ -720,7 +720,7 @@ export function AdminDashboardPage() {
         await axios.put(`${API_URL}/api/admin/songs/${editingSongId}`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
         setNotice('Đã cập nhật bài hát.');
       } else {
-        await axios.post(`${API_URL}/api/admin/songs`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
+        await axios.post(`${API_URL}/api/admin/songs/update-song`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
         setNotice('Đã thêm bài hát.');
       }
       closeCreateSongForm();

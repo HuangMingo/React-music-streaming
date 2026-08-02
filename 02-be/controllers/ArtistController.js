@@ -45,7 +45,6 @@ const followArtist = async (req, res) => {
     try {
         const userId = req.query.userId ?? req.params.userId;
         const artistId = req.query.artistId ?? req.params.artistId;
-
         if (!artistId || !userId) {
             return res.status(400).json({ message: 'Missing artistId or userId' });
         }
@@ -114,8 +113,8 @@ const getArtistFollowersCount = async (req, res) => {
 // Endpoint tương thích cho nơi còn gọi toggle: nếu đang follow thì unfollow, ngược lại follow.
 const toggleFollowArtist = async (req, res) => {
     try {
-        const artistId = req.params.artistId ?? req.body.artistId;
-        const userId = req.body.userId ?? req.query.userId;
+        const artistId = req.params.artistId ?? req.query.artistId;
+        const userId = req.params.userId ?? req.query.userId;
 
         if (!artistId || !userId) {
             return res.status(400).json({ message: 'Missing artistId or userId' });

@@ -64,18 +64,8 @@ const getSongsByGenreSlug = async (slug) => {
 		songs: result.rows,
 	};
 };
-const createGenreSong = async (songId, genreId) => {
-	const result = await pool.query(
-		`
-			INSERT INTO genre_song (song_id, genre_id)
-			values ($1, $2) 
-		`, [songId, genreId]
-	);
-	console.log(typeof result);
-	return result;
-}
+
 export const genreService = {
 	getAllGenres,
 	getSongsByGenreSlug,
-	createGenreSong
 };

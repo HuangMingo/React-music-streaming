@@ -12,6 +12,7 @@ import SearchRoutes from './routes/SearchRoutes.js';
 import ArtistRoutes from './routes/ArtistRoutes.js';
 import AdminRoutes from './routes/AdminRoutes.js';
 import GenreRoutes from './routes/GenreRoutes.js';
+import GenreSongRoutes from './routes/GenreSongRoutes.js';
 import dotenv from 'dotenv';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
@@ -94,6 +95,7 @@ app.use('/api/genres', GenreRoutes);
 app.use('/api/search', SearchRoutes);
 app.use('/api/artists', ArtistRoutes);
 app.use('/api/admin', AdminRoutes);
+app.use('/api/genre-song', GenreSongRoutes);
 
 app.use((err, req, res, next) => {
 	console.error(err);
