@@ -215,7 +215,7 @@ export function DreamChart() {
                                                                     `${Math.floor(song.duration_seconds / 60).toString().padStart(2, '0')}:${Math.floor(song.duration_seconds % 60).toString().padStart(2, '0')}`
                                                                 }
                                                             </span>
-                                                            <div className="playlist__song-option song--tab media__right hide-on-mobile">
+                                                            <div className="playlist__song-option song--tab media__right">
                                                                 {/* <div className="playlist__song-btn btn--mic option-btn" title= "Xem lời bài hát">
                                                                     <i className="btn--icon song__icon bi bi-mic-fill"></i>
                                                                 </div> */}

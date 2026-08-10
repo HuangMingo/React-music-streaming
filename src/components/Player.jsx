@@ -534,7 +534,7 @@ export function Player({ style }) {
                     <div className="player__popup-header">
                         <div className="player__popup-logo">
                             <img
-                                src="/assets/img/logos/main-logo.png"
+                                src="/assets/img/logos/main-logo.svg"
                                 alt="Logo"
                                 className="player__logo-img"
                             />

@@ -42,7 +42,7 @@ import { ArtistDetail } from './components/ArtistsDetail/ArtistsDetail.jsx'
 
 function GuestOnlyRoute({ children }) {
   const { isAuthenticated, isAdmin } = useAuthContext();
-  if (isAuthenticated) {sfgsgfsfs
+  if (isAuthenticated) {
     // Người đã đăng nhập không cần quay lại trang login/register.
     return <Navigate to={'/'} />;
   }
