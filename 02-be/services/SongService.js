@@ -121,6 +121,17 @@ const getAudioBySongId = async (songId) => {
     return result.rows[0];
 };
 
+const updateSong = async(songId, songForm) => {
+    const { title, image, duration_seconds, release_date, album_id, lyrics } = songForm;
+    const result = await pool.query(`
+        UPDATE song 
+        SET title = $1, image = $2, duration_seconds = $3, release_date = $4, album_id = $5, lyrics = $6
+        WHERE id = $7
+        RETURNING *
+    `, [title, image, duration_seconds, release_date, album_id, lyrics, songId]);
+    return result.rows[0];
+}
+
 export const songService = {
     getAllSong,
     getNewestSongs,
@@ -128,5 +139,6 @@ export const songService = {
     toggleFavouriteSong,
     getTop10MostPlayedSongs,
     incrementPlayCount,
-    getAudioBySongId
+    getAudioBySongId,
+    updateSong
 }
