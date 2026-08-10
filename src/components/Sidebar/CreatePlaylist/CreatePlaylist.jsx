@@ -8,7 +8,7 @@ import { API_URL } from '../../../api.js';
 export function CreatePlaylist({ onClose, onSuccess, editingPlaylist = null }) {
     const isEditing = Boolean(editingPlaylist);
     const [playlistName, setPlaylistName] = useState(editingPlaylist?.playlist_name ?? "");
-    const [isPublic, setIsPublic] = useState(editingPlaylist?.ispublic ?? true);
+    const [isPublic, setIsPublic] = useState(editingPlaylist?.ispublic ?? false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [nameError, setNameError] = useState("");
     const { currentUser } = useAuthContext();

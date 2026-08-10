@@ -266,6 +266,19 @@
     /* App */
     .app {
         height: calc(100vh - 2 * var(--player-height));
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .app__container,
+    .app__container-content,
+    .content__container,
+    .header__with-search,
+    .header__search,
+    .media__content {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .header__button {
@@ -338,6 +351,20 @@
     .header {
         width: 100%;
         padding: 0 10px;
+        gap: 8px;
+        box-sizing: border-box;
+    }
+
+    .header__nav-list {
+        margin: 15px 0;
+    }
+
+    .header__nav-item {
+        margin-right: 6px;
+    }
+
+    .header__auth-btn {
+        padding: 0 10px;
     }
 
 
@@ -386,6 +413,16 @@
         min-width: calc(100vw / 5);
     }
 
+    .content__navbar-list {
+        max-width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .content__navbar-list::-webkit-scrollbar {
+        display: none;
+    }
+
 
 
 
@@ -396,7 +433,13 @@
 
     .playlist__song-info {
         flex: 1;
+        width: auto;
+        min-width: 0;
         margin-right: 0;
+    }
+
+    .playlist__song-body {
+        min-width: 0;
     }
 
     .playlist__song-info > i {
@@ -602,6 +645,8 @@
 
     /* Modal theme */
     .modal-container {
+        width: calc(100% - 24px);
+        max-width: calc(100% - 24px);
         max-height: 400px;
         min-height: unset
     }
@@ -748,4 +793,34 @@
         min-width: calc(80vw - 10px);
     }
 
+}
+
+@media (max-width: 30em) {
+    .header__auth-btn {
+        padding: 0 8px;
+        font-size: 1.2rem;
+    }
+
+    .header__nav-item {
+        margin-right: 4px;
+    }
+
+    .header__nav-btn,
+    .header__nav-item:last-child .header__nav-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .content__container,
+    .app__container-content {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .genre-page__grid,
+    .search-page__artist-track,
+    .search-page__card-track {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
 }

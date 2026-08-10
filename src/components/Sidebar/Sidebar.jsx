@@ -19,7 +19,7 @@ export function Sidebar({ onPlaylistsChanged }) {
             <div className="sidebar__logo hide-on-mobile">
                 <NavLink to="/" className="sidebar__logo-link">
                     <img
-                        src="/assets/img/logos/main-logo.png"
+                        src="/assets/img/logos/main-logo.svg"
                         alt="Logo"
                         className="sidebar__logo-img"
                     />

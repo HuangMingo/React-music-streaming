@@ -958,7 +958,7 @@ export function AdminDashboardPage() {
       <aside className="admin-sidebar">
         <div className="admin-brand">
           <a href="/">
-            <img src="./../../assets/img/logos/main-logo.png" alt="Logo" />
+            <img src="/assets/img/logos/main-logo.svg" alt="Logo" />
           </a>
 
         </div>

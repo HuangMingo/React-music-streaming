@@ -250,6 +250,10 @@ export function PlaylistSection() {
                         </div>
                     </div>
                 </div>
+               <button 
+                className="sidebar__create-container hide-on-tablet-mobile btn--create-playlist" onClick={() => { setOpenForm(true) }} >
+                Tạo playlist mới
+               </button>
             </div >
             <EditPlaylistMenu
                 openPlaylistMenuId={openPlaylistMenuId}
