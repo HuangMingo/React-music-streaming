@@ -7,8 +7,8 @@ const router = express.Router();
 router.get('/overview', requireAdminContent, adminController.getOverview);
 
 router.get('/songs', requireAdminContent, adminController.getSongs);
-router.post('/songs/update-song', requireAdminContent, express.raw({ type: 'multipart/form-data', limit: '120mb' }), adminController.createSong);
-router.put('/songs/:id', requireAdminContent, adminController.updateSong);
+router.post('/songs/insert-song', requireAdminContent, express.raw({ type: 'multipart/form-data', limit: '120mb' }), adminController.createSong);
+router.put('/songs/update-song/:id', requireAdminContent, adminController.updateSong);
 router.delete('/songs/:id', requireAdminContent, adminController.deleteSong);
 
 router.get('/albums', requireAdminContent, adminController.getAlbums);

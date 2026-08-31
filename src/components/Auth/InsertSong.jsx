@@ -142,7 +142,7 @@ export function InsertSong({
             <div className="admin-multi-select__control">
               <div className="admin-multi-select__values">
                 {
-                  selectedArtists.length ? selectedArtists.map((artist) => (
+                  selectedArtistIds.length ? selectedArtistIds.map((artist) => (
                     <span className="admin-multi-select__tag" key={artist.id}>
                       {artist.name}
                       <button type="button" onClick={() => toggleArtist(artist.id)}><i class="fa-solid fa-x"></i></button>
@@ -152,7 +152,7 @@ export function InsertSong({
               </div>
               <button
                 className="admin-multi-select__clear"
-                disabled={!selectedArtists.length}
+                disabled={!selectedArtistIds.length}
                 type="button"
                 onClick={() => updateArtistIds([])}
               >

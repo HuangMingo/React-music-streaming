@@ -407,7 +407,7 @@ export function Player({ style }) {
                                                         )
                                                     })
                                                 )
-                                                :(
+                                                : (
                                                     "Unknown artist"
                                                 )
 
@@ -511,8 +511,15 @@ export function Player({ style }) {
                         id="audio"
                         onTimeUpdate={handleTimeUpdate}
                         onLoadedMetadata={handleLoadedMetadata}
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
+                        onPlay={() => {
+                            console.log("Audio play");
+                            setIsPlaying(true)
+                        }
+                        }
+                        onPause={() => {
+                            console.log("Audio pause");
+                            setIsPlaying(false)
+                        }}
                         onEnded={() => {
                             if (isRepeat) {
                                 if (audioRef.current) {

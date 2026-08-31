@@ -717,10 +717,10 @@ export function AdminDashboardPage() {
     setSongSubmitting(true);
     try {
       if (editingSongId) {
-        await axios.put(`${API_URL}/api/admin/songs/${editingSongId}`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
+        await axios.put(`${API_URL}/api/admin/songs/update-song/${editingSongId}`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
         setNotice('Đã cập nhật bài hát.');
       } else {
-        await axios.post(`${API_URL}/api/admin/songs/update-song`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
+        await axios.post(`${API_URL}/api/admin/songs/insert-song`, { ...songForm, title: songForm.title.trim() }, { headers: adminHeaders });
         setNotice('Đã thêm bài hát.');
       }
       closeCreateSongForm();
@@ -1007,6 +1007,7 @@ export function AdminDashboardPage() {
         {message && songMode === 'list' && !albumFormOpen && !artistFormOpen && !playlistFormOpen ? <p className="admin-message">{message}</p> : null}
 
         {activeTab === 'songs' && songMode === 'create' ? (
+          console.log('Song form:', songForm),
           <InsertSong
             albums={albums}
             artists={artists}
